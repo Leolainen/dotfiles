@@ -1,0 +1,35 @@
+#!/usr/bin/env zsh
+
+# --- Moving around ---
+alias ..="cd .."
+alias ...="cd ../.."
+alias cd..="cd .."
+alias oo='open .'
+
+# --- Shortcust ---
+alias dot='cd ~/dotfiles'
+alias dl="cd ~/Downloads"
+alias dt="cd ~/Desktop"
+
+# --- Docker ---
+alias dc='docker-compose'
+
+
+# --- utils ---
+alias getip='ifconfig | grep 192'
+alias getssh='cat ~/.ssh/id_rsa.pub'
+alias unixTime='date +%s'
+alias chrome='/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome'
+
+# better ls
+alias ls='pwd; ls -color'
+
+# npm
+alias flush-npm="rm -rf node_modules && npm i && echo NPM is done"
+
+# git
+alias amend="git commit --amend"
+alias logf='git log --date-order --all --graph --format="%C(green)%h%Creset %C(yellow)%an%Creset %C(blue bold)%ar%Creset %C(red bold)%d%Creset%s"'
+alias logs='git log --date-order --all --graph --name-status --format="%C(green)%h%Creset %C(yellow)%an%Creset %C(blue bold)%ar%Creset %C(red bold)%d%Creset%s"'
+alias loga='git log --graph --decorate --pretty=oneline --abbrev-commit --all'
+alias logd='git log --graph --decorate --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset --abbrev-commit --date=relative --all"'
