@@ -16,4 +16,4 @@ ln -sf "$SCRIPT_DIR/zsh_theme"        ~/.zsh_theme
 mkdir -p ~/.zsh_completions
 ln -sf "$SCRIPT_DIR/completions/_jq"  ~/.zsh_completions/_jq
 
-[ "$SHELL" =~ "zsh" ] || chsh -s "$(command -v zsh)"
+[[ "$SHELL" =~ "zsh" ]] || chsh -s "$(command -v zsh)"

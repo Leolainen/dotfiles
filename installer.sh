@@ -64,8 +64,7 @@ on_start() {
   read -p "Do you want to proceed with installation? [y/N] " -n 1 answer
   echo
 
-  if [ ${answer} != "y" ]; then
-    on_finish
+  if [[ ${answer} != "y" ]]; then
     exit 1
   fi
 
@@ -74,13 +73,14 @@ on_start() {
 install_cli_tools() {
   # Install Cli Tools. 
   # Note:There's not need to install XCode tools on Linux
+  echo
   info "Trying to detect installed Command Line Tools..."
 
   if ! [ $(xcode-select -p) ]; then
     echo "You don't have Command Line Tools installed!"
     read -p "Do you agree to install Command Line Tools? [y/N] " -n 1 answer
     echo
-    if [ ${answer} != "y"  ]; then
+    if [[ ${answer} != "y" ]]; then
       exit 1
     fi
 
@@ -97,31 +97,49 @@ install_cli_tools() {
 
 
 install_package_manager() {
+  echo
+  read -p "Do you agree to proceed with Homebrew installation? [y/N] " -n 1 answer
+  echo
+
+  if [[ ${answer} != "y" ]]; then
+    info "Exiting installation ..."
+    exit 1
+  fi
+
+  info "Installing Homebrew ..."
+  echo "This may take a while"
   
+  ruby -e "$(curl -fsSL ${HOMEBREW_INSTALLER_URL})"
+
+  # Make sure we’re using the latest Homebrew.
+  $brew update
+
+  # Upgrade any already-installed formulae.
+  $brew upgrade
+
+  finish
+}
+
+ask_install_package_manager() {
   # macOS 
+  echo
   info "Checking if Homebrew is installed..."
     
   if ! _exists $brew; then
-    echo "Seems like you don't have Homebrew installed!"
-    read -p "Do you agree to proceed with Homebrew installation? [y/N] " -n 1 answer
+    echo "Homebrew not found!"
+    install_package_manager
+  else
+    echo "Homebrew is already installed!"
+    read -p "Install Homebrew anyway? [y/N] " -n 1 answer
     echo
 
-    if [ ${answer} != "y" ]; then
-      exit 1
+    if [[ ${answer} != "y" ]]; then
+      echo "Skipping to next step.  ... 💨"
+      echo
+      return
     fi
 
-    info "Installing Homebrew..."
-    echo "This may take a while"
-    
-    ruby -e "$(curl -fsSL ${HOMEBREW_INSTALLER_URL})"
-    # Make sure we’re using the latest Homebrew.
-    $brew update
-    # Upgrade any already-installed formulae.
-    $brew upgrade --all
-
-  else
-    success "Homeberw already installed! Skipping to next step.  ... 💨"
-    $brew -v
+    install_package_manager
 
   fi
 
@@ -129,37 +147,54 @@ install_package_manager() {
 }
 
 install_git() {
+  echo
+  read -p "Would you like to install Git? [y/N] " -n 1 answer
+  echo
 
-  # Install git
+  if [[ ${answer} != "y" ]]; then
+    exit 1
+  fi
+
+  info "Installing Git"
+
+  if [ `uname` == 'Darwin' ]; then
+    brew install git
+  else
+    error "Error: Failed to install Git!"
+    error "Your computer is probably not a Mac!"
+  fi
+
+  finish
+}
+
+ask_install_git() {
+  # macOS 
+  echo
   info "Checking if Git is installed..."
-
+    
   if ! _exists git; then
     echo "Git not found!"
-    read -p "Would you like to install Git? [y/N]" -n 1 answer
+    install_git
+  else
+    echo "Git is already installed!"
+    read -p "Would you like to go through the installation anyway? [y/N] " -n 1 answer
     echo
 
-    if [ ${answer} != "y" ]; then
-      exit 1
+    if [[ ${answer} != "y" ]]; then
+      echo "Skipping to next step.  ... 💨"
+      echo
+      return
     fi
 
-    info "Installing Git"
-
-    if [ `uname` == 'Darwin' ]; then
-      brew install git
-    else
-      error "Error: Failed to install Git!"
-      error "Your computer is probably not a Mac!"
-    fi
-  else
-    success "Git is already installed! Skipping installation ..."
+    install_git
   fi
 
   finish
 }
 
 install_zsh() {
-
   # Install ZSH
+  echo
   info "Checking if Zsh is installed ..."
 
   if ! _exists zsh; then
@@ -167,7 +202,7 @@ install_zsh() {
     read -p "Would you like to install Zsh? [y/N]" -n 1 answer
     echo
 
-    if [ ${answer} != "y" ]; then
+    if [[ ${answer} != "y" ]]; then
       exit 1
     fi
 
@@ -197,7 +232,9 @@ install_zsh() {
   finish
 }
 
+
 install_dotfiles() {
+  echo
   info "Looking for dotfiles in $DOTFILES ..."
 
   if [ ! -d $DOTFILES ]; then
@@ -205,7 +242,7 @@ install_dotfiles() {
     read -p "Would you like to install Dotfiles? [y/N] " -n 1 answer
     echo
 
-    if [ ${answer} != "y" ]; then
+    if [[ ${answer} != "y" ]]; then
       exit 1
     fi
 
@@ -216,16 +253,57 @@ install_dotfiles() {
     success "Dotfiles were found! Skipping ..."
   fi
 
-  read -p "Enter files you would like to install separated by 'space' : " input
-
-  for module in ${input[@]}; do
-    info "Installing $module config ..."
-
-    [[ ! -f "$module/setup.sh" ]] && error "$module config not found!" && return
-    "$module/setup.sh"            && success "$module config installed successfully!"
-  done
+  dotfiles_selection 
 
   finish
+}
+
+dotfiles_selection() {
+  echo
+  echo "Please select what you want to install: "
+  dotfiles=("zsh" "fonts" "config")
+
+  PS3='Enter your choice: '
+  options=("zsh" "fonts" "config" "Install all" "Skip this step" "Exit install")
+
+  select opt in "${options[@]}"
+  do
+      case $opt in
+          "zsh")
+              install_selected_dotfile $opt
+              ;;
+          "fonts")
+              install_selected_dotfile $opt
+              ;;
+          "config")
+              install_selected_dotfile $opt
+              ;;
+          "Install all")
+              for module in "${dotfiles[@]}"
+              do
+                install_selected_dotfile ${module}
+              done
+              break
+              ;;              
+          "Skip this step")
+              echo "Skipping dotfiles installation ..."
+              return
+              ;;
+          "Exit install")
+              echo "Exiting installation ..."
+              exit 1
+              ;;
+          *) echo "invalid option $REPLY";;
+      esac
+  done
+}
+
+install_selected_dotfile() {
+  echo
+  info "Installing $1 config ..."
+
+  [[ ! -f "$1/setup.sh" ]] && error "$1 config not found!" && dotfiles_selection
+  "$1/setup.sh"            && success "$1 config installed successfully!"
 }
 
 bootstrap() {
@@ -271,8 +349,8 @@ on_error() {
 main() {
   on_start "$*"
   install_cli_tools "$*"
-  install_package_manager "$*"
-  install_git "$*"
+  ask_install_package_manager "$*"
+  ask_install_git "$*"
   install_zsh "$*"
   install_dotfiles "$*"
   bootstrap "$*"
