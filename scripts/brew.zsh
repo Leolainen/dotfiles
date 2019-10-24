@@ -110,6 +110,7 @@ install_binaries() {
 
   BINARIES=(
     "zsh"
+    "zplug"
     "git"
     "ruby"
     "htop"    # monitor CPU, RAM and processes
