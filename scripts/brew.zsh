@@ -66,30 +66,28 @@ check_updates() {
 }
 
 brew_install() {
-  local $program=$1
-  ask "Do you want to install $(info $program)?" && read answer
+  ask "Do you want to install $(info $1)?" && read answer
 
   if [ ${answer} != 'y' ]; then
     success "Skipping ..."
     return
   else
-    info "Installing $program ..."
-    brew install $program
+    info "Installing $1 ..."
+    brew install $1
   fi
 
   finish
 }
 
 brew_cask_install() {
-  local $program=$1
-  ask "Do you want to install $(info $program)?" && read answer
+  ask "Do you want to install $(info $1)?" && read answer
 
   if [ ${answer} != 'y' ]; then
     success "Skipping ..."
     return
   else
-    info "Installing $program with cask ..."
-    brew cask install $program
+    info "Installing $1 with cask ..."
+    brew cask install $1
   fi
 
   finish
