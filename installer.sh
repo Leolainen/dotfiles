@@ -307,7 +307,6 @@ install_selected_dotfile() {
 }
 
 bootstrap() {
-  echo "Found no dotfiles!"
   read -p "Would you like to bootstrap your environment by installing Homebrew formulae? [y/N] " -n 1 answer
   echo
 

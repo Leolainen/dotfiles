@@ -10,7 +10,7 @@ while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
 
 cd $DOTFILES/scripts
 
-if [ `uname` == 'Darwin' ]; then
+if [[ `uname` == 'Darwin' ]]; then
     . ./brew.zsh
     . ./nodejs.zsh
     cd -

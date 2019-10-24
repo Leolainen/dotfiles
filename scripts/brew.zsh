@@ -116,7 +116,6 @@ install_binaries() {
     "htop"    # monitor CPU, RAM and processes
     "thefuck" # Corrects misspelled console commands
     "ncdu"    # find where diskspace went
-    "stow"    
   )
 
   brew_install "${BINARIES[@]}"
