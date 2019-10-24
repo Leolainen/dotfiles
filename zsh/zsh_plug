@@ -9,7 +9,7 @@
 export ZPLUG_THREADS=32
 
 # Source zplug manager (https://github.com/zplug/zplug)
-source "$DOTFILES/zsh/plugins/zplug/init.zsh"
+source ~/.zplug/init.zsh
 
 zplug 'zplug/zplug', hook-build:'zplug --self-manage'
 

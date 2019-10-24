@@ -19,10 +19,10 @@ echo "⏳Installing Taskwarrior"
 brew="/usr/local/bin/brew"
 
 packages=(
-    "stow"
     "task"
     "tasksh"
     "timewarrior"
+    "stow"
 )
 
 for package in "${packages[@]}"
