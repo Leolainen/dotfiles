@@ -174,7 +174,7 @@ install_browsers() {
     "microsoft-edge-canary"
   )
 
-  brew_install cask "${BROWSERS[@]}"
+  brew_cask_install "${BROWSERS[@]}"
 
   success "Browsers installed sucessfully!"
 
