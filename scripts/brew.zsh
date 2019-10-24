@@ -66,6 +66,7 @@ check_updates() {
 }
 
 brew_install() {
+  local $program=$1
   ask "Do you want to install $(info $program)?" && read answer
 
   if [ ${answer} != 'y' ]; then
@@ -80,6 +81,7 @@ brew_install() {
 }
 
 brew_cask_install() {
+  local $program=$1
   ask "Do you want to install $(info $program)?" && read answer
 
   if [ ${answer} != 'y' ]; then
