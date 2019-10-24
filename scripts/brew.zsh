@@ -103,7 +103,11 @@ install_cli_tools() {
     "fd"  
   )
 
-  brew_install "${CLI_TOOLS[@]}"
+  for tool in "${CLI_TOOLS[@]}"
+  do
+    brew_install "${tool}"
+  done
+  
 
   success "CLI Tools installed successfully!"
 
@@ -123,7 +127,10 @@ install_binaries() {
     "ncdu"    # find where diskspace went
   )
 
-  brew_install "${BINARIES[@]}"
+  for binary in "${BINARIES[@]}"
+  do
+    brew_install "${binary}"
+  done
 
   success "Binaries installed successfully!"
 
@@ -156,7 +163,12 @@ intall_apps() {
     "postman"
   )
 
-  brew_cask_install "${APPS[@]}"
+
+  for app in "${APPS[@]}"
+  do
+    brew_cask_install "${app}"
+  done
+    
 
   success "Apps installed successfully!"
 
@@ -174,7 +186,11 @@ install_browsers() {
     "microsoft-edge-canary"
   )
 
-  brew_cask_install "${BROWSERS[@]}"
+  for browser in "${BROWSERS[@]}"
+  do
+    brew_cask_install "${browser}"
+  done
+    
 
   success "Browsers installed sucessfully!"
 
