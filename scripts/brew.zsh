@@ -62,27 +62,32 @@ check_updates() {
   brew update
 
   info "Upgrading apps ..."
-  brew upgrade --all
+  brew upgrade
 }
 
 brew_install() {
-  local cask=$1 program=$2
-
-  [ -z $program] && $program=$cask
-
   ask "Do you want to install $(info $program)?" && read answer
 
   if [ ${answer} != 'y' ]; then
     success "Skipping ..."
     return
-  fi
-
-  if [ $cask == 'cask' ]; then
-    info "Installing $program with cask ..."
-    brew cask install $program
   else
     info "Installing $program ..."
     brew install $program
+  fi
+
+  finish
+}
+
+brew_cask_install() {
+  ask "Do you want to install $(info $program)?" && read answer
+
+  if [ ${answer} != 'y' ]; then
+    success "Skipping ..."
+    return
+  else
+    info "Installing $program with cask ..."
+    brew cask install $program
   fi
 
   finish
@@ -151,7 +156,7 @@ intall_apps() {
     "postman"
   )
 
-  brew_install cask "${APPS[@]}"
+  brew_cask_install "${APPS[@]}"
 
   success "Apps installed successfully!"
 
