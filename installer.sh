@@ -352,8 +352,8 @@ main() {
   ask_install_package_manager "$*"
   ask_install_git "$*"
   install_zsh "$*"
-  install_dotfiles "$*"
   bootstrap "$*"
+  install_dotfiles "$*"
   on_finish "$*"
 }
 
