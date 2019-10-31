@@ -125,6 +125,9 @@ install_binaries() {
     "htop"    # monitor CPU, RAM and processes
     "thefuck" # Corrects misspelled console commands
     "ncdu"    # find where diskspace went
+    "fzf"
+    "git-flow"
+    "ansible"
   )
 
   for binary in "${BINARIES[@]}"
@@ -171,6 +174,12 @@ intall_apps() {
     
 
   success "Apps installed successfully!"
+
+  info "Installing vagrant hostmanager ..."
+
+  vagrant plugin install vagrant-hostmanager
+  
+  success "Vagrant hostmanager installed!"
 
   unset -v APPS
 }

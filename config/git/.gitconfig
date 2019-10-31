@@ -1,5 +1,7 @@
 [user]
 	useconfigonly=true
+	name = Leolainen
+	email = leolainen2@gmail.com
 
 # use separate file for username / github token / etc
 [include]

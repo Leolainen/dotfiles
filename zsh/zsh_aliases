@@ -22,12 +22,17 @@ alias unixTime='date +%s'
 alias chrome='/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome'
 
 # better ls
-alias ls='pwd; ls -color'
+# alias ls='pwd; ls -color'
+alias ls='colorls'
+alias la='colorls -a'
+alias l='colorls -al'
+alias ll='colorls -l'
 
 # npm
 alias flush-npm="rm -rf node_modules && npm i && echo NPM is done"
 
 # git
+alias status="git status"
 alias amend="git commit --amend"
 alias logf='git log --date-order --all --graph --format="%C(green)%h%Creset %C(yellow)%an%Creset %C(blue bold)%ar%Creset %C(red bold)%d%Creset%s"'
 alias logs='git log --date-order --all --graph --name-status --format="%C(green)%h%Creset %C(yellow)%an%Creset %C(blue bold)%ar%Creset %C(red bold)%d%Creset%s"'
@@ -37,3 +42,5 @@ alias logd='git log --graph --decorate --pretty=format:"%Cred%h%Creset -%C(yello
 # Show / hide folders
 alias show="defaults write com.apple.finder AppleShowAllFiles -bool true && killall Finder"
 alias hide="defaults write com.apple.finder AppleShowAllFiles -bool false && killall Finder"
+
+alias refresh="source ~/.zshrc"

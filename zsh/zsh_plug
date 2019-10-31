@@ -23,13 +23,7 @@ zplug 'zplug/zplug', hook-build:'zplug --self-manage'
 
 # Oh-My-Zsh plugins
 # Git alias. See: https://github.com/robbyrussell/oh-my-zsh/wiki/Plugin:git
-zplug "plugins/git", from:oh-my-zsh
-zplug "plugins/npm", from:oh-my-zsh
-zplug "plugins/yarn", from:oh-my-zsh
-zplug "plugins/nvm", from:oh-my-zsh
-zplug "plugins/extract", from:oh-my-zsh
 
-zplug "plugins/colored-man-pages", from:oh-my-zsh
 # zplug "plugins/sudo", from:oh-my-zsh
 # zplug "morhetz/gruvbox", use:"gruvbox_256palette.sh"
 
