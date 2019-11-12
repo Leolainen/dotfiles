@@ -68,6 +68,19 @@ install_node() {
   finish
 }   
 
+intall_nvm() {
+  info "Installing Node Version Manager ..."
+
+  if [[ "$(uname)" == 'Darwin' ]]; then
+    brew install nvm
+  else
+    error "You’re not using a Mac! Exiting ..."
+    exit 1
+  fi
+
+  finish
+}
+
 configure_npm_init() {
   # Ask required parameters
   info "Configuring npm init ..."
