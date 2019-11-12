@@ -72,7 +72,7 @@ intall_nvm() {
   info "Installing Node Version Manager ..."
 
   if [[ "$(uname)" == 'Darwin' ]]; then
-    brew install nvm
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.1/install.sh | bash
   else
     error "You’re not using a Mac! Exiting ..."
     exit 1
