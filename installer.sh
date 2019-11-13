@@ -192,6 +192,64 @@ ask_install_git() {
   finish
 }
 
+install_pip() {
+  echo
+  read -p "Would you like to install pip? [y/N] " -n 1 answer
+  echo
+
+  if [[ ${answer} != "y" ]]; then
+    echo "Skipping to next step.  ... 💨"
+    echo
+    return
+  fi
+
+  echo "Fetching get-pip.py file ... "
+  echo
+
+  curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+
+  echo
+  echo "Running get-pip.py file ... "
+  echo
+
+  python get-pip.py --user
+
+  finish
+}
+
+install_composer() {
+
+  echo
+  read -p "Would you like to install pip? [y/N] " -n 1 answer
+  echo
+
+  if [[ ${answer} != "y" ]]; then
+    echo "Skipping to next step.  ... 💨"
+    echo
+    return
+  fi
+
+  echo "Fetching get-pip.py file ... "
+  echo
+
+  curl -sS https://getcomposer.org/installer | php
+
+  echo
+  echo "Running get-pip.py file ... "
+  echo
+
+  php composer.phar
+
+  echo
+  echo "Symlinking composer.phar ... "
+
+  ln -s ~/Desktop/dotfiles/composer.phar ~/../../usr/local/bin/composer.phar
+  
+  echo
+
+  finish
+}
+
 install_zsh() {
   # Install ZSH
   echo
@@ -231,7 +289,6 @@ install_zsh() {
 
   finish
 }
-
 
 install_dotfiles() {
   echo
@@ -350,6 +407,8 @@ main() {
   install_cli_tools "$*"
   ask_install_package_manager "$*"
   ask_install_git "$*"
+  install_pip "$*"
+  install_composer "$*"
   install_zsh "$*"
   install_dotfiles "$*"
   bootstrap "$*"
