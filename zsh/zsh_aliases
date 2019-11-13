@@ -10,6 +10,7 @@ alias oo='open .'
 alias dot='cd ~/dotfiles'
 alias dl="cd ~/Downloads"
 alias dt="cd ~/Desktop"
+alias ow="cd ~/oakwood"
 
 # --- Docker ---
 alias dc='docker-compose'
@@ -46,3 +47,6 @@ alias mouseAccOff="defaults write .GlobalPreferences com.apple.mouse.scaling -1"
 alias mouseAccOn="defaults write .GlobalPreferences com.apple.mouse.scaling 1"
 
 alias refresh="source ~/.zshrc"
+
+# php
+alias composer="php /usr/local/bin/composer.phar"
