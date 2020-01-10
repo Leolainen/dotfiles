@@ -7,9 +7,12 @@
 
 # Plugin manager
 export ZPLUG_THREADS=32
+export ZPLUG_HOME=/usr/local/opt/zplug
 
 # Source zplug manager (https://github.com/zplug/zplug)
-source ~/.zplug/init.zsh
+
+source $ZPLUG_HOME/init.zsh
+# source ~/.zplug/init.zsh
 
 zplug 'zplug/zplug', hook-build:'zplug --self-manage'
 
