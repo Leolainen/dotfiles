@@ -129,18 +129,11 @@ ask_install_package_manager() {
     echo "Homebrew not found!"
     install_package_manager
   else
-    echo "Homebrew is already installed!"
-    read -p "Install Homebrew anyway? [y/N] " -n 1 answer
+    info "Homebrew is already installed"
+    echo "Skipping to next step.  ... 💨"
     echo
 
-    if [[ ${answer} != "y" ]]; then
-      echo "Skipping to next step.  ... 💨"
-      echo
-      return
-    fi
-
-    install_package_manager
-
+    return
   fi
 
   finish
@@ -176,8 +169,22 @@ ask_install_git() {
     echo "Git not found!"
     install_git
   else
-    echo "Git is already installed!"
-    read -p "Would you like to go through the installation anyway? [y/N] " -n 1 answer
+    info "Git is already installed"
+    echo "Skipping to next step.  ... 💨"
+    echo
+
+    return
+  fi
+
+  finish
+}
+
+install_pip() {
+  info "Checking if Pip is installed..."
+
+  if ! _exists $pip; then
+    echo
+    read -p "Would you like to install pip? [y/N] " -n 1 answer
     echo
 
     if [[ ${answer} != "y" ]]; then
@@ -186,66 +193,71 @@ ask_install_git() {
       return
     fi
 
-    install_git
-  fi
+    echo "Fetching get-pip.py file ... "
+    echo
 
-  finish
-}
+    curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
 
-install_pip() {
-  echo
-  read -p "Would you like to install pip? [y/N] " -n 1 answer
-  echo
+    echo
+    echo "Running get-pip.py file ... "
+    echo
 
-  if [[ ${answer} != "y" ]]; then
+    python get-pip.py --user
+  else
+    info "Pip is already installed"
     echo "Skipping to next step.  ... 💨"
     echo
+    
     return
   fi
-
-  echo "Fetching get-pip.py file ... "
-  echo
-
-  curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-
-  echo
-  echo "Running get-pip.py file ... "
-  echo
-
-  python get-pip.py --user
 
   finish
 }
 
 install_composer() {
+  info "Checking if Composer is installed..."
 
-  echo
-  read -p "Would you like to install pip? [y/N] " -n 1 answer
-  echo
+  if ! _exists $composer; then
+    echo
+    read -p "Would you like to install composer? (Requires Pip) [y/N] " -n 1 answer
+    echo
 
-  if [[ ${answer} != "y" ]]; then
+    if ! _exists $pip; then
+      error "Pip was not found"
+      info "Pip is required to install composer."
+      install_pip
+    fi
+
+    if [[ ${answer} != "y" ]]; then
+      echo "Skipping to next step.  ... 💨"
+      echo
+      return
+    fi
+
+    echo "Fetching get-pip.py file ... "
+    echo
+
+    curl -sS https://getcomposer.org/installer | php
+
+    echo
+    echo "Running get-pip.py file ... "
+    echo
+
+    php composer.phar
+
+    echo
+    echo "Symlinking composer.phar ... "
+
+    ln -s ~/Desktop/dotfiles/composer.phar ~/../../usr/local/bin/composer.phar
+    
+    echo
+  else
+    info "Composer is already installed"
     echo "Skipping to next step.  ... 💨"
     echo
+
     return
   fi
-
-  echo "Fetching get-pip.py file ... "
-  echo
-
-  curl -sS https://getcomposer.org/installer | php
-
-  echo
-  echo "Running get-pip.py file ... "
-  echo
-
-  php composer.phar
-
-  echo
-  echo "Symlinking composer.phar ... "
-
-  ln -s ~/Desktop/dotfiles/composer.phar ~/../../usr/local/bin/composer.phar
-  
-  echo
 
   finish
 }
