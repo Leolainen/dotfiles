@@ -10,7 +10,7 @@ alias oo='open .'
 alias dot='cd ~/dotfiles'
 alias dl="cd ~/Downloads"
 alias dt="cd ~/Desktop"
-alias ow="cd ~/oakwood"
+alias atg="cd ~/ATG"
 
 # --- Docker ---
 alias dc='docker-compose'
@@ -31,6 +31,7 @@ alias ll='colorls -l'
 
 # npm
 alias flush-npm="rm -rf node_modules && npm i && echo NPM is done"
+alias flush-yarn="rm -rf node_modules && yarn && echo Yarn is done"
 
 # git
 alias status="git status"
@@ -44,6 +45,7 @@ alias logd='git log --graph --decorate --pretty=format:"%Cred%h%Creset -%C(yello
 alias show="defaults write com.apple.finder AppleShowAllFiles -bool true && killall Finder"
 alias hide="defaults write com.apple.finder AppleShowAllFiles -bool false && killall Finder"
 alias mouseAccOff="defaults write .GlobalPreferences com.apple.mouse.scaling -1"
+alias mouseAccOff2="defaults write com.apple.mouse.scaling 2.0"
 alias mouseAccOn="defaults write .GlobalPreferences com.apple.mouse.scaling 1"
 
 alias refresh="source ~/.zshrc"
