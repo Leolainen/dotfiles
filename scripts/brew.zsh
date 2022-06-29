@@ -121,13 +121,13 @@ install_binaries() {
     "zsh"
     "zplug"
     "git"
-    "ruby"
+    "ruby"    # required for colorls
     "htop"    # monitor CPU, RAM and processes
     "thefuck" # Corrects misspelled console commands
     "ncdu"    # find where diskspace went
     "fzf"
     "git-flow"
-    "ansible"
+    # "ansible" # possibly useful but not used today
   )
 
   for binary in "${BINARIES[@]}"
@@ -154,18 +154,12 @@ intall_apps() {
     "discord"
     "iterm2"
     "visual-studio-code"
-    "sequel-pro"
     "docker"
     "figma"
-    "zeplin"
-    "virtualbox"
-    "vagrant"
     "vlc"
-    "dashlane"
     "spotify"
     "postman"
   )
-
 
   for app in "${APPS[@]}"
   do
@@ -174,12 +168,6 @@ intall_apps() {
     
 
   success "Apps installed successfully!"
-
-  info "Installing vagrant hostmanager ..."
-
-  vagrant plugin install vagrant-hostmanager
-  
-  success "Vagrant hostmanager installed!"
 
   unset -v APPS
 }
@@ -190,13 +178,13 @@ install_browsers() {
   BROWSERS=(
     "google-chrome"
     "firefox"
-    "firefox-developer-edition"
     "opera"
-    "microsoft-edge-canary"
+    "microsoft-edge"
   )
 
   for browser in "${BROWSERS[@]}"
   do
+    info "Installing ${browser}"
     brew_cask_install "${browser}"
   done
     
