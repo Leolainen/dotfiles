@@ -66,13 +66,13 @@
 
 
 [core]
-	editor = $EDITOR
+	editor = vim
 	commitGraph = true
 	whitespace=fix,space-before-tab,tab-in-indent,trailing-space,cr-at-eol
 	excludesfile = ~/.gitignore
 	attributesfile = ~/.gitattributes
 	untrackedCache = true
-	pager = diff-so-fancy | less --tabs=2 -RFX
+	pager = diff-so-fancy | less --tabs=4 -RFX
 	commentChar = %
 
 [fetch]
