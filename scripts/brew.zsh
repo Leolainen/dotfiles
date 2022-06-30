@@ -149,6 +149,7 @@ intall_apps() {
   info "Installing useful apps ..."
 
   APPS=(
+"bankid"
     "java"
     "slack"
     "discord"
