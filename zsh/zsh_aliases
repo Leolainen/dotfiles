@@ -18,7 +18,7 @@ alias dc='docker-compose'
 
 # --- utils ---
 alias getip='ifconfig | grep 192'
-alias getssh='cat ~/.ssh/id_rsa.pub'
+alias getssh='cat ~/.ssh/id_ed25519.pub'
 alias unixTime='date +%s'
 alias chrome='/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome'
 
