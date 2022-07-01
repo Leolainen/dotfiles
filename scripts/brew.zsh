@@ -87,7 +87,8 @@ brew_cask_install() {
     return
   else
     info "Installing $1 with cask ..."
-    brew cask install $1
+
+    brew install $1 --cask
   fi
 
   finish
