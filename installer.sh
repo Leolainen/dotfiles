@@ -39,8 +39,8 @@ finish() {
 
 export DOTFILES=${1:-"$HOME/dotfiles"}
 GITHUB_REPO_URL_BASE="https://github.com/leolainen/dotfiles"
-HOMEBREW_INSTALLER_URL="https://raw.githubusercontent.com/Homebrew/install/master/install"
-brew="/usr/local/bin/brew"
+HOMEBREW_INSTALLER_URL="https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh"
+brew="/opt/homebrew/bin/brew"
 
 
 # get the dir of the current script
@@ -109,13 +109,13 @@ install_package_manager() {
   info "Installing Homebrew ..."
   echo "This may take a while"
   
-  ruby -e "$(curl -fsSL ${HOMEBREW_INSTALLER_URL})"
+  /bin/bash -c "$(curl -fsSL ${HOMEBREW_INSTALLER_URL})"
 
   # Make sure we’re using the latest Homebrew.
-  $brew update
+  brew update
 
   # Upgrade any already-installed formulae.
-  $brew upgrade
+  brew upgrade
 
   finish
 }
@@ -125,7 +125,9 @@ ask_install_package_manager() {
   echo
   info "Checking if Homebrew is installed..."
     
-  if ! _exists $brew; then
+  # special case "if exists" check for brew
+  which -s brew 
+  if [[ $? != 0 ]] ; then
     echo "Homebrew not found!"
     install_package_manager
   else
@@ -295,7 +297,7 @@ install_zsh() {
     echo "The script will ask you the password for sudo when changing your default shell via chsh -s"
     echo
 
-    chsh -s "$(command -v zsh)" || error "Error: Cannot set Zsh as default shell!"
+    chsh -s /bin/zsh || chsh -s "$(command -v zsh)" || error "Error: Cannot set Zsh as default shell!"
     echo "You'll need to log out for this to take effect"
   fi
 
