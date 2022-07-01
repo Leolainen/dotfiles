@@ -38,5 +38,6 @@ stow --restow -vv --target="$HOME" --dir=$SCRIPT_DIR taskwarrior
 echo "Create timewarrior folder...\\n"
 mkdir -p $HOME/.timewarrior
 
-echo "⏳Symlink timewarrior.cfg file"
-stow --restow -vv --target="$HOME/.timewarrior" --dir=$SCRIPT_DIR timewarrior
+# Currently don't use custom configs
+# echo "⏳Symlink timewarrior.cfg file"
+# stow --restow -vv --target="$HOME/.timewarrior" --dir=$SCRIPT_DIR timewarrior
