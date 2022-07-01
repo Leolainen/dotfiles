@@ -46,9 +46,7 @@ zplug "zsh-users/zsh-autosuggestions"
 ZSH_AUTOSUGGEST_PARTIAL_ACCEPT_WIDGETS=(forward-word forward-char)
 ZSH_AUTOSUGGEST_ACCEPT_WIDGETS=(end-of-line)
 
-zplug 'so-fancy/diff-so-fancy', \
-    as:command, use:diff-so-fancy, \
-    hook-build:'git config --global core.pager "diff-so-fancy | less --tabs=4 -RFX"'
+zplug "z-shell/zsh-diff-so-fancy", as:command, use:"bin/"
 
 # zplug 'wfxr/iconful', as:command, use:'(iconful).sh', rename-to:'$1'
 # zplug 'wfxr/forgit', defer:1
