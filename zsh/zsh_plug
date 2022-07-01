@@ -7,7 +7,7 @@
 
 # Plugin manager
 export ZPLUG_THREADS=32
-export ZPLUG_HOME=/usr/local/opt/zplug
+export ZPLUG_HOME=$(brew --prefix)/opt/zplug
 
 # Source zplug manager (https://github.com/zplug/zplug)
 
