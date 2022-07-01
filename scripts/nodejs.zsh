@@ -40,7 +40,7 @@ on_start() {
   info "   _   _           _           _  _____  "
   info "  | \ | |         | |         | |/ ____| "
   info "  |  \| | ___   __| | ___     | | (___   "
-  info "  | . ` |/ _ \ / _` |/ _ \_   | |\___ \  "
+  info "  | .   |/ _ \ / _  |/ _ \_   | |\___ \  "
   info "  | |\  | (_) | (_| |  __/ |__| |____) | "
   info "  |_| \_|\___/ \__,_|\___|\____/|_____/  "
   info "                                         "
@@ -68,7 +68,7 @@ install_node() {
   finish
 }   
 
-intall_nvm() {
+install_nvm() {
   info "Installing Node Version Manager ..."
 
   if [[ "$(uname)" == 'Darwin' ]]; then
@@ -86,9 +86,9 @@ configure_npm_init() {
   info "Configuring npm init ..."
 
   # Defaults
-  local name = "Leolainen"
-  local email = "Leolainen2@gmail.com"
-  local website = ""
+  local name="Leolainen"
+  local email="Leolainen2@gmail.com"
+  local website=""
 
   ask "Enter your name: ($name)" && read NAME
   ask "Enter your e-mail: ($email)" && read EMAIL
