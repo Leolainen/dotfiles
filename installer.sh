@@ -57,7 +57,7 @@ on_start() {
   info "                                                           "
   info "       by @Leolainen (Stolen from @Ahmedabdulrahman)       "
 
-  
+
   info "This script will guide you through installing essentials for your Mac."
   echo "It will not install anything without your direct agreement!"
   echo
@@ -71,7 +71,7 @@ on_start() {
 }
 
 install_cli_tools() {
-  # Install Cli Tools. 
+  # Install Cli Tools.
   # Note:There's not need to install XCode tools on Linux
   echo
   info "Trying to detect installed Command Line Tools..."
@@ -108,7 +108,7 @@ install_package_manager() {
 
   info "Installing Homebrew ..."
   echo "This may take a while"
-  
+
   /bin/bash -c "$(curl -fsSL ${HOMEBREW_INSTALLER_URL})"
 
   # Make sure we’re using the latest Homebrew.
@@ -121,12 +121,12 @@ install_package_manager() {
 }
 
 ask_install_package_manager() {
-  # macOS 
+  # macOS
   echo
   info "Checking if Homebrew is installed..."
-    
+
   # special case "if exists" check for brew
-  which -s brew 
+  which -s brew
   if [[ $? != 0 ]] ; then
     echo "Homebrew not found!"
     install_package_manager
@@ -163,10 +163,10 @@ install_git() {
 }
 
 ask_install_git() {
-  # macOS 
+  # macOS
   echo
   info "Checking if Git is installed..."
-    
+
   if ! _exists git; then
     echo "Git not found!"
     install_git
@@ -209,7 +209,7 @@ install_pip() {
     info "Pip is already installed"
     echo "Skipping to next step.  ... 💨"
     echo
-    
+
     return
   fi
 
@@ -251,7 +251,7 @@ install_composer() {
     echo "Symlinking composer.phar ... "
 
     ln -s ~/Desktop/dotfiles/composer.phar ~/../../usr/local/bin/composer.phar
-    
+
     echo
   else
     info "Composer is already installed"
@@ -282,7 +282,7 @@ install_zsh() {
 
     if [ `uname` == "Darwin" ]; then
       brew install zsh
-    else 
+    else
       error "Error: Failed to install Zsh!"
       error "Your computer is probably not a Mac!"
       exit 1
@@ -320,11 +320,11 @@ install_dotfiles() {
     echo "Cloning dotfiles ..."
     git clone --recursive "$GITHUB_REPO_URL_BASE.git" $DOTFILES
 
-  else 
+  else
     success "Dotfiles were found! Skipping ..."
   fi
 
-  dotfiles_selection 
+  dotfiles_selection
 
   finish
 }
@@ -332,10 +332,10 @@ install_dotfiles() {
 dotfiles_selection() {
   echo
   echo "Please select what you want to install: "
-  dotfiles=("zsh" "fonts" "config")
+  dotfiles=("zsh" "fonts" "config" "nvim")
 
   PS3='Enter your choice: '
-  options=("zsh" "fonts" "config" "Install all" "Skip this step" "Exit install")
+  options=("zsh" "fonts" "config" "nvim" "Install all" "Skip this step" "Exit install")
 
   select opt in "${options[@]}"
   do
@@ -349,13 +349,16 @@ dotfiles_selection() {
           "config")
               install_selected_dotfile $opt
               ;;
+          "nvim")
+              install_selected_dotfile $opt
+              ;;
           "Install all")
               for module in "${dotfiles[@]}"
               do
                 install_selected_dotfile ${module}
               done
               break
-              ;;              
+              ;;
           "Skip this step")
               echo "Skipping dotfiles installation ..."
               return

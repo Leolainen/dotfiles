@@ -66,7 +66,7 @@ install_node() {
   fi
 
   finish
-}   
+}
 
 install_nvm() {
   info "Installing Node Version Manager ..."
@@ -140,6 +140,21 @@ install_global_packages() {
   unset -v NPM_PACKAGES
 }
 
+install_nvim_dependencies() {
+  info "Installing dependencies for NVIM plugins ..."
+
+  NVM_DEPENDENCIES=(
+    "eslint"
+    "typescript"
+    "typescript-language-server"
+    "prettier"
+  )
+
+	yarn global add "${NVM_DEPENDENCIES[@]}"
+
+  # Removes NVM_DEPENDENCIES variable
+  unset -v NVM_DEPENDENCIES
+}
 on_finish() {
   success "Done!"
   success "Node.js was successfully installed!"
@@ -158,6 +173,7 @@ main() {
   install_nvm "$*"
   configure_npm_init "$*"
   install_global_packages "$*"
+  install_nvim_dependencies "$*"
 }
 
 main "$*"

@@ -101,18 +101,41 @@ install_cli_tools() {
     "tree"
     "wget"
     "yarn"
-    "fd"  
+    "fd"
   )
 
   for tool in "${CLI_TOOLS[@]}"
   do
     brew_install "${tool}"
   done
-  
+
 
   success "CLI Tools installed successfully!"
 
   unset -v CLI_TOOLS
+}
+
+install_nvim_dependencies() {
+  info "Installing NVIM and dependencies ..."
+
+
+  NVIM_TOOLS=(
+    "neovim"
+    "stylua"
+    "code-minimap"
+    "lazygit"
+    "ripgrep"
+  )
+
+  for tool in "${NVIM_TOOLS[@]}"
+  do
+    brew_install "${tool}"
+  done
+
+
+  success "Installation done!"
+
+  unset -v NVIM_TOOLS
 }
 
 install_binaries() {
@@ -167,7 +190,7 @@ intall_apps() {
   do
     brew_cask_install "${app}"
   done
-    
+
 
   success "Apps installed successfully!"
 
@@ -189,7 +212,7 @@ install_browsers() {
     info "Installing ${browser}"
     brew_cask_install "${browser}"
   done
-    
+
 
   success "Browsers installed sucessfully!"
 
@@ -215,6 +238,7 @@ main() {
   on_start "$*"
   check_updates "$*"
   install_cli_tools "$*"
+  install_nvim_dependencies "$*"
   install_binaries "$*"
   intall_apps "$*"
   install_browsers "$*"
