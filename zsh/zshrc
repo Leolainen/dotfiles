@@ -42,4 +42,7 @@ export NVM_DIR="$HOME/.nvm"
 # Run alias to turn off mouse acceleration
 mouseAccOff
 
+# allow key repeat – necessary for h,j,k,l keys in vscode
+defaults write com.microsoft.VSCode ApplePressAndHoldEnabled -bool false
+
 return 0
