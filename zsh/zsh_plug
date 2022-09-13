@@ -65,7 +65,7 @@ zplug "z-shell/zsh-diff-so-fancy", as:command, use:"bin/"
 
 # Extra
 zplug "lukechilds/zsh-better-npm-completion", defer:2
-zplug "rauchg/wifi-password", as:command, use:"wifi-password.sh", rename-to:"wifi-password"
+# zplug "rauchg/wifi-password", as:command, use:"wifi-password.sh", rename-to:"wifi-password"
 zplug "changyuheng/fz", defer:1
 zplug "djui/alias-tips"
 # zplug "denysdovhan/gitio-zsh", as:command, use:"gitio.zsh", rename-to:"gitio"
