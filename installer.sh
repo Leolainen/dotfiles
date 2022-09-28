@@ -332,10 +332,10 @@ install_dotfiles() {
 dotfiles_selection() {
   echo
   echo "Please select what you want to install: "
-  dotfiles=("zsh" "fonts" "config" "nvim")
+  dotfiles=("zsh" "fonts" "config" "lvim")
 
   PS3='Enter your choice: '
-  options=("zsh" "fonts" "config" "nvim" "Install all" "Skip this step" "Exit install")
+  options=("zsh" "fonts" "config" "lvim" "Install all" "Skip this step" "Exit install")
 
   select opt in "${options[@]}"
   do
@@ -349,7 +349,7 @@ dotfiles_selection() {
           "config")
               install_selected_dotfile $opt
               ;;
-          "nvim")
+          "lvim")
               install_selected_dotfile $opt
               ;;
           "Install all")

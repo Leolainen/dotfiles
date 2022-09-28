@@ -101,7 +101,7 @@ lvim.leader = "space"
 -- add your own keymapping
 lvim.keys.normal_mode["<C-s>"] = ":w<cr>"
 lvim.keys.normal_mode["ﬁ"] = "$"
-lvim.keys.normal_mode["˛"] = "0"
+lvim.keys.normal_mode["˛"] = "^"
 -- clone line to line below/above
 lvim.keys.normal_mode["<C-√>"] = "yyp"
 lvim.keys.normal_mode["<C-ª>"] = "yyP"
@@ -402,6 +402,70 @@ lvim.plugins = {
       }
     })
   end },
+  {
+    "ggandor/leap.nvim",
+    event = "BufRead",
+    config = "require('leap').set_default_keymaps()"
+  },
+  {
+    "gen740/SmoothCursor.nvim",
+    config = function()
+      require("smoothcursor").setup({
+        autostart = true,
+        cursor = "", -- cursor shape (need nerd font)
+        intervals = 35, -- tick interval
+        linehl = nil, -- highlight sub-cursor line like 'cursorline', "CursorLine" recommended
+        type = "default", -- define cursor movement calculate function, "default" or "exp" (exponential).
+        fancy = {
+          enable = true, -- enable fancy mode
+          head = { cursor = "▷", texthl = "SmoothCursor", linehl = nil },
+          body = {
+            -- { cursor = "█", texthl = "SmoothCursorAqua" },
+            -- { cursor = "▉", texthl = "SmoothCursorAqua" },
+            -- { cursor = "▊", texthl = "SmoothCursorAqua" },
+            -- { cursor = "▋", texthl = "SmoothCursorBlue" },
+            -- { cursor = "▌", texthl = "SmoothCursorBlue" },
+            -- { cursor = "▍", texthl = "SmoothCursorPurple" },
+            -- { cursor = "▎", texthl = "SmoothCursorPurple" },
+
+            { cursor = "▓", texthl = "SmoothCursorAqua" },
+            { cursor = "▓", texthl = "SmoothCursorAqua" },
+            { cursor = "▒", texthl = "SmoothCursorAqua" },
+            { cursor = "▒", texthl = "SmoothCursorBlue" },
+            { cursor = "▒", texthl = "SmoothCursorBlue" },
+            { cursor = "░", texthl = "SmoothCursorPurple" },
+            { cursor = "░", texthl = "SmoothCursorPurple" },
+
+            -- { cursor = "▓", texthl = "SmoothCursorAqua" },
+            -- { cursor = "▚", texthl = "SmoothCursorAqua" },
+            -- { cursor = "▞", texthl = "SmoothCursorAqua" },
+            -- { cursor = "▝", texthl = "SmoothCursorBlue" },
+            -- { cursor = "▗", texthl = "SmoothCursorBlue" },
+            -- { cursor = "▘", texthl = "SmoothCursorPurple" },
+            -- { cursor = "▖", texthl = "SmoothCursorPurple" },
+
+            -- { cursor = "", texthl = "SmoothCursorAqua" },
+            -- { cursor = "", texthl = "SmoothCursorAqua" },
+            -- { cursor = "●", texthl = "SmoothCursorBlue" },
+            -- { cursor = "●", texthl = "SmoothCursorBlue" },
+            -- { cursor = "•", texthl = "SmoothCursorPurple" },
+            -- { cursor = ".", texthl = "SmoothCursorPurple" },
+            -- { cursor = ".", texthl = "SmoothCursorPurple" },
+          },
+          tail = { cursor = nil, texthl = "SmoothCursor" }
+        },
+        priority = 10, -- set marker priority
+        speed = 45, -- max is 100 to stick to your current position
+        texthl = "SmoothCursor", -- highlight group, default is { bg = nil, fg = "#FFD400" }
+        threshold = 3,
+        timeout = 3000,
+      })
+    end
+  },
+  {
+    "nvim-treesitter/nvim-treesitter-context",
+    -- config = "require('treesitter-context).setup()"
+  }
   -- { 'RRethy/vim-illuminate' },
   -- {
   --   'levouh/tint.nvim',

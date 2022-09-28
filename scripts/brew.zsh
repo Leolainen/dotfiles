@@ -115,29 +115,6 @@ install_cli_tools() {
   unset -v CLI_TOOLS
 }
 
-install_nvim_dependencies() {
-  info "Installing NVIM and dependencies ..."
-
-
-  NVIM_TOOLS=(
-    "neovim"
-    "stylua"
-    "code-minimap"
-    "lazygit"
-    "ripgrep"
-  )
-
-  for tool in "${NVIM_TOOLS[@]}"
-  do
-    brew_install "${tool}"
-  done
-
-
-  success "Installation done!"
-
-  unset -v NVIM_TOOLS
-}
-
 install_binaries() {
   info "Intalling useful binaries ..."
 
@@ -238,7 +215,6 @@ main() {
   on_start "$*"
   check_updates "$*"
   install_cli_tools "$*"
-  install_nvim_dependencies "$*"
   install_binaries "$*"
   intall_apps "$*"
   install_browsers "$*"
