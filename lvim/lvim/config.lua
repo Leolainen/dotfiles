@@ -10,49 +10,49 @@ an executable
 
 
 local options = {
-  backup = false, -- creates a backup file
-  background = 'dark',
-  clipboard = 'unnamedplus', -- allows neovim to access the system clipboard
-  cmdheight = 2, -- more space in the neovim command line for displaying messages
-  completeopt = {
-    'menuone',
-    'noselect',
-  }, -- mostly just for cmp
-  conceallevel = 0, -- so that `` is visible in markdown files
-  fileencoding = 'utf-8', -- the encoding written to a file
-  hlsearch = true, -- highlight all matches on previous search pattern
-  ignorecase = true, -- ignore case in search patterns
-  mouse = 'a', -- allow the mouse to be used in neovim
-  pumheight = 10, -- pop up menu height
-  showmode = true, -- show mode like -- INSERT --
-  showtabline = 2, -- always show tabs
-  smartcase = true, -- smart case
-  smartindent = true, -- make indenting smarter again
-  splitbelow = true, -- force all horizontal splits to go below current window
-  splitright = true, -- force all vertical splits to go to the right of current window
-  swapfile = false, -- disable creates a swapfile
-  timeoutlen = 400, -- time to wait for a mapped sequence to complete (in milliseconds)
-  undofile = true, -- enable persistent undo
-  updatetime = 300, -- faster completion (4000ms default)
-  writebackup = false, -- if a file is being edited by another program (or was written to file while editing with another program), it is not allowed to be edited
-  expandtab = true, -- convert tabs to spaces
-  shiftwidth = 2, -- the number of spaces inserted for each indentation
-  tabstop = 2, -- insert 2 spaces for a tab
-  softtabstop = 2, -- insert 2 spaces for a tab
-  cursorline = true, -- highlight the current line
-  number = true, -- set numbered lines
-  relativenumber = true, -- set relative numbered lines
-  numberwidth = 2, -- set number column width to 2 {default 4}
-  signcolumn = 'yes', -- always show the sign column, otherwise it would shift the text each time
-  wrap = false, -- display lines as one long line
-  scrolloff = 10, -- is one of my fav
-  sidescrolloff = 8,
-  textwidth = 90,
-  -- guifont = "monospace:h17",               -- the font used in graphical neovim applications
+    backup = false, -- creates a backup file
+    background = 'dark',
+    clipboard = 'unnamedplus', -- allows neovim to access the system clipboard
+    cmdheight = 2, -- more space in the neovim command line for displaying messages
+    completeopt = {
+        'menuone',
+        'noselect',
+    }, -- mostly just for cmp
+    conceallevel = 0, -- so that `` is visible in markdown files
+    fileencoding = 'utf-8', -- the encoding written to a file
+    hlsearch = true, -- highlight all matches on previous search pattern
+    ignorecase = true, -- ignore case in search patterns
+    mouse = 'a', -- allow the mouse to be used in neovim
+    pumheight = 10, -- pop up menu height
+    showmode = false, -- show mode like -- INSERT --
+    showtabline = 4, -- always show tabs
+    smartcase = true, -- smart case
+    smartindent = true, -- make indenting smarter again
+    splitbelow = true, -- force all horizontal splits to go below current window
+    splitright = true, -- force all vertical splits to go to the right of current window
+    swapfile = false, -- disable creates a swapfile
+    timeoutlen = 400, -- time to wait for a mapped sequence to complete (in milliseconds)
+    undofile = true, -- enable persistent undo
+    updatetime = 300, -- faster completion (4000ms default)
+    writebackup = false, -- if a file is being edited by another program (or was written to file while editing with another program), it is not allowed to be edited
+    expandtab = true, -- convert tabs to spaces
+    shiftwidth = 4, -- the number of spaces inserted for each indentation
+    tabstop = 2, -- insert 2 spaces for a tab
+    softtabstop = 2, -- insert 2 spaces for a tab
+    cursorline = true, -- highlight the current line
+    number = true, -- set numbered lines
+    relativenumber = true, -- set relative numbered lines
+    numberwidth = 2, -- set number column width to 2 {default 4}
+    signcolumn = 'yes', -- always show the sign column, otherwise it would shift the text each time
+    wrap = false, -- display lines as one long line
+    scrolloff = 10, -- is one of my fav
+    sidescrolloff = 8,
+    textwidth = 90,
+    -- guifont = "monospace:h17",               -- the font used in graphical neovim applications
 }
 
 for k, v in pairs(options) do
-  vim.opt[k] = v
+    vim.opt[k] = v
 end
 
 -- set colorscheme to aylin
@@ -92,7 +92,7 @@ vim.cmd([[set iskeyword+=-]])
 -- general
 lvim.log.level = "warn"
 lvim.format_on_save = true
-lvim.colorscheme = "tokyonight"
+lvim.colorscheme = "tokyonight-moon"
 -- to disable icons and use a minimalist setup, uncomment the following
 -- lvim.use_icons = false
 
@@ -143,6 +143,14 @@ lvim.keys.normal_mode['cl'] = 'viwyoconsole.log("<C-R>% ~ line: <C-R>=line(".")+
 -- Show hover
 lvim.keys.normal_mode['gh'] = '<cmd>lua vim.lsp.buf.hover()<cr>'
 
+-- move "marks" key from ` to ¨ for convenience on swedish keyboard
+lvim.keys.normal_mode["ä"] = '`'
+
+-- toggle capital or uncapitalized char & stay on same char
+lvim.keys.normal_mode["§"] = "~h"
+
+lvim.keys.insert_mode["jj"] = "<esc>"
+
 -- Visual --
 -- don't overwrite yanked lines with overwritten lines
 lvim.keys.visual_mode['p'] = '"_dP'
@@ -160,8 +168,8 @@ lvim.keys.visual_mode['cl'] = 'y<esc>oconsole.log("<C-R>% ~ line: <C-R>=line("."
 -- Visual Block --
 -- Move text up and down
 lvim.keys.visual_block_mode['J'] = ":move '>+1<CR>gv-gv"
-lvim.keys.visual_block_mode['K'] = ":move '<-2<CR>gv-gv"
 lvim.keys.visual_block_mode['√'] = ":move '>+1<CR>gv-gv"
+lvim.keys.visual_block_mode['K'] = ":move '<-2<CR>gv-gv"
 lvim.keys.visual_block_mode['ª'] = ":move '<-2<CR>gv-gv"
 
 -- unmap a default keymapping
@@ -199,42 +207,79 @@ lvim.keys.visual_block_mode['ª'] = ":move '<-2<CR>gv-gv"
 --   w = { "<cmd>Trouble workspace_diagnostics<cr>", "Wordspace Diagnostics" },
 -- }
 
+-- WHICH_KEY config
+lvim.builtin.which_key.setup.plugins.marks = true
+lvim.builtin.which_key.setup.plugins.registers = true
+
+for k in pairs(lvim.builtin.which_key.setup.plugins.presets) do
+    lvim.builtin.which_key.setup.plugins.presets[k] = true
+end
+
+
+-- TELESCOPE config
+-- lvim.builtin.telescope.pickers.find_files.previewer = true
+-- lvim.builtin.telescope.pickers.buffers.previewer = true
+
 -- space + r to replace all occurences of the word under the cursor
 lvim.builtin.which_key.mappings["r"] = { ':%s/<C-R><C-W>/', "replace all" }
 lvim.builtin.which_key.mappings["y"] = {
-  name = "+Yank",
-  w = { "viwy", "word" },
-  a = { "ggVGy", "all" },
-  p = { "viw\"_dP", "Paste over word" }
+    name = "+Yank",
+    w = { "viwy", "word" },
+    a = { "ggVGy", "all" },
+    p = { "viw\"_dP", "Paste over word" }
 }
-lvim.builtin.which_key.mappings["g"]["S"] = { ":Git stage_buffer<CR>", "stage buffer" }
-lvim.builtin.which_key.mappings["s"]["l"] = { ":Telescope resume<CR>", "Last search" }
-lvim.builtin.which_key.mappings["g"]["q"] = { ":Gitsigns setqflist<CR>", "Quickfix hunks" }
-lvim.builtin.which_key.mappings["s"]["T"] = { ":lua require('telescope.builtin').live_grep{ cwd = vim.fn.systemlist('git rev-parse --show-toplevel')[1] }<CR>",
-  "text from root" }
+lvim.builtin.which_key.mappings["g"]["S"] = { "<cmd>Git stage_buffer<CR>", "Stage buffer" }
+lvim.builtin.which_key.mappings["s"]["l"] = { "<cmd>Telescope resume<CR>", "Last search" }
+lvim.builtin.which_key.mappings["g"]["q"] = { "<cmd>Gitsigns setqflist<CR>", "Quickfix hunks" }
+-- lvim.builtin.which_key.mappings["s"]["t"] = { "<cmd>lua require('telescope').extensions.live_grep_args.live_grep_args()<CR>",
+--     "text from root" }
+-- lvim.builtin.which_key.mappings["s"]["T"] = { "<cmd>lua require('telescope').extensions.live_grep_args.live_grep_args({ cwd = vim.fn.systemlist('git rev-parse --show-toplevel')[1] })<CR>",
+--     "text from root" }
+lvim.builtin.which_key.mappings["s"]["T"] = { "<cmd>lua require('telescope.builtin').live_grep{ cwd = vim.fn.systemlist('git rev-parse --show-toplevel')[1] }<CR>",
+    "text from root" }
+lvim.builtin.which_key.mappings["s"]["m"] = { "<cmd>Telescope marks<CR>", "Marks" }
+lvim.builtin.which_key.mappings["b"]["t"] = { "<cmd>lua require('telescope.builtin').live_grep({grep_open_files=true})<CR>",
+    "text in buffers" }
+-- lvim.builting.which_key.mappings["c"] = {
+--     name = "+Conflict",
+--     q = { "<cmd>GitConflictListQf<CR>", "conflict quickfix list" },
+--     j = { "<cmd>GitConflictNextConflict<CR>", "next conflict" },
+--     k = { "<cmd>GitConflictPrevConflict<CR>", "prev conflict" },
+--     o = { "<cmd>GitConflictChooseOurs<CR>", "choose ours" },
+--     t = { "<cmd>GitConflictChooseTheirs<CR>", "choose theirs," },
+--     b = { "<cmd>GitConflictChooseBoth<CR>", "choose both" },
+-- }
+lvim.builtin.which_key.mappings["g"]["c"] = {
+    name = "+Conflict",
+    q = { "<cmd>GitConflictListQf<cr>", "Quickfix list" },
+    j = { "<cmd>GitConflictNextConflict<cr>", "Next conflict" },
+    k = { "<cmd>GitConflictPrevConflict<cr>", "Prev conflict" },
+    o = { "<cmd>GitConflictChooseOurs<cr>", "Choose ours" },
+    t = { "<cmd>GitConflictChooseTheirs<cr>", "Choose theirs," },
+    b = { "<cmd>GitConflictChooseBoth<cr>", "Choose both" },
+}
 -- TODO: User Config for predefined plugins
 -- After changing plugin config exit and reopen LunarVim, Run :PackerInstall :PackerCompile
 lvim.builtin.alpha.active = true
 lvim.builtin.alpha.mode = "dashboard"
-lvim.builtin.notify.active = true
 lvim.builtin.terminal.active = true
 lvim.builtin.nvimtree.setup.view.side = "left"
 lvim.builtin.nvimtree.setup.renderer.icons.show.git = false
 
 -- if you don't want all the parsers change this to a table of the ones you want
 lvim.builtin.treesitter.ensure_installed = {
-  "bash",
-  "c",
-  "javascript",
-  "json",
-  "lua",
-  "python",
-  "typescript",
-  "tsx",
-  "css",
-  "rust",
-  "java",
-  "yaml",
+    "bash",
+    "c",
+    "javascript",
+    "json",
+    "lua",
+    "python",
+    "typescript",
+    "tsx",
+    "css",
+    "rust",
+    "java",
+    "yaml",
 }
 
 lvim.builtin.treesitter.ignore_install = { "haskell" }
@@ -286,18 +331,19 @@ lvim.builtin.treesitter.highlight.enabled = true
 -- -- set a formatter, this will override the language server formatting capabilities (if it exists)
 local formatters = require "lvim.lsp.null-ls.formatters"
 formatters.setup {
-  --   { command = "black", filetypes = { "python" } },
-  --   { command = "isort", filetypes = { "python" } },
-  {
-    --     -- each formatter accepts a list of options identical to https://github.com/jose-elias-alvarez/null-ls.nvim/blob/main/doc/BUILTINS.md#Configuration
-    command = "prettier",
-    --     ---@usage arguments to pass to the formatter
-    --     -- these cannot contain whitespaces, options such as `--line-width 80` become either `{'--line-width', '80'}` or `{'--line-width=80'}`
-    -- extra_args = { "--print-with", "100" },
-    --     ---@usage specify which filetypes to enable. By default a providers will attach to all the filetypes it supports.
-    filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact", "vue", "css", "scss", "less", "html",
-      "json", "jsonc", "yaml", "markdown", "graphql", "handlebars" },
-  },
+    --   { command = "black", filetypes = { "python" } },
+    --   { command = "isort", filetypes = { "python" } },
+    {
+        --     -- each formatter accepts a list of options identical to https://github.com/jose-elias-alvarez/null-ls.nvim/blob/main/doc/BUILTINS.md#Configuration
+        command = "prettier",
+        --     ---@usage arguments to pass to the formatter
+        --     -- these cannot contain whitespaces, options such as `--line-width 80` become either `{'--line-width', '80'}` or `{'--line-width=80'}`
+        -- extra_args = { "--print-with", "100" },
+        --     ---@usage specify which filetypes to enable. By default a providers will attach to all the filetypes it supports.
+        filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact", "vue", "css", "scss", "less",
+            "html",
+            "json", "jsonc", "yaml", "markdown", "graphql", "handlebars" },
+    },
 }
 
 -- -- set additional linters
@@ -346,136 +392,144 @@ require("lvim.lsp.manager").setup("eslint")
 
 -- Additional Plugins
 lvim.plugins = {
-  {
-    'AhmedAbdulrahman/aylin.vim',
-  },
-  {
-    'mg979/vim-visual-multi',
-    -- branch = 'master',
-    config = "require('plugins.vim-visual-multi')",
-  },
-  {
-    'kylechui/nvim-surround',
-    config = function()
-      require('nvim-surround').setup()
-    end
-  },
-  {
-    'wfxr/minimap.vim',
-    -- config = "require('plugins.minimap')",
-  },
-  {
-    "kevinhwang91/nvim-bqf",
-    event = { "BufRead", "BufNew" },
-    config = function()
-      require("bqf").setup({
-        auto_enable = true,
-        preview = {
-          win_height = 12,
-          win_vheight = 12,
-          delay_syntax = 80,
-          border_chars = { "┃", "┃", "━", "━", "┏", "┓", "┗", "┛", "█" },
-        },
-        func_map = {
-          vsplit = "",
-          ptogglemode = "z,",
-          stoggleup = "",
-        },
-        filter = {
-          fzf = {
-            action_for = { ["ctrl-s"] = "split" },
-            extra_opts = { "--bind", "ctrl-o:toggle-all", "--prompt", "> " },
-          },
-        },
-      })
-    end,
-  },
-  { "folke/tokyonight.nvim" },
-  { 'akinsho/git-conflict.nvim', tag = "*", config = function()
-    require('git-conflict').setup({
-      {
-        disable_diagnostics = true, -- This will disable the diagnostics in a buffer whilst it is conflicted
-        highlights = { -- They must have background color, otherwise the default color will be used
-          incoming = 'DiffText',
-          current = 'DiffAdd',
-        }
-      }
-    })
-  end },
-  {
-    "ggandor/leap.nvim",
-    event = "BufRead",
-    config = "require('leap').set_default_keymaps()"
-  },
-  {
-    "gen740/SmoothCursor.nvim",
-    config = function()
-      require("smoothcursor").setup({
-        autostart = true,
-        cursor = "", -- cursor shape (need nerd font)
-        intervals = 35, -- tick interval
-        linehl = nil, -- highlight sub-cursor line like 'cursorline', "CursorLine" recommended
-        type = "default", -- define cursor movement calculate function, "default" or "exp" (exponential).
-        fancy = {
-          enable = true, -- enable fancy mode
-          head = { cursor = "▷", texthl = "SmoothCursor", linehl = nil },
-          body = {
-            -- { cursor = "█", texthl = "SmoothCursorAqua" },
-            -- { cursor = "▉", texthl = "SmoothCursorAqua" },
-            -- { cursor = "▊", texthl = "SmoothCursorAqua" },
-            -- { cursor = "▋", texthl = "SmoothCursorBlue" },
-            -- { cursor = "▌", texthl = "SmoothCursorBlue" },
-            -- { cursor = "▍", texthl = "SmoothCursorPurple" },
-            -- { cursor = "▎", texthl = "SmoothCursorPurple" },
-
-            { cursor = "▓", texthl = "SmoothCursorAqua" },
-            { cursor = "▓", texthl = "SmoothCursorAqua" },
-            { cursor = "▒", texthl = "SmoothCursorAqua" },
-            { cursor = "▒", texthl = "SmoothCursorBlue" },
-            { cursor = "▒", texthl = "SmoothCursorBlue" },
-            { cursor = "░", texthl = "SmoothCursorPurple" },
-            { cursor = "░", texthl = "SmoothCursorPurple" },
-
-            -- { cursor = "▓", texthl = "SmoothCursorAqua" },
-            -- { cursor = "▚", texthl = "SmoothCursorAqua" },
-            -- { cursor = "▞", texthl = "SmoothCursorAqua" },
-            -- { cursor = "▝", texthl = "SmoothCursorBlue" },
-            -- { cursor = "▗", texthl = "SmoothCursorBlue" },
-            -- { cursor = "▘", texthl = "SmoothCursorPurple" },
-            -- { cursor = "▖", texthl = "SmoothCursorPurple" },
-
-            -- { cursor = "", texthl = "SmoothCursorAqua" },
-            -- { cursor = "", texthl = "SmoothCursorAqua" },
-            -- { cursor = "●", texthl = "SmoothCursorBlue" },
-            -- { cursor = "●", texthl = "SmoothCursorBlue" },
-            -- { cursor = "•", texthl = "SmoothCursorPurple" },
-            -- { cursor = ".", texthl = "SmoothCursorPurple" },
-            -- { cursor = ".", texthl = "SmoothCursorPurple" },
-          },
-          tail = { cursor = nil, texthl = "SmoothCursor" }
-        },
-        priority = 10, -- set marker priority
-        speed = 45, -- max is 100 to stick to your current position
-        texthl = "SmoothCursor", -- highlight group, default is { bg = nil, fg = "#FFD400" }
-        threshold = 3,
-        timeout = 3000,
-      })
-    end
-  },
-  {
-    "nvim-treesitter/nvim-treesitter-context",
-    -- config = "require('treesitter-context).setup()"
-  }
-  -- { 'RRethy/vim-illuminate' },
-  -- {
-  --   'levouh/tint.nvim',
-  --   config = "require('tint').setup()"
-  -- }
-  -- {
-  --   "folke/trouble.nvim",
-  --   cmd = "TroubleToggle",
-  -- },
+    {
+        'AhmedAbdulrahman/aylin.vim',
+    },
+    {
+        'mg979/vim-visual-multi',
+        -- branch = 'master',
+        config = function()
+            vim.g.VM_maps = {
+                ["Add Cursor Down"] = "¬",
+                ["Add Cursor Up"] = "º",
+            }
+            vim.g.VM_theme = 'codedark'
+            -- require('vim-visual-multi').setup({
+            --     vim.cmd([[
+            --       let g:VM_maps = {}
+            --       let g:VM_maps["Add Cursor Down"]    = '¬'   " new cursor down
+            --       let g:VM_maps["Add Cursor Up"]      = 'º'   " new cursor up
+            --       let g:VM_theme = 'codedark'
+            --     ]])
+            -- })
+        end
+    },
+    {
+        'kylechui/nvim-surround',
+        config = function()
+            require('nvim-surround').setup()
+        end
+    },
+    {
+        'wfxr/minimap.vim',
+        -- config = "require('plugins.minimap')",
+    },
+    {
+        "kevinhwang91/nvim-bqf",
+        event = { "BufRead", "BufNew" },
+        config = function()
+            require("bqf").setup({
+                auto_enable = true,
+                preview = {
+                    win_height = 12,
+                    win_vheight = 12,
+                    delay_syntax = 80,
+                    border_chars = { "┃", "┃", "━", "━", "┏", "┓", "┗", "┛", "█" },
+                },
+                func_map = {
+                    vsplit = "",
+                    ptogglemode = "z,",
+                    stoggleup = "",
+                },
+                filter = {
+                    fzf = {
+                        action_for = { ["ctrl-s"] = "split" },
+                        extra_opts = { "--bind", "ctrl-o:toggle-all", "--prompt", "> " },
+                    },
+                },
+            })
+        end,
+    },
+    -- { "folke/tokyonight.nvim" },
+    { 'akinsho/git-conflict.nvim', tag = "*", config = function()
+        require('git-conflict').setup({
+            {
+                disable_diagnostics = true, -- This will disable the diagnostics in a buffer whilst it is conflicted
+                highlights = { -- They must have background color, otherwise the default color will be used
+                    incoming = 'DiffText',
+                    current = 'DiffAdd',
+                }
+            }
+        })
+    end },
+    {
+        "gen740/SmoothCursor.nvim",
+        config = function()
+            require("smoothcursor").setup({
+                autostart = true,
+                cursor = "", -- cursor shape (need nerd font)
+                intervals = 35, -- tick interval
+                linehl = nil, -- highlight sub-cursor line like 'cursorline', "CursorLine" recommended
+                type = "default", -- define cursor movement calculate function, "default" or "exp" (exponential).
+                fancy = {
+                    enable = true, -- enable fancy mode
+                    head = { cursor = "▷", texthl = "SmoothCursor", linehl = nil },
+                    body = {
+                        { cursor = "▓", texthl = "SmoothCursorAqua" },
+                        { cursor = "▓", texthl = "SmoothCursorAqua" },
+                        { cursor = "▒", texthl = "SmoothCursorAqua" },
+                        { cursor = "▒", texthl = "SmoothCursorBlue" },
+                        { cursor = "▒", texthl = "SmoothCursorBlue" },
+                        { cursor = "░", texthl = "SmoothCursorPurple" },
+                        { cursor = "░", texthl = "SmoothCursorPurple" },
+                        { cursor = "░", texthl = "SmoothCursorPurple" },
+                    },
+                    tail = { cursor = nil, texthl = "SmoothCursor" }
+                },
+                priority = 10, -- set marker priority
+                speed = 45, -- max is 100 to stick to your current position
+                texthl = "SmoothCursor", -- highlight group, default is { bg = nil, fg = "#FFD400" }
+                threshold = 3,
+                timeout = 3000,
+            })
+        end
+    },
+    {
+        "nvim-treesitter/nvim-treesitter-context",
+        -- config = "require('treesitter-context).setup()"
+    },
+    {
+        "ggandor/lightspeed.nvim"
+    },
+    -- {
+    --     "ggandor/leap.nvim",
+    --     config = function()
+    --         require('leap').add_default_mappings()
+    --     end
+    -- },
+    {
+        "nvim-telescope/telescope-live-grep-args.nvim"
+    },
+    { "junegunn/fzf",
+        run = function()
+            vim.fn['fzf#install']()
+        end
+    },
+    -- { 'RRethy/vim-illuminate' },
+    {
+        'levouh/tint.nvim',
+        config = "require('tint').setup()"
+    }
+    -- {
+    --   "folke/trouble.nvim",
+    --   cmd = "TroubleToggle",
+    -- },
 }
+
+-- require("telescope").load_extension("live_grep_args")
+lvim.builtin.telescope.on_config_done = function(tele)
+    tele.load_extension("live_grep_args")
+end
 
 -- Autocommands (https://neovim.io/doc/user/autocmd.html)
 -- vim.api.nvim_create_autocmd("BufEnter", {
@@ -495,25 +549,29 @@ lvim.plugins = {
 -- open terminal
 lvim.builtin.terminal.open_mapping = "<C-SPACE>"
 
--- prevent nvimtree from updating tree when inspecting other buffers
--- lvim.builtin.nvimtree.setup.update_focused_file.enable = false
--- lvim.builtin.nvimtree.setup.update_focused_file.update_cwd = false
-lvim.builtin.nvimtree.setup.prefer_startup_root = true -- if update_focused_file is enabled
+-- function _G.set_terminal_keymaps()
+--     local opts = { buffer = 0 }
+--     -- step out of insert mode with esc
+--     vim.keymap.set('t', '<esc>', [[<C-\><C-n>]], opts)
+-- end
 
+-- -- -- if you only want these mappings for toggle term use term://*toggleterm#* instead
+-- vim.cmd('autocmd! TermOpen term://* lua set_terminal_keymaps()')
+
+lvim.builtin.which_key.disable = false
+
+lvim.builtin.nvimtree.setup.prefer_startup_root = true -- if update_focused_file is enabled
 lvim.builtin.nvimtree.setup.update_cwd = false
 lvim.builtin.nvimtree.setup.update_focused_file = {
-  enable = false,
-  update_root = false,
-  ignore_list = {},
+    enable = false,
+    update_root = false,
+    ignore_list = {},
 }
 lvim.builtin.nvimtree.setup.hijack_directories = {
-  enable = false,
-  auto_open = false,
+    enable = false,
+    auto_open = false,
 }
 lvim.builtin.nvimtree.setup.actions.change_dir.enable = false
--- lvim.builtin.telescope.mappings.i["<C-j>"]["1"] = "move_selection_previous"
--- lvim.builtin.telescope.mappings.i["<C-k>"]["1"] = "move_selection_next"
--- lvim.builtin.telescope.mappings.i["<C-n>"]["1"] = "cycle_history_next"
--- lvim.builtin.telescope.mappings.i["<C-p>"]["1"] = "cycle_history_prev"
 
-lvim.transparent_window = true
+-- lvim.transparent_window = true
+

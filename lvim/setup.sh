@@ -1,25 +1,31 @@
 #!/usr/bin/env bash
 
-brew_lvim_dependencies() {
+install_prereq() {
   info "Brew installing dependencies for LVIM ..."
 
-  LVIM_TOOLS=(
+  LVIM_PREREQ=(
     "neovim"
     "stylua"
     "code-minimap"
     "lazygit"
     "ripgrep"
+    "cmake"
   )
 
-  for tool in "${LVIM_TOOLS[@]}"
+  for tool in "${LVIM_PREREQ[@]}"
   do
     brew install "${tool}"
   done
 
+  # lunarvim requires pip - ensure that it is installed
+  python3 -m ensurepip
+
+  # install rust package manager – cargo
+  curl https://sh.rustup.rs -sSf | sh
 
   success "Brew installation done!"
 
-  unset -v LVIM_TOOLS
+  unset -v LVIM_PREREQ
 }
 
 npm_lvim_dependencies() {
@@ -50,28 +56,29 @@ symlink_files() {
   echo "\\n → Linking lvim config & plugin files..."
 
   # ln -sf $LVIM_CONFIG $XDG_CONFIG_HOME
-  ln -sf "$LVIM_CONFIG/config.lua"                            "$CONFIG_DIR/lvim/config.lua"
-  ln -sf "$LVIM_CONFIG/lua/plugins/toggleterm.lua"            "$CONFIG_DIR/lua/plugins/toggleterm.lua"
-  ln -sf "$LVIM_CONFIG/lua/plugins/vim-visual-multi.lua"      "$CONFIG_DIR/lua/plugins/vim-visual-multi.lua"
+  ln -sf "$LVIM_CONFIG/config.lua" "$CONFIG_DIR/lvim/config.lua"
 
   echo "✓ lvim config & plugins have been linked\\n"
 }
 
 install_lvim() {
-  brew_lvim_dependencies
+  echo "Installing LunarVim"
+  echo "If you see an EACCES – read https://docs.npmjs.com/resolving-eacces-permissions-errors-when-installing-packages-globally"
+
+  install_prereq
   npm_lvim_dependencies
 
   echo "✓ necessary dependencies have finished installing \\n"
   echo "\\n → Running LunarVim installer "
 
-  # https://github.com/LunarVim/LunarVim
-  bash <(curl -s https://raw.githubusercontent.com/lunarvim/lunarvim/master/utils/installer/install.sh) 
+  # https://www.lunarvim.org/docs/installation  
+  LV_BRANCH='release-1.2/neovim-0.8' bash <(curl -s https://raw.githubusercontent.com/lunarvim/lunarvim/master/utils/installer/install.sh)
 
   if confirm "Symlink existing configs?"; then
     symlink_files
   fi
 }
 
-if confirm "Would you like to install LunarVim's and all dependencies?"; then
+if confirm "Would you like to install LunarVim?"; then
   install_lvim
 fi
