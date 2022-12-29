@@ -258,6 +258,13 @@ lvim.builtin.which_key.mappings["g"]["c"] = {
     t = { "<cmd>GitConflictChooseTheirs<cr>", "Choose theirs," },
     b = { "<cmd>GitConflictChooseBoth<cr>", "Choose both" },
 }
+lvim.builtin.which_key.mappings["m"] = {
+    name = "+Mind",
+    o = { "<cmd>MindOpenMain<cr>", "Open main" },
+    r = { "<cmd>MindReloadState<cr>", "Reload" },
+    c = { "<cmd>MindClose<cr>", "Close" },
+}
+
 -- TODO: User Config for predefined plugins
 -- After changing plugin config exit and reopen LunarVim, Run :PackerInstall :PackerCompile
 lvim.builtin.alpha.active = true
@@ -404,14 +411,6 @@ lvim.plugins = {
                 ["Add Cursor Up"] = "º",
             }
             vim.g.VM_theme = 'codedark'
-            -- require('vim-visual-multi').setup({
-            --     vim.cmd([[
-            --       let g:VM_maps = {}
-            --       let g:VM_maps["Add Cursor Down"]    = '¬'   " new cursor down
-            --       let g:VM_maps["Add Cursor Up"]      = 'º'   " new cursor up
-            --       let g:VM_theme = 'codedark'
-            --     ]])
-            -- })
         end
     },
     {
@@ -519,6 +518,36 @@ lvim.plugins = {
     {
         'levouh/tint.nvim',
         config = "require('tint').setup()"
+    },
+    {
+        'echasnovski/mini.animate',
+        config = function()
+            local animate = require("mini.animate")
+
+            animate.setup({
+                -- cursor = {
+                --     enable = true
+                -- },
+                resize = {
+                    enable = false
+                },
+                scroll = {
+                    timing = animate.gen_timing.linear({
+                        easing = "out",
+                        duration = 125,
+                        unit = "total"
+                    })
+                }
+            })
+        end
+    },
+    {
+        'phaazon/mind.nvim',
+        branch = 'v2.2.1',
+        requires = { 'nvim-lua/plenary.nvim' },
+        config = function()
+            require 'mind'.setup()
+        end
     }
     -- {
     --   "folke/trouble.nvim",
@@ -527,9 +556,9 @@ lvim.plugins = {
 }
 
 -- require("telescope").load_extension("live_grep_args")
-lvim.builtin.telescope.on_config_done = function(tele)
-    tele.load_extension("live_grep_args")
-end
+-- lvim.builtin.telescope.on_config_done = function(tele)
+--     tele.load_extension("live_grep_args")
+-- end
 
 -- Autocommands (https://neovim.io/doc/user/autocmd.html)
 -- vim.api.nvim_create_autocmd("BufEnter", {
@@ -573,5 +602,4 @@ lvim.builtin.nvimtree.setup.hijack_directories = {
 }
 lvim.builtin.nvimtree.setup.actions.change_dir.enable = false
 
--- lvim.transparent_window = true
-
+lvim.transparent_window = true
