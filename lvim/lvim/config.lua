@@ -77,6 +77,26 @@ vim.cmd([[set iskeyword+=-]])
 --	augroup END
 --]])
 
+-- poor attempt at trying to automate sessions
+-- vim.api.nvim_create_autocmd({ "BufEnter", "BufLeave" }, {
+--     command = "mks! " .. vim.fn.expand("~") .. "/dotfiles/vim_sessions/session.vim"
+-- })
+
+-- Autocommands (https://neovim.io/doc/user/autocmd.html)
+-- vim.api.nvim_create_autocmd("BufEnter", {
+--   pattern = { "*.json", "*.jsonc" },
+--   -- enable wrap mode for json files only
+--   command = "setlocal wrap",
+-- })
+-- vim.api.nvim_create_autocmd("FileType", {
+--   pattern = "zsh",
+--   callback = function()
+--     -- let treesitter use bash highlight for zsh files as well
+--     require("nvim-treesitter.highlight").attach(0, "bash")
+--   end,
+-- })
+
+
 -- Disable automatic comment insertion when pressing o
 --vim.cmd(
 -- [[autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o]]
@@ -117,6 +137,8 @@ lvim.keys.normal_mode['<S-h>'] = '<cmd>BufferLineCyclePrev<cr>'
 
 -- remove higlights
 lvim.keys.normal_mode['<CR>'] = ':noh<CR><CR>'
+lvim.keys.normal_mode['<C-BS>'] = '<Del>'
+lvim.keys.insert_mode['<C-BS>'] = '<Del>'
 
 -- Resize with arrows
 lvim.keys.normal_mode['<Up>'] = ':resize -2<CR>'
@@ -125,8 +147,8 @@ lvim.keys.normal_mode['<Left>'] = ':vertical resize -2<CR>'
 lvim.keys.normal_mode['<Right>'] = ':vertical resize +2<CR>'
 
 -- Move text up and down
-lvim.keys.normal_mode['√'] = ':m .+1<CR>=='
-lvim.keys.normal_mode['ª'] = ':m .-2<CR>=='
+-- lvim.keys.normal_mode['√'] = ':m .+1<CR>=='
+-- lvim.keys.normal_mode['ª'] = ':m .-2<CR>=='
 
 -- swap places with , and ; --
 lvim.keys.normal_mode[','] = ';'
@@ -167,10 +189,10 @@ lvim.keys.visual_mode['cl'] = 'y<esc>oconsole.log("<C-R>% ~ line: <C-R>=line("."
 
 -- Visual Block --
 -- Move text up and down
-lvim.keys.visual_block_mode['J'] = ":move '>+1<CR>gv-gv"
-lvim.keys.visual_block_mode['√'] = ":move '>+1<CR>gv-gv"
-lvim.keys.visual_block_mode['K'] = ":move '<-2<CR>gv-gv"
-lvim.keys.visual_block_mode['ª'] = ":move '<-2<CR>gv-gv"
+-- lvim.keys.visual_block_mode['J'] = ":move '>+1<CR>gv-gv"
+-- lvim.keys.visual_block_mode['√'] = ":move '>+1<CR>gv-gv"
+-- lvim.keys.visual_block_mode['K'] = ":move '<-2<CR>gv-gv"
+-- lvim.keys.visual_block_mode['ª'] = ":move '<-2<CR>gv-gv"
 
 -- unmap a default keymapping
 -- vim.keymap.del("n", "<C-Up>")
@@ -230,6 +252,7 @@ lvim.builtin.which_key.mappings["y"] = {
 }
 lvim.builtin.which_key.mappings["g"]["S"] = { "<cmd>Git stage_buffer<CR>", "Stage buffer" }
 lvim.builtin.which_key.mappings["s"]["l"] = { "<cmd>Telescope resume<CR>", "Last search" }
+lvim.builtin.which_key.mappings["s"]["s"] = { "<cmd>Telescope sessions_picker<CR>", "Sessions" }
 lvim.builtin.which_key.mappings["g"]["q"] = { "<cmd>Gitsigns setqflist<CR>", "Quickfix hunks" }
 -- lvim.builtin.which_key.mappings["s"]["t"] = { "<cmd>lua require('telescope').extensions.live_grep_args.live_grep_args()<CR>",
 --     "text from root" }
@@ -274,23 +297,23 @@ lvim.builtin.nvimtree.setup.view.side = "left"
 lvim.builtin.nvimtree.setup.renderer.icons.show.git = false
 
 -- if you don't want all the parsers change this to a table of the ones you want
-lvim.builtin.treesitter.ensure_installed = {
-    "bash",
-    "c",
-    "javascript",
-    "json",
-    "lua",
-    "python",
-    "typescript",
-    "tsx",
-    "css",
-    "rust",
-    "java",
-    "yaml",
-}
+-- lvim.builtin.treesitter.ensure_installed = {
+--     "bash",
+--     "c",
+--     "javascript",
+--     "json",
+--     "lua",
+--     "python",
+--     "typescript",
+--     "tsx",
+--     "css",
+--     "rust",
+--     "java",
+--     "yaml",
+-- }
 
-lvim.builtin.treesitter.ignore_install = { "haskell" }
-lvim.builtin.treesitter.highlight.enabled = true
+-- lvim.builtin.treesitter.ignore_install = { "haskell" }
+-- lvim.builtin.treesitter.highlight.enabled = true
 
 -- generic LSP settings
 
@@ -397,6 +420,21 @@ formatters.setup {
 
 require("lvim.lsp.manager").setup("eslint")
 
+-- remapping vim-visual-multi keys
+vim.keymap.set(
+    { "n" },
+    "º",
+    ":call vm#commands#add_cursor_up(0, v:count1)<cr>",
+    { noremap = true, silent = true }
+)
+
+
+vim.keymap.set(
+    { "n" },
+    "¬",
+    ":call vm#commands#add_cursor_down(0, v:count1)<cr>",
+    { noremap = true, silent = true }
+)
 -- Additional Plugins
 lvim.plugins = {
     {
@@ -406,9 +444,14 @@ lvim.plugins = {
         'mg979/vim-visual-multi',
         -- branch = 'master',
         config = function()
+            -- let g:VM_maps = {}
+            -- let g:VM_maps["Add Cursor Down"] = '¬'
+
             vim.g.VM_maps = {
                 ["Add Cursor Down"] = "¬",
                 ["Add Cursor Up"] = "º",
+                ["Select Cursor Down"] = "¬",
+                ["Select Cursor Up"] = "º",
             }
             vim.g.VM_theme = 'codedark'
         end
@@ -449,8 +492,7 @@ lvim.plugins = {
             })
         end,
     },
-    -- { "folke/tokyonight.nvim" },
-    { 'akinsho/git-conflict.nvim', tag = "*", config = function()
+    { 'akinsho/git-conflict.nvim', version = "*", config = function()
         require('git-conflict').setup({
             {
                 disable_diagnostics = true, -- This will disable the diagnostics in a buffer whilst it is conflicted
@@ -494,30 +536,22 @@ lvim.plugins = {
         end
     },
     {
-        "nvim-treesitter/nvim-treesitter-context",
-        -- config = "require('treesitter-context).setup()"
+        "ggandor/lightspeed.nvim",
     },
-    {
-        "ggandor/lightspeed.nvim"
-    },
-    -- {
-    --     "ggandor/leap.nvim",
-    --     config = function()
-    --         require('leap').add_default_mappings()
-    --     end
-    -- },
     {
         "nvim-telescope/telescope-live-grep-args.nvim"
     },
     { "junegunn/fzf",
-        run = function()
+        build = function()
             vim.fn['fzf#install']()
         end
     },
     -- { 'RRethy/vim-illuminate' },
     {
         'levouh/tint.nvim',
-        config = "require('tint').setup()"
+        config = function()
+            require('tint').setup()
+        end
     },
     {
         'echasnovski/mini.animate',
@@ -525,9 +559,9 @@ lvim.plugins = {
             local animate = require("mini.animate")
 
             animate.setup({
-                -- cursor = {
-                --     enable = true
-                -- },
+                cursor = {
+                    enable = true
+                },
                 resize = {
                     enable = false
                 },
@@ -542,18 +576,50 @@ lvim.plugins = {
         end
     },
     {
+        'echasnovski/mini.move',
+        config = function()
+            require('mini.move').setup({
+                -- Module mappings. Use `''` (empty string) to disable one.
+                mappings = {
+                    -- Move visual selection in Visual mode. Defaults are Alt (Meta) + hjkl.
+                    left = '˛',
+                    right = 'ﬁ',
+                    down = '√',
+                    up = 'ª',
+
+                    -- Move current line in Normal mode
+                    line_left = '<Nop>',
+                    line_right = '<Nop>ﬁ',
+                    line_down = '√',
+                    line_up = 'ª',
+                },
+            })
+        end
+    },
+    {
         'phaazon/mind.nvim',
-        branch = 'v2.2.1',
-        requires = { 'nvim-lua/plenary.nvim' },
+        branch = 'v2.2',
+        dependencies = { 'nvim-lua/plenary.nvim' },
         config = function()
             require 'mind'.setup()
         end
+    },
+    { "shortcuts/no-neck-pain.nvim", version = "*" },
+    {
+        "JoseConseco/telescope_sessions_picker.nvim"
     }
-    -- {
-    --   "folke/trouble.nvim",
-    --   cmd = "TroubleToggle",
-    -- },
 }
+
+-- require("telescope").load_extension("sessions_picker")
+lvim.builtin.telescope.on_config_done = function(tele)
+    tele.extensions = {
+        sessions_picker = {
+            sessions_dir = vim.fn.stdpath('data') .. "/session" -- same as '/Users/{user}/.local/share/nvim/session'
+        }
+    }
+
+    tele.load_extension("sessions_picker")
+end
 
 -- require("telescope").load_extension("live_grep_args")
 -- lvim.builtin.telescope.on_config_done = function(tele)
