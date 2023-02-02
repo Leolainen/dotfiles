@@ -74,11 +74,19 @@ install_lvim() {
   # https://www.lunarvim.org/docs/installation  
   LV_BRANCH='release-1.2/neovim-0.8' bash <(curl -s https://raw.githubusercontent.com/lunarvim/lunarvim/master/utils/installer/install.sh)
 
-  if confirm "Symlink existing configs?"; then
+
+  read -p "Symlink existing configs? [y/N]" -n 1 answer
+  echo
+  
+  if [ ${answer} == "y" ]; then
     symlink_files
   fi
 }
 
-if confirm "Would you like to install LunarVim?"; then
-  install_lvim
+read -p "Would you like to install LunarVim?? [y/N]" -n 1 answer
+echo
+
+if [ ${answer} == "y" ]; then
+  install_sketchybar
 fi
+
