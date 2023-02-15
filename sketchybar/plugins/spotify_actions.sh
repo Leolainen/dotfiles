@@ -16,9 +16,11 @@ update() {
         POSITION=$(osascript -e 'tell application "Spotify" to player position') 
 
         label_icon=""
+        updates="off"
 
         if [ $PLAYING = "playing" ]; then
           label_icon=""
+          updates="on"
         fi
 
         TRACK_LENGTH=$(($DURATION / 1000))
@@ -27,7 +29,8 @@ update() {
 
         args+=(--set spotify.anchor     label="阮 $ARTIST – $TRACK $label_icon"   \
                --set spotify.progress   drawing=on                                \
-                                        updates=on                                \
+                                        updates="$updates"                        \
+                                        update_freq=on                            \
                                         slider.percentage="$percentage"           )
 
         sketchybar -m "${args[@]}"
