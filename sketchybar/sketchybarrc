@@ -63,7 +63,7 @@ source "$PLUGIN_DIR/spotify.sh"
 
 # Right
 source "$PLUGIN_DIR/calendar.sh"
-# source "$PLUGIN_DIR/github.sh"
+source "$PLUGIN_DIR/github.sh"
 source "$PLUGIN_DIR/volume.sh"
 source "$PLUGIN_DIR/battery.sh"
 # source "$PLUGIN_DIR/divider.sh"
@@ -73,3 +73,4 @@ source "$PLUGIN_DIR/battery.sh"
 sketchybar --update
 
 echo "sketchybar configuation loaded.."
+

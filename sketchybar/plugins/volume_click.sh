@@ -53,3 +53,4 @@ if [ "$BUTTON" = "right" ] || [ "$MODIFIER" = "shift" ]; then
 else
   toggle_mute
 fi
+

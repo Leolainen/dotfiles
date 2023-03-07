@@ -30,7 +30,7 @@ update() {
         args+=(--set spotify.anchor     label="阮 $ARTIST – $TRACK $label_icon"   \
                --set spotify.progress   drawing=on                                \
                                         updates="$updates"                        \
-                                        update_freq=on                            \
+                                        update_freq=2                             \
                                         slider.percentage="$percentage"           )
 
         sketchybar -m "${args[@]}"
@@ -73,3 +73,4 @@ case "$SENDER" in
   *) update
   ;;
 esac
+

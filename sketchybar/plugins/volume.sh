@@ -47,5 +47,7 @@ sketchybar  --add item  volume_amount   right                                   
                                         background.corner_radius=8                    \
                                         background.drawing=on                         \
                                         script="$PLUGIN_DIR/volume_change.sh"         \
-           --subscribe  volume          mouse.entered.global                                 \
-                                        mouse.exited.global                                  \
+           --subscribe  volume          mouse.entered                                 \
+                                        mouse.exited                                  \
+                                        mouse.exited.global                           \
+
