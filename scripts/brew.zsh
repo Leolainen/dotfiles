@@ -102,6 +102,7 @@ install_cli_tools() {
     "wget"
     "yarn"
     "fd"
+    "gh"
   )
 
   for tool in "${CLI_TOOLS[@]}"
@@ -150,7 +151,7 @@ intall_apps() {
   info "Installing useful apps ..."
 
   APPS=(
-"bankid"
+    "bankid"
     "java"
     "slack"
     "discord"
