@@ -231,24 +231,32 @@ formatters.setup {
     {
         --     -- each formatter accepts a list of options identical to https://github.com/jose-elias-alvarez/null-ls.nvim/blob/main/doc/BUILTINS.md#Configuration
         command = "prettier",
-        filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact", "vue", "css", "scss", "less",
-            "html",
-            "json", "jsonc", "yaml", "markdown", "graphql", "handlebars" },
+        filetypes = { "json", "javascript", "javascriptreact", "typescript", "typescriptreact", "vue" },
     },
     -- { command = "stylelua", filetypes = { "lua" }}
 }
 
 -- additional linters
--- local linters = require "lvim.lsp.null-ls.linters"
--- linters.setup {
---     { command = "luacheck", filetypes = { "lua" }}
--- }
+local linters = require "lvim.lsp.null-ls.linters"
+linters.setup {
+    -- {
+    --     command = "eslint",
+    --     filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact", "vue" },
+    -- },
+    {
+        command = "markdownlint",
+        filetypes = { "markdown" }
+    }
+    --     { command = "luacheck", filetypes = { "lua" }}
+}
 
 -- set up language servers
 require("lvim.lsp.manager").setup("eslint")
 require("lvim.lsp.manager").setup("tsserver")
 require("lvim.lsp.manager").setup("lua_ls")
 require("lvim.lsp.manager").setup("bashls")
+require("lvim.lsp.manager").setup("jsonls")
+require("lvim.lsp.manager").setup("markdownlint")
 
 -- remapping vim-visual-multi keys
 vim.keymap.set(
