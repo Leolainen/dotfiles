@@ -6,7 +6,7 @@ update() {
     PLUGIN_DIR="$HOME/.config/sketchybar/plugins" # Directory where all the plugin scripts are stored
 
 
-    PR_LIST="$(gh pr list --repo=atgse/atgse --author=@me --json number,title,reviews,url,mergeable)"
+    PR_LIST="$(gh pr list --repo=atgse/atgse --author=@me --json number,title,reviews,url,mergeable,mergeStateStatus)"
     TOTAL_REVIEWS=0
     OPEN_PULL_REQUESTS=$(echo "$PR_LIST" | jq -r "length")
 
@@ -22,12 +22,23 @@ update() {
         REVIEWS=$(_jq '.reviews' | jq 'length')
         URL=$(_jq '.url')
         MERGEABLE=$(_jq '.mergeable')
+        MERGESTATESTATUS=$(_jq '.mergeStateStatus')
 
         TOTAL_REVIEWS=$((TOTAL_REVIEWS+REVIEWS))
 
-        if [ "$MERGEABLE" == "CONFLICTING" ]; then
-          MERGEABLE_ICON=×
-          MERGEABLE_COLOR=$RED
+        if [ "$MERGEABLE" != "MERGEABLE" ] || [ "$MERGESTATESTATUS" != "CLEAN" ]; then
+            MERGE_STATUS=""
+
+            if [ "$MERGEABLE" != "MERGEABLE" ]; then
+                MERGE_STATUS+=" $MERGEABLE"
+            fi
+
+            if [ "$MERGESTATESTATUS" != "CLEAN" ]; then
+                MERGE_STATUS+=" $MERGESTATESTATUS"
+            fi
+
+              MERGEABLE_ICON="×$MERGE_STATUS |"
+              MERGEABLE_COLOR=$RED
         else
           MERGEABLE_ICON=√
           MERGEABLE_COLOR=$GREEN
@@ -93,5 +104,4 @@ case "$SENDER" in
     "mouse.clicked") popup toggle
     ;;
 esac
-
 
