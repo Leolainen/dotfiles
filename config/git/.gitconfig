@@ -66,7 +66,7 @@
 
 
 [core]
-	editor = vim
+	editor = lvim
 	commitGraph = true
 	whitespace=fix,space-before-tab,tab-in-indent,trailing-space,cr-at-eol
 	excludesfile = ~/.gitignore
