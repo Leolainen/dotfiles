@@ -1,7 +1,14 @@
 #!/bin/sh
 
+source "$HOME/.config/sketchybar/colors.sh"
+source "$HOME/.config/sketchybar/tokens.sh"
+
 app_name="Spotify"
 spotify_exists="off"
+
+player_state() {
+    echo "$(osascript -e 'tell application "Spotify" to player state as string')" 
+}
 
 update() {
     if pgrep -x "Spotify" > /dev/null; then
@@ -9,33 +16,62 @@ update() {
         
         # ARTIST="$(echo "$INFO" | jq -r .Artist | sed 's/\(.\{14\}\).*/\1.../')"
         # TRACK="$(echo "$INFO" | jq -r .Name | sed 's/\(.\{14\}\).*/\1.../')"
-        ARTIST=$(osascript -e 'tell application "Spotify" to artist of current track as string' | sed 's/\(.\{18\}\).*/\1.../')
-        TRACK=$(osascript -e 'tell application "Spotify" to name of current track as string' | sed 's/\(.\{16\}\).*/\1.../')
+        # ARTIST=$(osascript -e 'tell application "Spotify" to artist of current track as string' | sed 's/\(.\{18\}\).*/\1.../')
+        # TRACK=$(osascript -e 'tell application "Spotify" to name of current track as string' | sed 's/\(.\{16\}\).*/\1.../')
+        ARTIST=$(osascript -e 'tell application "Spotify" to artist of current track as string')
+        TRACK=$(osascript -e 'tell application "Spotify" to name of current track as string')
         DURATION=$(osascript -e 'tell application "Spotify" to duration of current track as string')
         PLAYING=$(osascript -e 'tell application "Spotify" to player state as string') 
         POSITION=$(osascript -e 'tell application "Spotify" to player position') 
 
-        label_icon=""
+        # label_icon=""
         updates="off"
+        border_color=$TRANSPARENT
+        text_color=$TEXT_SECONDARY
+        scroll_texts=off
 
         if [ $PLAYING = "playing" ]; then
-          label_icon=""
+          # label_icon=""
           updates="on"
+          border_color=$BORDER_HIGHLIGHT
+          text_color=$TEXT_PRIMARY
+          scroll_texts=on
         fi
 
         TRACK_LENGTH=$(($DURATION / 1000))
 
         percentage=$(echo "scale=2; $POSITION / $TRACK_LENGTH * 100" | bc | awk '{print int($0)}')
 
-        args+=(--set spotify.anchor     label="阮 $ARTIST – $TRACK $label_icon"   \
-               --set spotify.progress   drawing=on                                \
-                                        updates="$updates"                        \
-                                        update_freq=2                             \
-                                        slider.percentage="$percentage"           )
+        args+=(--animate tahn 8
+               --set spotify.anchor     icon="阮"                                     \
+                                        icon.padding_left=8                           \
+                                        icon.padding_right=4                          \
+                                        icon.color=$text_color                        \
+                                        label="$ARTIST – $TRACK"                      \
+                                        label.color="$text_color"                     \
+                                        label.max_chars=20                            \
+                                        scroll_texts=$scroll_texts                    \
+                                        label.scroll_duration=200                     \
+               --set spotify            background.border_color="$border_color"       \
+               --set spotify.progress   drawing=on                                    \
+                                        updates="$updates"                            \
+                                        update_freq=2                                 \
+                                        slider.highlight_color="$text_color"          \
+                                        slider.background.border_color="$text_color"  \
+                                        slider.knob.color="$text_color"               \
+                                        slider.percentage="$percentage"               )
 
         sketchybar -m "${args[@]}"
     else
         sketchybar --set spotify.progress drawing=off updates=off
+    fi
+}
+
+handle_click() {
+    if [ "$NAME" = "spotify.progress" ]; then
+        progress_updated
+    else
+        echo "$NAME"
     fi
 }
 
@@ -53,24 +89,44 @@ progress_updated()
         sketchybar --set spotify.progress slider.percentage="${PERCENTAGE}" 
 }
 
-mouse_entered() {
-    sketchybar --animate tanh 8 --set spotify.progress slider.knob.color=0xffcad3f5 
-}
+# Doesn't feel very nice
+# mouse_entered() {
+#     args=()
 
-mouse_exited() {
-    sketchybar --animate tanh 8 --set spotify.progress slider.knob.color=0x00000000 
-}
+#     # args+=(--animate tanh 8)
+
+#     if [ "$NAME" = "spotify.progress" ]; then
+#         args+=(--set spotify.progress   slider.highlight_color=$BORDER_HIGHLIGHT          \
+#                                         slider.background.border_color=$BORDER_HIGHLIGHT  \
+#                                         slider.knob.color=$BORDER_HIGHLIGHT               )
+#     fi
+
+#     sketchybar -m "${args[@]}"
+# }
+
+# mouse_exited() {
+#     args=()
+
+#     # args+=(--animate tanh 3)
+
+#     if [ "$NAME" = "spotify.progress" ]; then
+#         args+=(--set spotify.progress   slider.highlight_color=$BORDER          \
+#                                         slider.background.border_color=$BORDER  \
+#                                         slider.knob.color=$BORDER               )
+#     fi
+
+#     sketchybar -m "${args[@]}"
+# }
 
 update
 
 case "$SENDER" in
-  "mouse.entered"|"mouse.entered.global") mouse_entered 
+  "mouse.entered") mouse_entered 
   ;;
-  "mouse.exited"|"mouse.exited.global") mouse_exited
+  "mouse.exited") mouse_exited
   ;;
-  "mouse.clicked") progress_updated
+  "mouse.clicked") handle_click
   ;;
   *) update
   ;;
 esac
-

@@ -2,24 +2,58 @@
 
 WIDTH=100
 SLIDER_NAME=volume_slider
+STATE=()
 
 init() {
     VOLUME=$(osascript -e 'output volume of (get volume settings)')
      sketchybar --set $SLIDER_NAME slider.percentage=$VOLUME
 }
 
+# echo "enter $NAME $INFO"
 open_volume_control() {
-    echo "$NAME $INFO"
-    INITIAL_WIDTH=$(sketchybar --query volume_slider | jq -r ".slider.width")
+    # STATE+=("$NAME")
 
-    if [ "$INITIAL_WIDTH" -eq "0" ]; then
-        sketchybar --animate tanh 30 --set $SLIDER_NAME slider.width=$WIDTH 
+    # if STATE does not already contain NAME
+    if [[ ! " ${STATE[@]} " =~ " $NAME " ]]; then
+        STATE+=("$NAME")
+    else
+        return
     fi
+
+    if [ "${#STATE[@]}" -gt 0 ]; then
+         sketchybar --set $SLIDER_NAME slider.width=$WIDTH 
+    fi
+
+    # echo "enter ${#STATE[@]}"
+    # if [ $STATE = "inactive" ] && [ "$NAME" = "volume" -o "$NAME" = "volume_slider" ]; then
+    #     STATE="active"
+    #     sketchybar --set $SLIDER_NAME slider.width=$WIDTH 
+    # fi
+    
+    # INITIAL_WIDTH=$(sketchybar --query volume_slider | jq -r ".slider.width")
+
+    # if [ "$INITIAL_WIDTH" -eq "0" ]; then
+        # sketchybar --animate tanh 30 --set $SLIDER_NAME slider.width=$WIDTH 
+    # fi
 }
 
 close_volume_control() {
+    # Remove $NAME from STATE array
+    # STATE=("${STATE[@]/$NAME}")
+
+    # if [ "${#STATE[@]}" -eq 0 ]; then
+    #     sketchybar --set $SLIDER_NAME slider.width=0
+    # fi
+
+    # echo "exit $STATE"
+    # echo "exit $NAME $INFO"
     INITIAL_WIDTH=$(sketchybar --query volume_slider | jq -r ".slider.width")
     
+    # if [ $STATE = "active" ] && [ "$NAME" = "volume" -o "$NAME" = "volume_slider" ]; then
+    #     STATE="inactive"
+    #     sketchybar --set $SLIDER_NAME slider.width=0
+    # fi
+    #
     if [[ $INITIAL_WIDTH -gt "0" ]]; then
         sketchybar --animate tanh 30 --set $SLIDER_NAME slider.width=0
     fi
@@ -42,7 +76,7 @@ volume_change() {
 
   # Check wether the volume was changed another time while sleeping
   FINAL_PERCENTAGE=$(sketchybar --query $SLIDER_NAME | jq -r ".slider.percentage")
-  if [ "$FINAL_PERCENTAGE" -eq "$INFO" ]; then
+  if [ $FINAL_PERCENTAGE -eq "$INFO" ]; then
       close_volume_control
   fi
 }
@@ -52,10 +86,10 @@ mouse_clicked() {
 }
 
 case "$SENDER" in
-  "mouse.entered") open_volume_control
-  ;;
-  "mouse.exited"|"mouse.exited.global") close_volume_control
-  ;;
+  # "mouse.clicked") open_volume_control
+  # ;;
+  # "mouse.exited") close_volume_control
+  # ;;
   "volume_change") volume_change
   ;;
   "mouse.clicked") mouse_clicked
@@ -63,5 +97,4 @@ case "$SENDER" in
   "forced") init
   ;;
 esac
-
 

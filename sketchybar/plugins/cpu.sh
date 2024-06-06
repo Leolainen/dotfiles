@@ -18,8 +18,8 @@ sketchybar --add item        cpu.top right                  \
                                                             \
            --add graph       cpu.sys right 100              \
            --set cpu.sys     width=0                        \
-                             graph.color=$RED               \
-                             graph.fill_color=$RED          \
+                             graph.color=$ERROR               \
+                             graph.fill_color=$ERROR          \
                              label.drawing=off              \
                              icon.drawing=off               \
                              background.padding_left=10     \
@@ -28,7 +28,7 @@ sketchybar --add item        cpu.top right                  \
                              background.color=$TRANSPARENT  \
                                                             \
            --add graph       cpu.user right 100             \
-           --set cpu.user    graph.color=$BLUE              \
+           --set cpu.user    graph.color=$INFO              \
                              label.drawing=off              \
                              icon.drawing=off               \
                              background.padding_left=10     \

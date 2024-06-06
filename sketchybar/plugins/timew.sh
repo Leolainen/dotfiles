@@ -2,7 +2,7 @@
 
 POPUP_CLICK_SCRIPT="sketchybar --set \$NAME popup.drawing=toggle"
 
-github_bell=(
+timew_plugin=(
     ${ITEM_MIXIN[@]}
     update_freq=180
     padding_right=$PADDING
@@ -13,7 +13,7 @@ github_bell=(
     label=$LOADING
     label.highlight_color=$INFO
     popup.align=center
-    script="$PLUGIN_DIR/github_scripts.sh"
+    script="$PLUGIN_DIR/timew_scripts.sh"
     click_script="$POPUP_CLICK_SCRIPT"
 )
 
@@ -30,7 +30,7 @@ github_template=(
 )
 
 sketchybar --add    item                github.bell right                             \
-           --set    github.bell         "${github_bell[@]}"                           \
+           --set    github.bell         "${timew_plugin[@]}"                           \
                                                                                       \
            --subscribe github.bell      mouse.entered                                 \
                                         mouse.exited                                  \

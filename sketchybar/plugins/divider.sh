@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
 sketchybar --add bracket status brew github.bell volume volume_alias \
-           --set status background.color=$BACKGROUND_1
+           --set status background.color=$BACKGROUND
 
 sketchybar --add item divider right \
            --set divider label.drawing=off \

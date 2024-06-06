@@ -34,14 +34,14 @@ toggle_devices() {
   CURRENT="$(SwitchAudioSource -t output -c)"
 
   while IFS= read -r device; do
-    COLOR=$GREY
+    COLOR=$GREY_400
     if [ "${device}" = "$CURRENT" ]; then
-      COLOR=$WHITE
+      COLOR=$TEXT_PRIMARY
     fi
     args+=(--add item volume.device.$COUNTER popup."$NAME" \
            --set volume.device.$COUNTER label="${device}" \
                                         label.color="$COLOR" \
-                 click_script="SwitchAudioSource -s \"${device}\" && sketchybar --set /volume.device\.*/ label.color=$GREY --set \$NAME label.color=$WHITE")
+                 click_script="SwitchAudioSource -s \"${device}\" && sketchybar --set /volume.device\.*/ label.color=$GREY_400 --set \$NAME label.color=$TEXT_PRIMARY")
     COUNTER=$((COUNTER+1))
   done <<< "$(SwitchAudioSource -a -t output)"
 
@@ -53,4 +53,3 @@ if [ "$BUTTON" = "right" ] || [ "$MODIFIER" = "shift" ]; then
 else
   toggle_mute
 fi
-

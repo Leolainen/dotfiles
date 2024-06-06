@@ -1,76 +1,80 @@
 #!/usr/bin/env sh
 
 source "$HOME/.config/sketchybar/colors.sh" # Loads all defined colors
+# source "$HOME/.config/sketchybar/tokens.sh" # Loads all defined widths & stuffs
+# source "$HOME/.config/sketchybar/themes.sh" # Loads all defined icons
 source "$HOME/.config/sketchybar/icons.sh" # Loads all defined icons
+source "$HOME/.config/sketchybar/mixins.sh" # Loads all defined widths & stuffs
 
-# PLUGIN_DIR="$HOME/.config/sketchybar/items" # Directory where the items are configured
 PLUGIN_DIR="$HOME/.config/sketchybar/plugins" # Directory where all the plugin scripts are stored
 
-FONT="LiterationMono Nerd Font" # Needs to have Regular, Bold, Semibold, Heavy and Black variants
-PADDINGS=8 # All paddings use this value (icon, label, background)
+# theme_rose_pine
 
-# Setting up and starting the helper process
-# HELPER=git.felix.helper
-# killall helper
-# cd $HOME/.config/sketchybar/helper && make
-# $HOME/.config/sketchybar/helper/helper $HELPER > /dev/null 2>&1 &
+bar=(
+    height=$BAR_HEIGHT
+    color=$CANVAS
+    # color=$TRANSPARENT
+    margin=$PADDING
+    shadow=on
+    position=top
+    sticky=on
+    padding_right=12
+    padding_left=12
+    corner_radius=$BORDER_RADIUS
+    border_width=$BORDER_WIDTH
+    border_color=$BORDER
+    y_offset=4
+    notch_offset=0
+    blur_radius=$BLUR
+    notch_width=200
+)
 
-# Unload the macOS on screen indicator overlay for volume change
-# launchctl unload -F /System/Library/LaunchAgents/com.apple.OSDUIHelper.plist > /dev/null 2>&1 &
+defaults=(
+    updates=when_shown
+    icon.font="$ICON_MD"
+    icon.color=$TEXT_PRIMARY
+    icon.padding_left=$PADDING
+    icon.padding_right=$PADDING
+    label.font="$LABEL_MD"
+    label.color=$TEXT_PRIMARY
+    label.padding_left=$PADDING
+    label.padding_right=$PADDING
+    background.height=28
+    background.corner_radius=$BORDER_RADIUS
+    popup.background.border_width=$BORDER_WIDTH
+    popup.background.corner_radius=$BORDER_RADIUS
+    popup.background.border_color=$BORDER
+    popup.background.color=$CANVAS
+    popup.blur_radius=$BLUR
+    # popup.background.color=$BACKGROUND
+    popup.background.shadow.drawing=on
+)
 
 # Setting up the general bar appearance and default values
-sketchybar --bar     height=24                                         \
-                     color=$TRANSPARENT                                \
-                     shadow=on                                         \
-                     position=top                                      \
-                     sticky=on                                         \
-                     padding_right=0                                   \
-                     padding_left=0                                    \
-                     corner_radius=4                                   \
-                     y_offset=4                                        \
-                     notch_offset=0                                    \
-                     margin=8                                          \
-                     blur_radius=20                                    \
-                     notch_width=200                                   \
-                                                                       \
-           --default updates=when_shown                                \
-                     icon.font="$FONT:Bold:14.0"                       \
-                     icon.color=$ICON_COLOR                            \
-                     icon.padding_left=$PADDINGS                       \
-                     icon.padding_right=$PADDINGS                      \
-                     label.font="$FONT:13.0"                           \
-                     label.color=$LABEL_COLOR                          \
-                     label.padding_left=$PADDINGS                      \
-                     label.padding_right=$PADDINGS                     \
-                     background.padding_right=$PADDINGS                \
-                     background.padding_left=$PADDINGS                 \
-                     background.height=24                              \
-                     background.corner_radius=9                        \
-                     popup.background.border_width=1                   \
-                     popup.background.corner_radius=4                 \
-                     popup.background.border_color=$POPUP_BORDER_COLOR \
-                     popup.background.color=$POPUP_BACKGROUND_COLOR    \
-                     popup.background.shadow.drawing=on
-                     # border_color=$BAR_COLOR                                  \
-                     # border_width=1                                  \
+sketchybar --bar     "${bar[@]}"                                       \
+           --default "${defaults[@]}" 
 
 # Left
 source "$PLUGIN_DIR/apple.sh"
+source "$PLUGIN_DIR/spaces.sh"
+source "$PLUGIN_DIR/current_app.sh"
 source "$PLUGIN_DIR/spotify.sh"
+
 # source "$PLUGIN_DIR/spaces.sh"
 # source "$PLUGIN_DIR/front_app.sh"
 
 
 # Right
 source "$PLUGIN_DIR/calendar.sh"
-source "$PLUGIN_DIR/github.sh"
-source "$PLUGIN_DIR/volume.sh"
 source "$PLUGIN_DIR/battery.sh"
+source "$PLUGIN_DIR/volume.sh"
+source "$PLUGIN_DIR/github.sh"
 # source "$PLUGIN_DIR/divider.sh"
 
 # source "$PLUGIN_DIR/cpu.sh"
 # Forcing all item scripts to run (never do this outside of sketchybarrc)
 sketchybar --update
 
-echo "sketchybar configuation loaded.."
+sketchybar --hotload on
 
+echo "sketchybar configuation loaded.."

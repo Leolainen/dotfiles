@@ -7,7 +7,7 @@ if [ $PERCENTAGE = "" ]; then
   exit 0
 fi
 
-COLOR=$WHITE
+COLOR=$TEXT_PRIMARY
 
 case ${PERCENTAGE} in
   9[0-9]|100) ICON=; 
@@ -22,13 +22,13 @@ case ${PERCENTAGE} in
   ;;
   4[0-9]|100) ICON=; 
   ;;
-  3[0-9]|100) ICON=; COLOR=$ORANGE
+  3[0-9]|100) ICON=; COLOR=$WARNING
   ;;
-  2[0-9]|100) ICON=; COLOR=$ORANGE
+  2[0-9]|100) ICON=; COLOR=$WARNING
   ;;
-  1[0-9]|100) ICON=; COLOR=$RED
+  1[0-9]|100) ICON=; COLOR=$ERROR
   ;;
-  *) ICON=; COLOR=$RED
+  *) ICON=; COLOR=$ERROR
 esac
 
 if [[ $CHARGING != "" ]]; then

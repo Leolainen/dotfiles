@@ -1,35 +1,53 @@
-#!/usr/bin/env bash
+#!/bin/bash
+
+# !/usr/bin/env bash
+source "$HOME/.config/sketchybar/colors.sh"
 
 update() {
-if [ "$SELECTED" = "true" ]; then
-  sketchybar -m --set $NAME label.highlight=on icon.highlight=on background.drawing=on
-else
-  sketchybar -m --set $NAME label.highlight=off icon.highlight=off background.drawing=off
-fi
+    if [ "$SELECTED" = "true" ]; then
+      sketchybar -m $NAME label.highlight=on background.color=$HIGHLIGHT_MED
+    else
+      sketchybar -m $NAME label.highlight=off background.color=$TRANSPARENT
+    fi
 }
 
 mouse_entered() {
-  sketchybar -m --set $NAME icon.highlight=on \
-                            label.highlight=on
+  # sketchybar -m --set $NAME label.highlight=on
+  sketchybar -m --set $NAME background.color=$HIGHLIGHT_MED \
+                # --set spaces_bracket background.border_color=$BORDER_HIGHLIGHT
 }
 
 mouse_exited() {
-  sketchybar -m --set $NAME icon.highlight=off \
-                            label.highlight=off
+  # sketchybar -m --set $NAME label.highlight=off                 \
+  sketchybar -m --set $NAME background.color=$TRANSPARENT       \
+                # --set spaces_bracket background.border_color=$TRANSPARENT
+}
+
+mouse_clicked() {
+    # yabai -m config mouse_follows_focus off
+    yabai -m space --focus $SID 2>/dev/null
+    # sleep 1
+    # yabai -m config mouse_follows_focus on
 }
 
 case "$SENDER" in
+  "mouse.clicked") mouse_clicked
+  ;;
   "mouse.entered") mouse_entered
   ;;
-  "mouse.exited") mouse_exited
+  "mouse.exited"|"mouse.exited.global") mouse_exited
   ;;
   *) update 
   ;;
 esac
 
-WIDTH="dynamic"
-if [ "$SELECTED" = "true" ]; then
-  WIDTH="0"
-fi
+# WIDTH="0"
+# BG_COLOR=$TRANSPARENT
 
-sketchybar --animate tanh 20 --set $NAME icon.highlight=$SELECTED label.width=$WIDTH
+# if [ "$SELECTED" = "true" ]; then
+    # WIDTH=4
+    # BG_COLOR=$IRIS
+    # WIDTH="dynamic"
+# fi
+
+sketchybar --animate tanh 10 --set $NAME label.highlight=$SELECTED # label.padding_right=$WIDTH label.padding_left=$WIDTH # background.color=$BG_COLOR # label.padding_left=$WIDTH label.padding_right=$WIDTH # label.border_width=$WIDTH  # label.width=$WIDTH
