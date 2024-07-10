@@ -234,6 +234,19 @@ lvim.builtin.which_key.mappings["z"] = {
     "<cmd>ZenMode<CR>", "Zen mode"
 }
 
+-- SNAP + which_key
+-- local snap = require "snap"
+-- local function git_root_path()
+--     return vim.fn.systemlist('git rev-parse --show-toplevel')[1]
+-- end
+
+-- lvim.builtin.which_key.mappings["s"]["T"] = {
+--     "<cmd>lua require('telescope.builtin').live_grep{ cwd = vim.fn.systemlist('git rev-parse --show-toplevel')[1] }<CR>",
+--     "text from root" }
+
+-- lvim.builtin.which_key.mappings["s"]["F"] = {
+--     "<cmd>lua require('telescope.builtin').live_grep{ cwd = vim.fn.systemlist('git rev-parse --show-toplevel')[1] }<CR>",
+--     "text from root" }
 
 -- TODO: User Config for predefined plugins
 -- After changing plugin config exit and reopen LunarVim, Run :PackerInstall :PackerCompile
@@ -396,10 +409,12 @@ vim.keymap.set(
 lvim.plugins = {
     {
         'AhmedAbdulrahman/aylin.vim',
-        lazy = true,
+        -- cmd = "colorscheme aylin",
+        keys = "<leader>sp"
     },
     {
         'mg979/vim-visual-multi',
+        event = { "BufRead", "BufNew" },
         config = function()
             -- let g:VM_maps = {}
             -- let g:VM_maps["Add Cursor Down"] = '¬'
@@ -428,7 +443,6 @@ lvim.plugins = {
     },
     {
         "kevinhwang91/nvim-bqf",
-        lazy = true,
         event = { "BufRead", "BufNew" },
         config = function()
             require("bqf").setup({
@@ -455,7 +469,6 @@ lvim.plugins = {
     },
     {
         'akinsho/git-conflict.nvim',
-        lazy = true,
         version = "*",
         cmd = { "GitConflictListQf", "GitConflictNextConflict", "GitConflictPrevConflict", "GitConflictChooseOurs",
             "GitConflictChooseTheirs", "GitConflictChooseBoth" },
@@ -474,7 +487,6 @@ lvim.plugins = {
     },
     {
         "gen740/SmoothCursor.nvim",
-        lazy = true,
         event = { "BufRead", "BufNew" },
         config = function()
             require("smoothcursor").setup({
@@ -514,7 +526,7 @@ lvim.plugins = {
     --     "nvim-telescope/telescope-live-grep-args.nvim",
     --     lazy = true
     -- },
-    {
+    { -- Prereq for nvim-bqf
         "junegunn/fzf",
         build = function()
             vim.fn['fzf#install']()
@@ -523,7 +535,7 @@ lvim.plugins = {
     -- { 'RRethy/vim-illuminate' },
     {
         'levouh/tint.nvim',
-        event = "VimResized",
+        event = { "VimResized", },
         lazy = true,
         config = function()
             require('tint').setup()
@@ -560,7 +572,8 @@ lvim.plugins = {
     -- },
     {
         'echasnovski/mini.move',
-        event = { "BufRead", "BufNew" },
+        -- event = { "BufRead", "BufNew", "BufEnter" },
+        event = "VeryLazy",
         config = function()
             require('mini.move').setup({
                 -- Module mappings. Use `''` (empty string) to disable one.
@@ -579,28 +592,38 @@ lvim.plugins = {
             })
         end
     },
+    -- {
+    --     'echasnovski/mini.diff',
+    --     version = "*"
+    --     -- event = "VeryLazy"
+    -- },
     {
         'phaazon/mind.nvim',
         branch = 'v2.2',
-        lazy = true,
         cmd = { "MindOpenMain", "MindReloadState", "MindClose" },
+        keys = { "<leader>mo", "<leader>mc" },
         dependencies = { 'nvim-lua/plenary.nvim' },
         config = function()
             require 'mind'.setup()
         end
     },
+    -- Sessions are nice, but I don't use them.
+    -- Re-enable when I get my shit together
     {
         'jedrzejboczar/possession.nvim',
         dependencies = { 'nvim-lua/plenary.nvim' },
+        cmd = "Telescope possession list",
+        keys = "<leader>ss",
         config = function()
             require("possession").setup({})
         end
     },
-    { "shortcuts/no-neck-pain.nvim", lazy = true,       cmd = "NoNeckPain", version = "*" },
+    { "shortcuts/no-neck-pain.nvim", cmd = "NoNeckPain", version = "*" },
     {
         "SmiteshP/nvim-navbuddy",
         lazy = true,
-        event = { "BufNew", "BufRead" },
+        cmd = "Navbuddy",
+        keys = "<leader>n",
         dependencies = {
             "neovim/nvim-lspconfig",
             "SmiteshP/nvim-navic",
@@ -615,6 +638,7 @@ lvim.plugins = {
     {
         'rmagatti/goto-preview',
         event = { "BufNew", "BufRead" },
+        keys = { "gpd", "gpt" },
         config = function()
             local gtp = require('goto-preview')
             local select_to_edit_map = {
@@ -754,11 +778,18 @@ lvim.plugins = {
     },
     {
         "chrishrb/gx.nvim",
-        event = { "BufEnter" },
+        keys = { { "gx", "<cmd>Browse<cr>", mode = { "n", "x" } } },
+        cmd = { "Browse" },
+        init = function()
+            vim.g.netrw_nogx = 1 -- disable netrw gx
+        end,
+        dependencies = { "nvim-lua/plenary.nvim" },
         config = true, -- default settings
     },
     {
         "xiyaowong/transparent.nvim",
+        cmd = { "TransaprentToggle", "TransparentEnable", "TransparentDisable" },
+        keys = "<leader>u",
         config = function()
             require("transparent").setup({
                 groups = { -- table: default groups
@@ -782,28 +813,26 @@ lvim.plugins = {
         end
     },
     {
-        'AckslD/muren.nvim',
-        config = true,
-    },
-    {
-        'ribru17/bamboo.nvim',
-        lazy = false,
-        priority = 1000,
-        config = function()
-            require('bamboo').setup {
-                -- optional configuration here
-            }
-            require('bamboo').load()
-        end,
-    },
-    {
         'rebelot/kanagawa.nvim',
-        config = true
+        -- cmd = "colorscheme kanagawa",
+        keys = "<leader>sp"
     },
-    { 'rose-pine/neovim',            name = 'rose-pine' },
-    { 'sainnhe/everforest',          config = true },
-    { "shaunsingh/moonlight.nvim",   name = "moonlight" },
-    { "andersevenrud/nordic.nvim",   name = "nordic" },
+    {
+        'rose-pine/neovim',
+        name = 'rose-pine',
+        -- cmd = "colorscheme rose-pine",
+        keys = "<leader>sp"
+    },
+    {
+        "shaunsingh/moonlight.nvim",
+        name = "moonlight",
+        -- cmd = "colorscheme moonlight",
+        keys = "<leader>sp"
+    },
+    {
+        "andersevenrud/nordic.nvim",
+        name = "nordic"
+    },
     -- {
     --     "pmizio/typescript-tools.nvim",
     --     dependencies = { "nvim-lua/plenary.nvim", "neovim/nvim-lspconfig" },
@@ -811,6 +840,7 @@ lvim.plugins = {
     -- }
     {
         "nvim-treesitter/nvim-treesitter-context",
+        event = { "BufEnter", "BufRead", "BufNew" },
         config = function()
             require("treesitter-context").setup({
                 mode = 'cursor', -- Line used to calculate context. Choices: 'cursor', 'topline'
@@ -823,20 +853,27 @@ lvim.plugins = {
         end
     },
     {
+        -- this is a fork of the original plugin
+        -- that fixes issues with react fragments and slashes
         "gungun974/nvim-ts-autotag",
-        --     -- "windwp/nvim-ts-autotag",
-        --     -- branch = "gungun974:main",
-        -- config = function()
-        --     require("nvim-ts-autotag").setup()
-        -- end
+        event = "VeryLazy"
+        -- event = { "BufEnter", "BufRead", "BufNew" },
+        --     "windwp/nvim-ts-autotag",
     },
     {
         "folke/twilight.nvim",
-        opts = {}
+        cmd = {
+            "Twilight", "TwilightDisable", "TwilightEnable"
+        }
     },
     {
         "folke/zen-mode.nvim",
+        keys = "<leader>z",
+        cmd = "ZenMode",
         opts = {
+            window = {
+                width = 160
+            },
             plugins = {
                 twilight = {
                     enabled = false
@@ -845,7 +882,9 @@ lvim.plugins = {
         }
     },
     {
-        "kevinhwang91/nvim-ufo", dependencies = "kevinhwang91/promise-async"
+        "kevinhwang91/nvim-ufo",
+        dependencies = "kevinhwang91/promise-async",
+        event = "BufRead",
     },
     {
         "github/copilot.vim",
@@ -861,63 +900,234 @@ lvim.plugins = {
     },
     {
         "camspiers/snap",
+        keys = {
+            "<leader>sF",
+            "<leader>sT"
+        },
         config = function()
             local snap = require "snap"
             local function git_root_path()
                 return vim.fn.systemlist('git rev-parse --show-toplevel')[1]
             end
 
-            -- local git_root_grep_producer =
-            --     snap.get "consumer.cache" (
-            --         function(request)
-            --             snap.get "producer.ripgrep.general" (
-            --                 request,
-            --                 {
-            --                     absolute = true,
-            --                     args = {
-            --                         "--line-buffered", "-M", 100, "--vimgrep"
-            --                         -- '--line-buffered',
-            --                         -- '--vimgrep',
-            --                         -- '--hidden',
-            --                         -- '--ignore-case'
-            --                         -- '-M',
-            --                         -- '100',
-            --                         -- request.filter
-            --                     },
-            --                     cwd = '/Users/leo.karlsson/ATG/atgse'
-            --                     -- cwd = snap.sync(vim.fn.getcwd)
-            --                     -- cwd = snap.sync(git_root_path)
-            --                     -- cwd = git_root_path
-            --                 }
-            --             )
-            --         end
-            --     )
+            -- Function to make a path relative to the root
+            local function make_relative_path(root, path)
+                if path:sub(1, #root) == root then
+                    return path:sub(#root + 2) -- +2 to remove the leading slash
+                end
+                return path
+            end
 
-            -- snap.register.map('n', '<leader>o', function()
-            --     snap.run {
-            --         -- prompt = "grep",
-            --         producer = git_root_grep_producer,
-            --         steps = { {
-            --             consumer = snap.get 'consumer.fzf',
-            --             config = { prompt = "FZF>" }
-            --         } },
-            --         select = snap.get "select.vimgrep".select,
-            --         multiselect = snap.get "select.vimgrep".multiselect,
-            --         views = { snap.get "preview.vimgrep" },
-            --     }
-            -- end)
+            local function git_root_producer(request)
+                local cwd = snap.sync(git_root_path)
+                -- local current_dir = snap.sync(vim.fn.getcwd)
+                local io = snap.get("common.io")
 
+                -- Iterates rg commands output using snap.io.spawn
+                for data, err, kill in io.spawn("rg", {
+                    "--line-buffered",
+                    "--hidden",
+                    "--ignore-case",
+                    "--files"
+                }, cwd) do
+                    -- If the filter updates while the command is still running
+                    -- then we kill the process and yield nil
+                    if request.canceled() then
+                        kill()
+                        coroutine.yield(nil)
+                        -- If there is an error we yield nil
+                    elseif (err ~= "") then
+                        print("error", err)
+                        coroutine.yield(nil)
+                        -- If the data is empty we yield an empty table
+                    elseif (data == "") then
+                        coroutine.yield({})
+                        -- coroutine.continue()
+                        -- If there is data we split it by newline
+                    else
+                        local function get_abs_path(line)
+                            return string.format("%s/%s", cwd, line)
+                        end
+
+                        local results = vim.split(data, "\n", true)
+                        results = vim.tbl_map(get_abs_path, results)
+
+                        coroutine.yield(results)
+                    end
+                end
+                return nil
+            end
+
+            local function git_root_consumer(producer)
+                local cached_producer = snap.get 'consumer.cache' (producer)
+
+                local cwd1 = git_root_path()
+                local cwd2 = vim.fn.getcwd()
+                local relative_path = make_relative_path(cwd1, cwd2)
+                print(vim.inspect(relative_path))
+                -- Return producer
+                return function(request)
+                    local results = {}
+
+                    for data in snap.consume(cached_producer, request) do
+                        snap.get 'common.tbl'.acc(results, data)
+                        snap.continue()
+                    end
+
+                    local results_string = table.concat(vim.tbl_map(tostring, results), "\n")
+
+                    if (request.filter == "") then
+                        return coroutine.yield(results)
+                    else
+                        local io = snap.get("common.io")
+                        local cwd = snap.sync(git_root_path)
+                        -- local cwd = snap.sync(vim.fn.getcwd)
+                        local stdout = vim.loop.new_pipe(false)
+                        local fzf = io.spawn("fzf", { "-f", request.filter }, cwd, stdout)
+                        stdout:write(results_string)
+                        stdout:shutdown()
+
+                        for data, err, kill in fzf do
+                            if request.canceled() then
+                                kill()
+                                coroutine.yield(nil)
+                            elseif (err ~= "") then
+                                print(vim.inspect(err))
+                                coroutine.yield(nil)
+                            elseif (data == "") then
+                                -- snap.continue()
+                                coroutine.yield({})
+                            else
+                                local results_indexed = {}
+
+                                for _, result in ipairs(results) do
+                                    result = make_relative_path(cwd, result)
+                                    -- local shortened_result = vim.fn.fnamemodify(result, ":.")
+                                    -- results_indexed[tostring(shortened_result)] = shortened_result
+                                    results_indexed[tostring(result)] = result
+                                end
+
+                                local filtered_results = string.split(data)
+
+                                local function result_index(line)
+                                    line = make_relative_path(cwd, line)
+                                    return results_indexed[line]
+                                end
+
+                                coroutine.yield(vim.tbl_map(result_index, filtered_results))
+                            end
+                        end
+
+                        return nil
+                    end
+                end
+            end
+
+            local function trunc(meta_result)
+                -- return vim.fn.fnamemodify(meta_result.result, ':h') ..
+                -- "/" .. vim.fn.fnamemodify(meta_result.result, ':t')
+
+                local result = meta_result.result
+                -- local firstParent = vim.fn.fnamemodify(result, ":p:.:h")
+                local filename = vim.fn.fnamemodify(meta_result.result, ":t")
+                -- return filename
+
+                local remove_part = vim.fn.fnamemodify(result, ":h:h")
+                local subbed = string.sub(result, #remove_part + 2)
+                -- local root_path = git_root_path()
+                -- Escape special characters in root_path for pattern matching
+                -- local escaped_root_path = root_path:gsub("([^%w])", "%%%1")
+                -- return "../" .. firstParent .. "/" .. filename
+                -- return vim.fn.fnamemodify(result, ":s?^" .. git_root_path() .. "/??")
+                -- return vim.fn.fnamemodify(result, ":t")
+
+                return "../" .. subbed
+
+                -- if (#result > 80) then
+                --     return "..." .. result:sub(#result - 80)
+                -- end
+
+                -- return result
+                -- return vim.fn.fnamemodify(meta_result.result, ':t')
+            end
+
+            -- IMPORTANT!!!
+            -- For this consumer to work, one must change the compiled source code in snap/init.lua
+            -- Add this function:
+            --
+            -- local function display(result)
+            --   local display_fn
+            --   if has_meta(result, "display") then
+            --     assert((type(result.display) == "function"), "display meta must be a function")
+            --     display_fn = result.display
+            --   else
+            --     display_fn = tostring
+            --   end
+            --   return display_fn(result)
+            -- end
+            --
+            -- and replace the table.insert() bit in "write_results" with this
+            -- table.insert(partial_results, display(result))
+            --
+            -- file found in: .local/share/lunarvim/site/pack/lazy/opt/snap/lua/snap/init.lua
+            local function display_results(producer)
+                return function(request)
+                    for results in snap.consume(producer, request) do
+                        if type(results) == 'table' then
+                            if not vim.tbl_islist(results) then
+                                coroutine.yield(results)
+                            else
+                                coroutine.yield(vim.tbl_map(function(result)
+                                    return snap.with_metas(result, {
+                                        display = trunc
+                                    })
+                                end, results))
+                            end
+                        else
+                            coroutine.yield(nil)
+                        end
+                    end
+                end
+            end
+
+            -- IMPORTANT
             -- MUST change line 5 in lua/snap/common/string.lua to
             -- package.loaded[_2amodule_name_2a] = string <-- changed {} to string
             snap.register.map({ "n" }, { "<Leader>sT" }, function()
                 snap.run {
-                    producer = snap.get 'producer.ripgrep.vimgrep'.args({
+                    producer = display_results(snap.get 'producer.ripgrep.vimgrep'.args({
                         '--hidden',
-                        -- '--ignore-case'
-                    }, git_root_path()),
+                        '--ignore-case'
+                    }, git_root_path())),
                     select = snap.get 'select.vimgrep'.select,
                     multiselect = snap.get 'select.vimgrep'.multiselect,
                     views = { snap.get 'preview.vimgrep' },
+                    steps = {
+                        {
+                            consumer = snap.get 'consumer.fzf',
+                            config = { prompt = "FZF>" }
+                        }
+                    },
+                }
+            end)
+
+            snap.register.map({ "n" }, { "<Leader>sF" }, function()
+                snap.run {
+                    producer = display_results(
+                        snap.get 'consumer.fzf' (
+                            snap.get 'producer.ripgrep.file'.args({
+                                "--hidden",
+                                "--ignore-case"
+                            }, git_root_path())
+                        )
+                    ),
+                    -- producer = snap.get 'consumer.fzf' (git_root_grep_producer),
+                    -- producer = git_root_grep_consumer(git_root_grep_producer),
+                    select = snap.get 'select.file'.select,
+                    -- select = custom_select,
+                    multiselect = snap.get 'select.file'.multiselect,
+                    -- views = { custom_views },
+                    views = { snap.get 'preview.file' },
                     steps = { {
                         consumer = snap.get 'consumer.fzf',
                         config = { prompt = "FZF>" }
@@ -926,7 +1136,7 @@ lvim.plugins = {
             end)
 
             snap.maps {
-                { "<Leader>sF", snap.config.file { producer = "ripgrep.file", prompt = "files" } },
+                -- { "<Leader>sF", snap.config.file { producer = "ripgrep.file", prompt = "files" } },
                 { "<Leader>st", snap.config.vimgrep { prompt = "grep" } },
             }
         end
