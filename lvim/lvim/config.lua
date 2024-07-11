@@ -414,7 +414,8 @@ lvim.plugins = {
     },
     {
         'mg979/vim-visual-multi',
-        event = { "BufRead", "BufNew" },
+        event = { "BufRead", },
+        -- event = { "BufRead", "BufNew" },
         config = function()
             -- let g:VM_maps = {}
             -- let g:VM_maps["Add Cursor Down"] = '¬'
@@ -430,7 +431,8 @@ lvim.plugins = {
     },
     {
         'kylechui/nvim-surround',
-        event = { "BufRead", "BufNew" },
+        event = { "BufRead", },
+        -- event = { "BufRead", "BufNew" },
         config = function()
             require('nvim-surround').setup()
         end
@@ -443,7 +445,7 @@ lvim.plugins = {
     },
     {
         "kevinhwang91/nvim-bqf",
-        event = { "BufRead", "BufNew" },
+        event = { "BufRead", },
         config = function()
             require("bqf").setup({
                 auto_enable = true,
@@ -487,7 +489,7 @@ lvim.plugins = {
     },
     {
         "gen740/SmoothCursor.nvim",
-        event = { "BufRead", "BufNew" },
+        event = { "BufRead", },
         config = function()
             require("smoothcursor").setup({
                 autostart = true,
@@ -520,7 +522,7 @@ lvim.plugins = {
     },
     {
         "ggandor/lightspeed.nvim",
-        event = { "BufRead", "BufNew" },
+        event = { "BufRead", },
     },
     -- {
     --     "nvim-telescope/telescope-live-grep-args.nvim",
@@ -637,7 +639,7 @@ lvim.plugins = {
     },
     {
         'rmagatti/goto-preview',
-        event = { "BufNew", "BufRead" },
+        event = { "BufRead" },
         keys = { "gpd", "gpt" },
         config = function()
             local gtp = require('goto-preview')
@@ -788,8 +790,8 @@ lvim.plugins = {
     },
     {
         "xiyaowong/transparent.nvim",
-        cmd = { "TransaprentToggle", "TransparentEnable", "TransparentDisable" },
-        keys = "<leader>u",
+        cmd = { "TransparentToggle", "TransparentEnable", "TransparentDisable" },
+        -- keys = { "<leader>u", "<cmd>TransparentToggle<CR>", desc = "Toggle transparent" },
         config = function()
             require("transparent").setup({
                 groups = { -- table: default groups
@@ -814,20 +816,14 @@ lvim.plugins = {
     },
     {
         'rebelot/kanagawa.nvim',
-        -- cmd = "colorscheme kanagawa",
-        keys = "<leader>sp"
     },
     {
         'rose-pine/neovim',
         name = 'rose-pine',
-        -- cmd = "colorscheme rose-pine",
-        keys = "<leader>sp"
     },
     {
         "shaunsingh/moonlight.nvim",
         name = "moonlight",
-        -- cmd = "colorscheme moonlight",
-        keys = "<leader>sp"
     },
     {
         "andersevenrud/nordic.nvim",
@@ -840,7 +836,7 @@ lvim.plugins = {
     -- }
     {
         "nvim-treesitter/nvim-treesitter-context",
-        event = { "BufEnter", "BufRead", "BufNew" },
+        event = { "BufRead", },
         config = function()
             require("treesitter-context").setup({
                 mode = 'cursor', -- Line used to calculate context. Choices: 'cursor', 'topline'
