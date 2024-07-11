@@ -121,14 +121,15 @@ install_binaries() {
 
   BINARIES=(
     "zsh"
-    "zplug"
+    # "zplug"
+    "antidote" # fast replacement for zplug
     "git"
     "ruby"    # required for colorls
     "htop"    # monitor CPU, RAM and processes
-    "thefuck" # Corrects misspelled console commands
-    "ncdu"    # find where diskspace went
+    # "thefuck" # Corrects misspelled console commands
+    # "ncdu"    # find where diskspace went
     "fzf"
-    "git-flow"
+    # "git-flow"
     # "ansible" # possibly useful but not used today
   )
 
