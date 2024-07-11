@@ -68,18 +68,19 @@ install_node() {
   finish
 }
 
-install_nvm() {
-  info "Installing Node Version Manager ..."
+# Handled and lazyloaded by a zsh plugin for faster startup
+# install_nvm() {
+#   info "Installing Node Version Manager ..."
 
-  if [[ "$(uname)" == 'Darwin' ]]; then
-    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.1/install.sh | bash
-  else
-    error "You’re not using a Mac! Exiting ..."
-    exit 1
-  fi
+#   if [[ "$(uname)" == 'Darwin' ]]; then
+#     curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.1/install.sh | bash
+#   else
+#     error "You’re not using a Mac! Exiting ..."
+#     exit 1
+#   fi
 
-  finish
-}
+#   finish
+# }
 
 configure_npm_init() {
   # Ask required parameters
@@ -155,7 +156,7 @@ on_error() {
 main() {
   on_start "$*"
   install_node "$*"
-  install_nvm "$*"
+  # install_nvm "$*"
   configure_npm_init "$*"
   install_global_packages "$*"
 }
