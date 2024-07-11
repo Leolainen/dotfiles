@@ -14,8 +14,8 @@ zsh-users/zsh-syntax-highlighting kind:defer
 zsh-users/zsh-history-substring-search kind:defer
 
 # prompt
-# rupa/z
-# changyuheng/fz
+rupa/z
+changyuheng/fz
 
 # version managers
 lukechilds/zsh-nvm kind:defer
