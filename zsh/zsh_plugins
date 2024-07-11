@@ -1,0 +1,22 @@
+# .zsh_plugins.txt
+
+# prompt theme
+romkatv/powerlevel10k
+
+# Zsh improvements
+zsh-users/zsh-completions
+zsh-users/zsh-autosuggestions
+djui/alias-tips
+
+# deferred
+hlissner/zsh-autopair kind:defer
+zsh-users/zsh-syntax-highlighting kind:defer
+zsh-users/zsh-history-substring-search kind:defer
+
+# prompt
+# rupa/z
+# changyuheng/fz
+
+# version managers
+lukechilds/zsh-nvm kind:defer
+FrederickGeek8/zsh-rvm-lazy kind:defer

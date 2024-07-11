@@ -11,9 +11,9 @@ SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd) && cd "$SCRIPT_DIR" || 
 ln -sf "$SCRIPT_DIR/zshrc"            ~/.zshrc
 ln -sf "$SCRIPT_DIR/zsh_aliases"      ~/.zsh_aliases
 ln -sf "$SCRIPT_DIR/zsh_plug"         ~/.zsh_plug
-ln -sf "$SCRIPT_DIR/zsh_theme"        ~/.zsh_theme
+ln -sf "$SCRIPT_DIR/zsh_plugins"      ~/.zsh_plugins.txt
 
-mkdir -p ~/.zsh_completions
-ln -sf "$SCRIPT_DIR/completions/_jq"  ~/.zsh_completions/_jq
+# mkdir -p ~/.zsh_completions
+# ln -sf "$SCRIPT_DIR/completions/_jq"  ~/.zsh_completions/_jq
 
 [[ "$SHELL" =~ "zsh" ]] || chsh -s "$(command -v zsh)"

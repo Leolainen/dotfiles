@@ -1,11 +1,20 @@
 #!usr/bin/env zsh
 
+# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
+# Initialization code that may require console input (password prompts, [y/n]
+# confirmations, etc.) must go above this block; everything else may go below.
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+
+# zsh loader profiling
+# zmodload zsh/zprof
+
 # Get the current Ruby version
 # ruby_version=$(rvm current)
 
-# - Exports
-export BREW_HOME=$(brew --prefix)
-export ZPLUG_HOME="$BREW_HOME/opt/zplug"
+# fzf plugin
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 # -- RUBY --
 # TURN ON WHEN NEEDED
@@ -43,11 +52,12 @@ export PATH=$(ruby -e 'puts Gem.bindir'):$PATH
 source $(dirname $(gem which colorls))/tab_complete.sh
 
 # exports zPlug
-source $ZPLUG_HOME/init.zsh
+# source $ZPLUG_HOME/init.zsh
 
 source ~/.zsh_plug
 source ~/.zsh_aliases
-source ~/.zsh_theme 2>/dev/null
+# source ~/.zsh_theme
+# source ~/.zsh_theme 2>/dev/null
 
 # pyenv for managin python versions
 # (( $+commands[pyenv]   )) && source <(pyenv init -)
@@ -71,4 +81,5 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 # export PATH="$HOME/.rvm/bin:$PATH"
 # export PATH="$PATH:$HOME/.rvm/bin"
 
-# export PATH="$PATH:$HOME/.docker/bin/docker"
+# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
