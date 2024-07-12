@@ -76,6 +76,9 @@ defaults write com.microsoft.VSCode ApplePressAndHoldEnabled -bool false
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 
+# fix bug: gitstatus_stop_p9k_:zle:41: No handler installed for fd 14
+# https://github.com/romkatv/powerlevel10k/issues/1554#issuecomment-1701598955
+unset ZSH_AUTOSUGGEST_USE_ASYNC
 
 # Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
 # export PATH="$HOME/.rvm/bin:$PATH"
