@@ -7,7 +7,7 @@ install_prereq() {
     "neovim"
     "stylua"
     "code-minimap"
-    "lazygit"
+    "jesseduffield/lazygit/lazygit" # lazygit
     "ripgrep"
     "cmake"
   )
