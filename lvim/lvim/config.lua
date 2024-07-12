@@ -790,7 +790,8 @@ lvim.plugins = {
     },
     {
         "xiyaowong/transparent.nvim",
-        cmd = { "TransparentToggle", "TransparentEnable", "TransparentDisable" },
+        event = "VeryLazy",
+        -- cmd = { "TransparentToggle", "TransparentEnable", "TransparentDisable" },
         -- keys = { "<leader>u", "<cmd>TransparentToggle<CR>", desc = "Toggle transparent" },
         config = function()
             require("transparent").setup({
