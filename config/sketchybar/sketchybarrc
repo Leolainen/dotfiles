@@ -1,0 +1,80 @@
+#!/usr/bin/env sh
+
+source "$HOME/.config/sketchybar/colors.sh" # Loads all defined colors
+# source "$HOME/.config/sketchybar/tokens.sh" # Loads all defined widths & stuffs
+# source "$HOME/.config/sketchybar/themes.sh" # Loads all defined icons
+source "$HOME/.config/sketchybar/icons.sh" # Loads all defined icons
+source "$HOME/.config/sketchybar/mixins.sh" # Loads all defined widths & stuffs
+
+PLUGIN_DIR="$HOME/.config/sketchybar/plugins" # Directory where all the plugin scripts are stored
+
+# theme_rose_pine
+
+bar=(
+    height=$BAR_HEIGHT
+    color=$CANVAS
+    # color=$TRANSPARENT
+    margin=$PADDING
+    shadow=on
+    position=top
+    sticky=on
+    padding_right=12
+    padding_left=12
+    corner_radius=$BORDER_RADIUS
+    border_width=$BORDER_WIDTH
+    border_color=$BORDER
+    y_offset=4
+    notch_offset=0
+    blur_radius=$BLUR
+    notch_width=200
+)
+
+defaults=(
+    updates=when_shown
+    icon.font="$ICON_MD"
+    icon.color=$TEXT_PRIMARY
+    icon.padding_left=$PADDING
+    icon.padding_right=$PADDING
+    label.font="$LABEL_MD"
+    label.color=$TEXT_PRIMARY
+    label.padding_left=$PADDING
+    label.padding_right=$PADDING
+    background.height=28
+    background.corner_radius=$BORDER_RADIUS
+    popup.background.border_width=$BORDER_WIDTH
+    popup.background.corner_radius=$BORDER_RADIUS
+    popup.background.border_color=$BORDER
+    popup.background.color=$CANVAS
+    popup.blur_radius=$BLUR
+    # popup.background.color=$BACKGROUND
+    popup.background.shadow.drawing=on
+)
+
+# Setting up the general bar appearance and default values
+sketchybar --bar     "${bar[@]}"                                       \
+           --default "${defaults[@]}" 
+
+# Left
+source "$PLUGIN_DIR/apple.sh"
+source "$PLUGIN_DIR/spaces.sh"
+source "$PLUGIN_DIR/current_app.sh"
+source "$PLUGIN_DIR/spotify.sh"
+
+# source "$PLUGIN_DIR/spaces.sh"
+# source "$PLUGIN_DIR/front_app.sh"
+
+
+# Right
+source "$PLUGIN_DIR/calendar.sh"
+source "$PLUGIN_DIR/battery.sh"
+source "$PLUGIN_DIR/volume.sh"
+source "$PLUGIN_DIR/github.sh"
+# source "$PLUGIN_DIR/divider.sh"
+
+# source "$PLUGIN_DIR/cpu.sh"
+# Forcing all item scripts to run (never do this outside of sketchybarrc)
+sketchybar --update
+
+sketchybar --hotload on
+
+echo "sketchybar configuation loaded.."
