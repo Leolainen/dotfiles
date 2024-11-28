@@ -1,0 +1,97 @@
+# -- Changing Window Focus --
+
+# change window focus within space (ctrl + [key])
+# ctrl - √ : yabai -m window --focus south
+# ctrl - ª : yabai -m window --focus north
+# ctrl - ˛ : yabai -m window --focus west
+# ctrl - ﬁ : yabai -m window --focus east
+ctrl + alt - h : yabai -m window --focus west; sketchybar --trigger window_focus 
+ctrl + alt - j : yabai -m window --focus south; sketchybar --trigger window_focus 
+ctrl + alt - k : yabai -m window --focus north; sketchybar --trigger window_focus 
+ctrl + alt - l : yabai -m window --focus east; sketchybar --trigger window_focus  
+
+#change focus between external displays (shift + ctrl + [key])
+# shift + ctrl + alt - h : yabai -m display --focus west
+# shift + ctrl + alt - j : yabai -m display --focus south
+# shift + ctrl + alt - k : yabai -m display --focus north
+# shift + ctrl + alt - l : yabai -m display --focus east
+
+# -- Modifying the Layout --
+
+# rotate layout clockwise (shift + opt + r)
+shift + alt - r : yabai -m space --rotate 270
+
+# flip along y-axis (shift + opt + y)
+shift + alt - y : yabai -m space --mirror y-axis
+
+# flip along x-axis (shift + opt + x)
+shift + alt - x : yabai -m space --mirror x-axis
+
+# toggle window float (shift + opt + f)
+shift + alt - f : yabai -m window --toggle float --grid 12:12:2:1:8:10
+# shift + alt - f : yabai -m window --toggle float --grid 4:4:1:1:2:2
+
+# TODO: fix this
+# shift - space : yabai -m config layout bsp|stack(or managed?)|float
+
+# -- Modifying Window Size --
+
+# maximize a window (shift + opt + m)
+shift + alt - m : yabai -m window --toggle zoom-fullscreen; sketchybar --trigger window_focus
+
+# toggles centering and clamping of window size (shift + opt + c)
+shift + alt - c : /Users/leo.karlsson/.config/yabai/toggle_window_layout.sh
+
+# resize window based on direction (shift + opt + [h|j|k|l])
+ctrl + alt - left : yabai -m window west --resize right:-20:0 2> /dev/null || yabai -m window --resize right:-20:0
+ctrl + alt - down : yabai -m window north --resize bottom:0:20 2> /dev/null || yabai -m window --resize bottom:0:2wshif
+ctrl + alt - up : yabai -m window south --resize top:0:-20 2> /dev/null || yabai -m window --resize top:0:-20
+ctrl + alt - right : yabai -m window east --resize left:20:0 2> /dev/null || yabai -m window --resize left:20:0
+
+# balance out tree of windows (resize to occupy same area) (shift + opt + =)
+shift + alt - 0 : yabai -m space --balance
+
+# -- Moving Windows Around --
+
+# move focues between windows (ctrl + opt + shift + [key])
+# ctrl + shift + alt - h : yabai -m window --swap west
+# ctrl + shift + alt - j : yabai -m window --swap south
+# ctrl + shift + alt - k : yabai -m window --swap north
+# ctrl + shift + alt - l : yabai -m window --swap east
+
+# move window and split (do I need this?)
+shift + ctrl + alt - j : yabai -m window --swap south; sketchybar --trigger window_focus 
+shift + ctrl + alt - k : yabai -m window --swap north; sketchybar --trigger window_focus 
+shift + ctrl + alt - h : yabai -m window --swap west; sketchybar --trigger window_focus 
+shift + ctrl + alt - l : yabai -m window --swap east; sketchybar --trigger window_focus  
+ 
+# focus next/prev display
+shift + alt - w : yabai -m display --focus next;   sketchybar --trigger window_focus  # yabai -m window --focus first;
+shift + alt - e : yabai -m display --focus prev;   sketchybar --trigger window_focus  # yabai -m window --focus first;
+shift + alt - q : yabai -m display --focus recent; sketchybar --trigger window_focus  # yabai -m window --focus first;
+
+# move window to next/prev display
+ctrl + shift + alt - w : yabai -m window --display next --focus; sketchybar --trigger window_focus
+ctrl + shift + alt - e : yabai -m window --display prev --focus; sketchybar --trigger window_focus
+
+# move window to prev and next space
+ctrl + shift + alt - left : yabai -m window --space prev --focus; sketchybar --trigger window_focus
+ctrl + shift + alt - right : yabai -m window --space next --focus; sketchybar --trigger window_focus
+
+# move window to space #
+ctrl + shift + alt - 1 : yabai -m window --space 1; sketchybar --trigger window_focus 
+ctrl + shift + alt - 2 : yabai -m window --space 2; sketchybar --trigger window_focus 
+ctrl + shift + alt - 3 : yabai -m window --space 3; sketchybar --trigger window_focus 
+ctrl + shift + alt - 4 : yabai -m window --space 4; sketchybar --trigger window_focus 
+ctrl + shift + alt - 5 : yabai -m window --space 5; sketchybar --trigger window_focus 
+ctrl + shift + alt - 6 : yabai -m window --space 6; sketchybar --trigger window_focus 
+ctrl + shift + alt - 7 : yabai -m window --space 7; sketchybar --trigger window_focus  
+ctrl + shift + alt - 8 : yabai -m window --space 8; sketchybar --trigger window_focus  
+ctrl + shift + alt - 9 : yabai -m window --space 9; sketchybar --trigger window_focus  
+
+# -- Starting/Stopping/Restarting Yabai --
+
+# stop/start/restart yabai (shift + ctrl + opt + [s|r|q])
+shift + ctrl + alt - q : yabai --stop-service
+shift + ctrl + alt - s : yabai --start-service
+shift + ctrl + alt - r : yabai --restart-service
