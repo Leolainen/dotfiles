@@ -1,0 +1,72 @@
+#!/bin/bash
+
+background_color=$(osascript -e 'tell application "iTerm" to tell current session of current window to get background color')
+foreground_color=$(osascript -e 'tell application "iTerm" to tell current session of current window to get foreground color')
+
+# Function to convert 16-bit RGB to 8-bit hex
+convert_to_hex() {
+    r16=$1
+    g16=$2
+    b16=$3
+
+    # Convert 16-bit values to 8-bit
+    r8=$((r16 / 257))
+    g8=$((g16 / 257))
+    b8=$((b16 / 257))
+
+    # Format as hex (without leading #)
+    printf "%02X%02X%02X\n" $r8 $g8 $b8
+}
+
+# Check if 3 arguments (RGB values) are provided
+# if [ "$#" -ne 3 ]; then
+#     echo "Usage: $0 <red_16bit> <green_16bit> <blue_16bit>"
+#     exit 1
+# fi
+
+# Call the function with input values
+convert_to_hex $1 $2 $3
+
+# Remove commas and store values in an array
+IFS=', ' read -r -a background_array <<< "$background_color"
+IFS=', ' read -r -a foreground_array <<< "$foreground_color"
+
+# Check if we have exactly 3 values (R, G, B)
+if [ "${#foreground_array[@]}" -ne 3 ] || [ "${#background_array[@]}" -ne 3 ]; then
+    echo "Error: Expected 3 values (R, G, B), but got something else."
+    exit 1
+fi
+
+foreground_hex=$(convert_to_hex "${foreground_array[0]}" "${foreground_array[1]}" "${foreground_array[2]}")
+background_hex=$(convert_to_hex "${background_array[0]}" "${background_array[1]}" "${background_array[2]}")
+
+echo "Foreground color: $foreground_hex"
+echo "Background color: $background_hex"
+
+
+options=(
+    # style=round
+    # width=3.0
+    hidpi=off
+    # active_color="0xff${foreground_hex}"
+    active_color="0xff675642"
+    # inactive_color="0xff${background_hex}"
+    # inactive_color=0x00000000
+    # background_color=0x00000000
+
+    order=above
+    width=8.0
+    style=square
+    # inactive_color="0xff${background_hex}"
+    # background_color="0xff${background_hex}"
+    inactive_color="0xff24211E"
+    background_color="0xff24211E"
+
+    # background_color="0xff${background_hex}"
+    # active_color=0xc0e2e2e3
+    # inactive_color=0xc02c2e34
+    # background_color=0x302c2e34
+)
+
+borders "${options[@]}"
+

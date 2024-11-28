@@ -1,0 +1,117 @@
+#!/bin/bash
+
+# max width for windows
+MAX_WIDTH=800
+MIN_PADDING=12
+LAST_RUN_FILE="$HOME/.config/yabai/last_run"
+THROTTLE_TIME=0.5
+LAST_RUN=0
+LAST_SCREEN_WIDTH=0
+LAST_WINDOW_COUNT=0
+
+# Function to get the current screen width
+get_screen_width() {
+    yabai -m query --displays --space | jq '.frame.w'
+}
+
+get_screen_height() {
+    yabai -m query --displays | jq '.[0].frame.h'
+}
+
+# Function to get the number of windows in the current space
+get_window_count() {
+    yabai -m query --windows --space | jq '. | length'
+}
+
+# Function to calculate the padding for each window based on the screen width and window count
+calculate_padding() {
+    local screen_width=$1
+    local window_count=$2
+    local max_width=$(echo "$screen_width * 0.6" | bc)
+    # echo "max_width: $max_width"
+    # echo "screen_width: $screen_width"
+
+    if [ "$window_count" -eq 2 ]; then
+        max_width=$(echo "$screen_width * 0.4" | bc)
+    fi
+
+    # Compare using `bc` for floating-point numbers
+    # Calculate total width that windows would take without padding
+    local total_window_width=$(echo "$window_count * $max_width" | bc)
+    # local total_window_width=$(echo "$window_count * $MAX_WIDTH" | bc)
+
+    # Calculate remaining space for padding
+    if (( $(echo "$total_window_width < $screen_width" | bc -l) )); then
+        # local total_padding=$((screen_width - total_window_width))
+        local total_padding=$(echo "$screen_width - $total_window_width" | bc)
+        local padding_per_side=$(echo "$total_padding / 2" | bc)
+    else
+        local padding_per_side=$MIN_PADDING
+    fi
+
+    local padding_per_window=$(echo "$padding_per_side / $window_count" | bc)
+
+    if (( $(echo "$padding_per_window < $MIN_PADDING" | bc -l) )); then
+        padding_per_window=$MIN_PADDING
+    fi
+
+    # Calculate padding per window
+    if [ "$window_count" -gt 0 ]; then
+        echo $padding_per_window
+        # echo $(echo "$padding_per_side / $window_count" | bc)
+    else
+        echo 0
+    fi
+}
+
+# Function to check if a window is split horizontally
+is_window_split_horizontally() {
+  # Query all windows in the current space and check if any have a horizontal split
+    local has_horizontal_split=$(yabai -m query --windows --space | jq 'any(.[]; ."split-type" == "horizontal")')
+
+    # Return 1 if any window has a horizontal split, otherwise return 0
+    if [ "$has_horizontal_split" == "true" ]; then
+        echo 1
+    else
+        echo 0
+    fi
+}
+
+# Function to apply the calculated padding to each window
+apply_padding_to_windows() {
+    local padding=$1
+    local is_window_split_horizontally=$(is_window_split_horizontally)
+
+    if [ "$is_window_split_horizontally" -eq 1 ]; then
+        yabai -m space --padding abs:18:12:"${padding}":"${padding}"
+    else
+        local screen_height=$(get_screen_height)
+        local vertical_padding=$(echo "scale=0; $screen_height / 9" | bc)
+        yabai -m space --padding abs:"${vertical_padding}":"${vertical_padding}":"${padding}":"${padding}"
+    fi
+}
+
+# Function to handle window layout adjustments
+adjust_window_layout() {
+    local lock_file="$HOME/.config/yabai/adjust_window_layout.lock"
+
+    if [ -f "$lock_file" ]; then
+        return
+    fi
+
+    touch "$lock_file"
+
+    local screen_width=$(get_screen_width)
+    local window_count=$(get_window_count)
+    local padding=$(calculate_padding "$screen_width" "$window_count")
+
+    apply_padding_to_windows "$padding"
+
+    rm "$lock_file"
+}
+
+# Main function to trigger layout adjustment if called directly
+if [ "$1" == "adjust_window_layout" ]; then
+    adjust_window_layout
+fi
+

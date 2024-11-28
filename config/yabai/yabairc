@@ -1,0 +1,145 @@
+#!/bin/bash
+# Check if the guard variable is set
+# if [ -z "$YABAI_RC_SOURCED" ]; then
+#     export YABAI_RC_SOURCED=true
+
+#     focus_window () {
+#         SPACE_NAME=$(yabai -m query --spaces --space | jq -r ".label")
+#         if [ -z "$SPACE_NAME" ]; then
+#             echo "Error: SPACE_NAME is empty"
+#             return
+#         fi
+
+#         WINDOW_ID=$(yabai -m query --windows --space | jq -r ".[] | select (.app==\"${SPACE_NAME}\").id")
+#         if [ -z "$WINDOW_ID" ]; then
+#             echo "Error: WINDOW_ID is empty for SPACE_NAME: $SPACE_NAME"
+#             return
+#         fi
+
+#         yabai -m window --focus "$WINDOW_ID"
+#     }
+
+#     # focus window after active space changes
+#     yabai -m signal --add event=space_changed action="focus_window"
+
+#     # focus window after active display changes
+#     yabai -m signal --add event=display_changed action="focus_window"
+# fi
+
+# . "$HOME/.config/yabai/yabairc"
+
+sudo yabai --load-sa
+yabai -m signal --add event=dock_did_restart action="sudo yabai --load-sa"
+
+# focus window after active space changes
+yabai -m signal --add event=space_changed action="yabai -m window --focus \$(yabai -m query --windows --space | jq .[0].id)"
+
+# focus window after active display changes
+yabai -m signal --add event=display_changed action="yabai -m window --focus \$(yabai -m query --windows --space | jq .[0].id)"
+
+# focus_window () {
+#     SPACE_NAME=$(yabai -m query --spaces --space | jq ".label")
+#     WINDOW_ID=$(yabai -m query --windows --space | jq ".[] | select (.app=${SPACE_NAME}).id")
+#     yabai -m window --focus "${WINDOW_ID}"
+# }
+
+# # focus window after active space changes
+# yabai -m signal --add event=space_changed action="focus_window"
+
+# # focus window after active display changes
+# yabai -m signal --add event=display_changed action="focus_window"
+
+# triggers sketchybar actions on events
+yabai -m signal --add event=window_created action="sketchybar --trigger windows_on_spaces"
+yabai -m signal --add event=window_destroyed action="sketchybar --trigger windows_on_spaces"
+
+# yabai -m signal --add event=window_created \
+#     action="yabai -m query --windows --space | jq .[0].id | xargs
+
+# default layout (can be bsp, stack or float)
+yabai -m config layout                      bsp             \
+                window_placement            second_child    \
+                window_zoom_persist         off             \
+                split_ratio                 0.50            \
+                auto_balance                off             \
+                window_shadow               float           \
+                window_opacity              off             \
+                window_opacity_duration     0.0             \
+                active_window_opacity       0.75            \
+                normal_window_opacity       0.75            \
+                window_animation_duration   0.0             \
+                insert_feedback_color       0xffc4a7e7      \
+                mouse_modifier              fn              \
+                mouse_action1               move            \
+                mouse_action2               resize          \
+                mouse_drop_action           swap            \
+                mouse_follows_focus         on              \
+                top_padding                 18              \
+                bottom_padding              12              \
+                left_padding                12              \
+                right_padding               12              \
+                window_gap                  12              \
+                external_bar                all:30:0
+
+# new window spawns to the right if vertical split, or bottom if horizontal split
+# yabai -m config window_placement second_child
+
+# padding set to 12px
+# yabai -m config top_padding 12
+# yabai -m config bottom_padding 12
+# yabai -m config left_padding 12
+# yabai -m config right_padding 12
+# yabai -m config window_gap 12
+
+# yabai -m config external_bar all:20:0
+
+# Adds border to focused window
+# yabai -m window --toggle border
+
+## Doesn't work since Yabai runs from a different env
+# last_window() {
+#     APP_NAME=$(yabai -m query --windows --space | jq -r .[0].app)
+
+#     if [ "$APP_NAME" == "Microsoft Team" ]; then
+#         yabai -m query --windows --space | jq -r .[1].id
+#     else
+#         yabai -m query --windows --space | jq -r .[0].id
+#     fi
+# }
+
+
+# -- mouse settings --
+
+# center mouse on window with focus
+# yabai -m config mouse_follows_focus on
+
+# modifier for clicking and dragging with mouse
+# yabai -m config mouse_modifier fn
+# # set modifier + left-click drag to move window
+# yabai -m config mouse_action1 move
+# # set modifier + right-click drag to resize window
+# yabai -m config mouse_action2 resize
+
+# # when window is dropped in center of another window, swap them (on edges it will split it)
+# yabai -m mouse_drop_action swap
+
+# disable specific apps
+yabai -m rule --add app="^Microsoft Teams$"  title="^Microsoft Teams Notification$" manage=off
+yabai -m rule --add app="Microsoft Teams" manage=off
+yabai -m rule --add app!="^(Google Chrome|iTerm2)$" manage=off
+
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Run border script
+"$SCRIPT_DIR/borders_config"
+
+# Trigger layout adjustment when a window is added, removed, or when display changes
+# yabai -m signal --add event=window_created action="$SCRIPT_DIR/adjust_window_layout adjust_window_layout"
+# yabai -m signal --add event=window_destroyed action="$SCRIPT_DIR/adjust_window_layout adjust_window_layout"
+# yabai -m signal --add event=display_changed action="$SCRIPT_DIR/adjust_window_layout adjust_window_layout"
+# yabai -m signal --add event=window_resized action="yabai -m query --windows --space | jq .[]"
+# yabai -m signal --add event=window_resized action="$SCRIPT_DIR/adjust_window_layout adjust_for_fullscreen"
+
+# Trigger layout adjustment on init
+# "$SCRIPT_DIR/adjust_window_layout" adjust_window_layout
