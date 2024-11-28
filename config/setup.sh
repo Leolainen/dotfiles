@@ -41,3 +41,15 @@ mkdir -p $HOME/.timewarrior
 # Currently don't use custom configs
 # echo "⏳Symlink timewarrior.cfg file"
 # stow --restow -vv --target="$HOME/.timewarrior" --dir=$SCRIPT_DIR timewarrior
+
+# yabai
+mkdir -p "$HOME/.config/yabai"
+stow --restow -vv --target="$HOME/.config/yabai" --dir=$SCRIPT_DIR yabai
+
+# skhd
+mkdir -p "$HOME/.config/skhd"
+stow --restow -vv --target="$HOME/.config/skhd" --dir=$SCRIPT_DIR skhd
+
+# sketchybar
+mkdir -p "$HOME/.config/sketchybar"
+stow --restow -vv --target="$HOME/.config/sketchybar" --dir=$SCRIPT_DIR sketchybar
