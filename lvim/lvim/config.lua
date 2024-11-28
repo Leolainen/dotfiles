@@ -69,7 +69,9 @@ end;
 -- general
 lvim.log.level = "warn"
 lvim.format_on_save = true
-lvim.colorscheme = "nordic"
+lvim.colorscheme = "darkearth"
+-- lvim.colorscheme = "kanagawa-wave"
+-- lvim.colorscheme = "nordic"
 -- to disable icons and use a minimalist setup, uncomment the following
 -- lvim.use_icons = false
 
@@ -96,6 +98,10 @@ lvim.keys.normal_mode['<S-h>'] = '<cmd>BufferLineCyclePrev<cr>'
 lvim.keys.normal_mode['<CR>'] = ':noh<CR><CR>'
 lvim.keys.normal_mode['<C-BS>'] = '<Del>'
 lvim.keys.insert_mode['<C-BS>'] = '<Del>'
+lvim.keys.insert_mode['˛'] = '<C-o>h'
+lvim.keys.insert_mode['√'] = '<C-o>j'
+lvim.keys.insert_mode['ª'] = '<C-o>k'
+lvim.keys.insert_mode['ﬁ'] = '<C-o>l'
 
 -- Resize with arrows
 lvim.keys.normal_mode['<Up>'] = ':resize -2<CR>'
@@ -191,7 +197,8 @@ lvim.builtin.telescope.defaults.preview = {
 
 -- space + r to replace all occurences of the word under the cursor
 lvim.builtin.which_key.mappings["n"] = { '<cmd>Navbuddy<CR>', "Navbuddy" }
-lvim.builtin.which_key.mappings["r"] = { ':%s/<C-R><C-W>/', "replace all" }
+lvim.builtin.which_key.mappings["r"] = { ':%s\\<C-R><C-W>\\', "replace all" }
+lvim.builtin.which_key.mappings["e"] = { '<cmd>lua MiniFiles.open(vim.api.nvim_buf_get_name(0))<CR>', "Explorer" }
 lvim.builtin.which_key.mappings["y"] = {
     name = "+Yank",
     w = { "viwy", "word" },
@@ -210,8 +217,8 @@ lvim.builtin.which_key.mappings["g"]["q"] = { "<cmd>Gitsigns setqflist<CR>", "Qu
 lvim.builtin.which_key.mappings["s"]["w"] = {
     "<cmd>Telescope projects<CR>",
     "workspaces" }
-lvim.builtin.which_key.mappings["s"]["m"] = { "<cmd>Telescope marks<CR>", "Marks" }
-lvim.builtin.which_key.mappings["s"]["s"] = { "<cmd>Telescope possession list<CR>", "Sessions" }
+-- lvim.builtin.which_key.mappings["s"]["m"] = { "<cmd>Telescope marks<CR>", "Marks" }
+-- lvim.builtin.which_key.mappings["s"]["s"] = { "<cmd>Telescope possession list<CR>", "Sessions" }
 lvim.builtin.which_key.mappings["b"]["t"] = {
     "<cmd>lua require('telescope.builtin').live_grep({grep_open_files=true})<CR>",
     "text in buffers" }
@@ -226,9 +233,9 @@ lvim.builtin.which_key.mappings["g"]["c"] = {
 }
 lvim.builtin.which_key.mappings["m"] = {
     name = "+Mind",
-    o = { "<cmd>MindOpenMain<cr>", "Open main" },
-    r = { "<cmd>MindReloadState<cr>", "Reload" },
-    c = { "<cmd>MindClose<cr>", "Close" },
+    o = { "<cmd>MindOpenMain<CR>", "Open main" },
+    r = { "<cmd>MindReloadState<CR>", "Reload" },
+    c = { "<cmd>MindClose<CR>", "Close" },
 }
 lvim.builtin.which_key.mappings["z"] = {
     "<cmd>ZenMode<CR>", "Zen mode"
@@ -336,8 +343,8 @@ linters.setup {
     },
     {
         command = "jsonlint",
-        filetpyes = { "json" }
-    }
+        filetypes = { "json" }
+    },
     -- {
     --     command = "eslint_d",
     --     filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact", "vue" },
@@ -389,21 +396,28 @@ lspManager.setup("markdownlint", {
         end
     end
 })
+-- lspManager.setup("mdx-analyzer")
+-- {
+--     command = "mdx-language-server",
+--     filetypes = { "mdx" }
+-- }
 
 -- remapping vim-visual-multi keys
-vim.keymap.set(
-    { "n" },
-    "º",
-    ":call vm#commands#add_cursor_up(0, v:count1)<cr>",
-    { noremap = true, silent = true }
-)
+-- vim.keymap.set(
+--     { "n" },
+--     "º",
+--     ":call vm#commands#add_cursor_up(0, v:count1)<cr>",
+--     { noremap = true, silent = true }
+-- )
 
-vim.keymap.set(
-    { "n" },
-    "¬",
-    ":call vm#commands#add_cursor_down(0, v:count1)<cr>",
-    { noremap = true, silent = true }
-)
+-- vim.keymap.set(
+--     { "n" },
+--     "¬",
+--     ":call vm#commands#add_cursor_down(0, v:count1)<cr>",
+--     { noremap = true, silent = true }
+-- )
+
+lvim.builtin.nvimtree.active = false
 
 -- Additional Plugins
 lvim.plugins = {
@@ -413,22 +427,64 @@ lvim.plugins = {
         keys = "<leader>sp"
     },
     {
-        'mg979/vim-visual-multi',
-        event = { "BufRead", },
-        -- event = { "BufRead", "BufNew" },
+        "jake-stewart/multicursor.nvim",
+        branch = "1.0",
         config = function()
-            -- let g:VM_maps = {}
-            -- let g:VM_maps["Add Cursor Down"] = '¬'
+            local mc = require("multicursor-nvim")
+            mc.setup()
+            local set = vim.keymap.set
 
-            vim.g.VM_maps = {
-                ["Add Cursor Down"] = "¬",
-                ["Add Cursor Up"] = "º",
-                ["Select Cursor Down"] = "¬",
-                ["Select Cursor Up"] = "º",
-            }
-            vim.g.VM_theme = 'codedark'
+            -- Add or skip cursor above/below the main cursor.
+            set({ "n", "v" }, "º",
+                function() mc.lineAddCursor(-1) end)
+            set({ "n", "v" }, "¬",
+                function() mc.lineAddCursor(1) end)
+
+            -- Add or skip adding a new cursor by matching word/selection
+            set({ "n", "v" }, "<C-n>",
+                function()
+                    print("<C-n>")
+                    mc.matchAddCursor(1)
+                end)
+            set({ "n", "v" }, "<C-m>", mc.deleteCursor)
+            -- set({ "n", "v" }, "<C-J>",
+            --     function() mc.matchSkipCursor(1) end)
+            -- set({ "n", "v" }, "<C-K>",
+            --     function() mc.matchSkipCursor(-1) end)
+
+            set("n", "<esc>", function()
+                if not mc.cursorsEnabled() then
+                    mc.enableCursors()
+                elseif mc.hasCursors() then
+                    mc.clearCursors()
+                else
+                    -- Default <esc> handler.
+                end
+            end)
+
+            -- Customize how cursors look.
+            local hl = vim.api.nvim_set_hl
+            hl(0, "MultiCursorCursor", { link = "Cursor" })
+            hl(0, "MultiCursorVisual", { link = "Visual" })
+            hl(0, "MultiCursorSign", { link = "SignColumn" })
+            hl(0, "MultiCursorDisabledCursor", { link = "Visual" })
+            hl(0, "MultiCursorDisabledVisual", { link = "Visual" })
+            hl(0, "MultiCursorDisabledSign", { link = "SignColumn" })
         end
     },
+    -- {
+    --     'mg979/vim-visual-multi',
+    --     event = { "BufRead", },
+    --     config = function()
+    --         vim.g.VM_maps = {
+    --             ["Add Cursor Down"] = "¬",
+    --             ["Add Cursor Up"] = "º",
+    --             ["Select Cursor Down"] = "¬",
+    --             ["Select Cursor Up"] = "º",
+    --         }
+    --         vim.g.VM_theme = 'codedark'
+    --     end
+    -- },
     {
         'kylechui/nvim-surround',
         event = { "BufRead", },
@@ -489,12 +545,13 @@ lvim.plugins = {
     },
     {
         "gen740/SmoothCursor.nvim",
-        event = { "BufRead", },
+        event = "VeryLazy",
+        -- event = { "BufRead", },
         config = function()
             require("smoothcursor").setup({
                 autostart = true,
                 cursor = "", -- cursor shape (need nerd font)
-                intervals = 35, -- tick interval
+                intervals = 30, -- tick interval
                 linehl = nil, -- highlight sub-cursor line like 'cursorline', "CursorLine" recommended
                 type = "default", -- define cursor movement calculate function, "default" or "exp" (exponential).
                 fancy = {
@@ -505,10 +562,10 @@ lvim.plugins = {
                         { cursor = "▓", texthl = "SmoothCursorAqua" },
                         { cursor = "▒", texthl = "SmoothCursorAqua" },
                         { cursor = "▒", texthl = "SmoothCursorBlue" },
-                        { cursor = "▒", texthl = "SmoothCursorBlue" },
+                        -- { cursor = "▒", texthl = "SmoothCursorBlue" },
                         { cursor = "░", texthl = "SmoothCursorPurple" },
                         { cursor = "░", texthl = "SmoothCursorPurple" },
-                        { cursor = "░", texthl = "SmoothCursorPurple" },
+                        -- { cursor = "░", texthl = "SmoothCursorPurple" },
                     },
                     tail = { cursor = nil, texthl = "SmoothCursor" }
                 },
@@ -603,7 +660,14 @@ lvim.plugins = {
         'phaazon/mind.nvim',
         branch = 'v2.2',
         cmd = { "MindOpenMain", "MindReloadState", "MindClose" },
-        keys = { "<leader>mo", "<leader>mc" },
+        keys = {
+            {
+                "<leader>mo", "<cmd>MindOpenMain<CR>", mode = { "n" }
+            },
+            {
+                "<leader>mc", "<cmd>MindClose<CR>", mode = { "n", }
+            }
+        },
         dependencies = { 'nvim-lua/plenary.nvim' },
         config = function()
             require 'mind'.setup()
@@ -623,9 +687,8 @@ lvim.plugins = {
     { "shortcuts/no-neck-pain.nvim", cmd = "NoNeckPain", version = "*" },
     {
         "SmiteshP/nvim-navbuddy",
-        lazy = true,
-        cmd = "Navbuddy",
-        keys = "<leader>n",
+        event = "VeryLazy",
+        -- keys = { "<leader>n", "<cmd>Navbuddy<CR>", mode = { "n" } },
         dependencies = {
             "neovim/nvim-lspconfig",
             "SmiteshP/nvim-navic",
@@ -658,7 +721,8 @@ lvim.plugins = {
             local open_previews = {}
 
             local function store_original_keymaps(buf)
-                local maps = vim.keymap.get('', { buffer = buf })
+                local maps = vim.api.nvim_buf_get_keymap(0, '')
+                -- local maps = vim.keymap.get('', { buffer = buf })
                 original_keymaps[buf] = {}
 
                 for _, m in ipairs(maps) do
@@ -830,6 +894,14 @@ lvim.plugins = {
         "andersevenrud/nordic.nvim",
         name = "nordic"
     },
+    {
+        "xero/miasma.nvim",
+        name = "miasma"
+    },
+    {
+        "ptdewey/darkearth-nvim",
+        name = "darkearth"
+    },
     -- {
     --     "pmizio/typescript-tools.nvim",
     --     dependencies = { "nvim-lua/plenary.nvim", "neovim/nvim-lspconfig" },
@@ -837,7 +909,7 @@ lvim.plugins = {
     -- }
     {
         "nvim-treesitter/nvim-treesitter-context",
-        event = { "BufRead", },
+        event = { "BufRead" },
         config = function()
             require("treesitter-context").setup({
                 mode = 'cursor', -- Line used to calculate context. Choices: 'cursor', 'topline'
@@ -865,7 +937,7 @@ lvim.plugins = {
     },
     {
         "folke/zen-mode.nvim",
-        keys = "<leader>z",
+        keys = { { "<leader>z", "<cmd>ZenMode<CR>", mode = { "n" } } },
         cmd = "ZenMode",
         opts = {
             window = {
@@ -896,11 +968,13 @@ lvim.plugins = {
         end
     },
     {
-        "camspiers/snap",
-        keys = {
-            "<leader>sF",
-            "<leader>sT"
-        },
+        "Leolainen/snap",
+        -- "camspiers/snap",
+        -- keys = {
+        --     "<leader>sF",
+        --     "<leader>sT"
+        -- },
+        event = "VeryLazy",
         config = function()
             local snap = require "snap"
             local function git_root_path()
@@ -1029,7 +1103,7 @@ lvim.plugins = {
                 local filename = vim.fn.fnamemodify(meta_result.result, ":t")
                 -- return filename
 
-                local remove_part = vim.fn.fnamemodify(result, ":h:h")
+                local remove_part = vim.fn.fnamemodify(result, ":h:h:h")
                 local subbed = string.sub(result, #remove_part + 2)
                 -- local root_path = git_root_path()
                 -- Escape special characters in root_path for pattern matching
@@ -1087,6 +1161,12 @@ lvim.plugins = {
                 end
             end
 
+            function title()
+                return {
+                    title = "hello"
+                }
+            end
+
             -- IMPORTANT
             -- MUST change line 5 in lua/snap/common/string.lua to
             -- package.loaded[_2amodule_name_2a] = string <-- changed {} to string
@@ -1122,7 +1202,7 @@ lvim.plugins = {
                     -- producer = git_root_grep_consumer(git_root_grep_producer),
                     select = snap.get 'select.file'.select,
                     -- select = custom_select,
-                    multiselect = snap.get 'select.file'.multiselect,
+                    multiselect = snap.get 'select.vimgrep'.multiselect,
                     -- views = { custom_views },
                     views = { snap.get 'preview.file' },
                     steps = { {
@@ -1137,6 +1217,112 @@ lvim.plugins = {
                 { "<Leader>st", snap.config.vimgrep { prompt = "grep" } },
             }
         end
+    },
+    {
+        'MeanderingProgrammer/markdown.nvim',
+        -- name = 'render-markdown', -- Only needed if you have another plugin named markdown.nvim
+        -- event = "BufRead",
+        ft = { "markdown" },
+        dependencies = { 'nvim-treesitter/nvim-treesitter', 'echasnovski/mini.nvim' }, -- if you use the mini.nvim suite
+        -- dependencies = { 'nvim-treesitter/nvim-treesitter', 'echasnovski/mini.icons' }, -- if you use standalone mini plugins
+        -- dependencies = { 'nvim-treesitter/nvim-treesitter', 'nvim-tree/nvim-web-devicons' }, -- if you prefer nvim-web-devicons
+        config = function()
+            require('render-markdown').setup({})
+        end,
+    },
+    {
+        "otavioschwanck/arrow.nvim",
+        event = "VeryLazy",
+        opts = {
+            show_icons = true,
+            leader_key = '\'',       -- Recommended to be a single key
+            buffer_leader_key = 'm', -- Per Buffer Mappings
+            global_bookmarks = true
+        }
+    },
+    {
+        'echasnovski/mini.files',
+        version = '*',
+        -- event = "VeryLazy",
+        config = function()
+            require("mini.files").setup()
+
+            local set_mark = function(id, path, desc)
+                MiniFiles.set_bookmark(id, path, { desc = desc })
+            end
+
+            local copy_path_to_clipboard = function()
+                local path = MiniFiles.get_fs_entry().path
+                print("Copying path to clipboard: " .. path)
+                vim.fn.setreg("+", path)
+            end
+
+            local open_file_in_split = function(cmd)
+                local path = MiniFiles.get_fs_entry().path
+                -- print("Opening file in split: " .. path)
+                vim.cmd(cmd .. path)
+                MiniFiles.close()
+            end
+
+            vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter" }, {
+                -- pattern = "BufEnter",
+                pattern = "*",
+                callback = function(args)
+                    local file_path = args.file
+                    local dir_path = vim.fn.fnamemodify(file_path, ":p:h")
+                    -- MiniFiles.open(dir_path)
+                    -- print(string.format('event fired: %s', vim.inspect(args)))
+                    -- local buf_id = args.bufnr
+                    -- vim.keymap.set('n', "<Leader>e", open_menu_from_file, { buffer = buf_id })
+                end
+            })
+
+            local lastBuffer = nil
+
+            vim.api.nvim_create_autocmd("BufLeave", {
+                pattern = 'MiniFilesExplorerOpen',
+                callback = function()
+                    lastBuffer = vim.api.nvim_get_current_buf()
+                    print("Last buffer: " .. lastBuffer)
+                end
+            })
+
+            vim.api.nvim_create_autocmd('User', {
+                pattern = 'MiniFilesBufferCreate',
+                callback = function(args)
+                    local current_buf_id = args.data.buf_id
+                    local buf_id = lastBuffer
+
+                    if not buf_id then
+                        buf_id = current_buf_id
+                    end
+
+                    vim.keymap.set('n', '<S-Y>', copy_path_to_clipboard, { buffer = current_buf_id })
+                    vim.keymap.set('n', '<C-v>', function() open_file_in_split("vsplit") end, { buffer = buf_id })
+                    vim.keymap.set('n', '<C-x>', function() open_file_in_split("split") end, { buffer = buf_id })
+                end,
+            })
+
+            vim.api.nvim_create_autocmd('User', {
+                pattern = 'MiniFilesExplorerOpen',
+                callback = function()
+                    -- set_mark('a', vim.fn.stdpath('config'), 'Config') -- path
+                    -- set_mark('w', vim.fn.getcwd, 'Working directory') -- callable
+                    set_mark('~', '~', 'Home')
+                    set_mark('a', '~/ATG/atgse', 'ATG SE')
+                    set_mark('d', '~/ATG/design-system', 'Design system')
+                    set_mark('t', '~/ATG/atgse/libs/ui/toolkit', 'Toolkit')
+                end,
+            })
+        end
+    },
+    {
+        "sphamba/smear-cursor.nvim",
+        opts = {
+            -- Smear cursor when moving within line or to neighbor lines
+            smear_between_neighbor_lines = true,
+            legacy_computing_symbols_support = true,
+        },
     }
 }
 
