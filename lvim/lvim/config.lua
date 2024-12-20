@@ -59,6 +59,8 @@ end
 pcall(vim.cmd, [[set iskeyword+=-]])
 -- vim.cmd([[set iskeyword+=-]])
 
+-- explicitly set conceal level to 0
+vim.cmd("setlocal conceallevel=0")
 -- util functions
 local store_buf_to_buflist = function()
     -- add preview window to buffer list
@@ -327,7 +329,7 @@ local formatters = require "lvim.lsp.null-ls.formatters"
 formatters.setup {
     {
         --     -- each formatter accepts a list of options identical to https://github.com/jose-elias-alvarez/null-ls.nvim/blob/main/doc/BUILTINS.md#Configuration
-        command = "prettier",
+        command = "prettierd",
         filetypes = { "json", "javascript", "javascriptreact", "typescript", "typescriptreact", "vue" },
     },
     -- { command = "stylelua", filetypes = { "lua" }}
@@ -1323,6 +1325,9 @@ lvim.plugins = {
             smear_between_neighbor_lines = true,
             legacy_computing_symbols_support = true,
         },
+    },
+    {
+        "lbrayner/vim-rzip",
     }
 }
 
