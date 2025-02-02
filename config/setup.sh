@@ -53,3 +53,7 @@ stow --restow -vv --target="$HOME/.config/skhd" --dir=$SCRIPT_DIR skhd
 # sketchybar
 mkdir -p "$HOME/.config/sketchybar"
 stow --restow -vv --target="$HOME/.config/sketchybar" --dir=$SCRIPT_DIR sketchybar
+
+# ghostty
+mkdir -p "$HOME/.config/ghostty"
+stow --restow -vv --target="$HOME/.config/ghostty" --dir=$SCRIPT_DIR ghostty
