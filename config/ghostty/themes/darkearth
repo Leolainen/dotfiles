@@ -1,0 +1,41 @@
+background = #24211E
+foreground = #d7c484
+cursor-color = #D7C484
+selection-foreground = #24211E
+selection-background = #77824A
+
+# Standard 16 colors (Base16 standard mapping)
+palette = 0=#24211E
+palette = 1=#B3664D
+palette = 2=#5F865F
+palette = 3=#77824A
+palette = 4=#B36B42
+palette = 5=#BB7844
+palette = 6=#C9A654
+palette = 7=#D7C484
+
+# Bright variants
+palette = 8=#675642
+palette = 9=#AC987D
+palette = 10=#5F865F
+palette = 11=#77824A
+palette = 12=#B36B42
+palette = 13=#BB7844
+palette = 14=#C9A654
+palette = 15=#D7C484
+
+# Extended colors (adjusting similar tones for depth)
+palette = 16=#221F1C
+palette = 17=#444A2B
+palette = 18=#6E665E
+palette = 19=#736659
+palette = 20=#8A7A6B
+palette = 21=#AC987D
+
+# Remaining colors (extra accent colors)
+palette = 22=#BB7844
+palette = 23=#B36B42
+palette = 24=#C9A654
+palette = 25=#5F865F
+palette = 26=#D7C484
+

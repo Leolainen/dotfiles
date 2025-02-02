@@ -1,0 +1,50 @@
+# shell-integration = none
+# shell-integration-features = false
+
+
+# The syntax is "key = value". The whitespace around the
+# equals doesn't matter.
+# background = 282c34
+# foreground = ffffff
+
+font-family = Departure Mono
+
+window-padding-balance = true
+window-padding-x = 2
+window-padding-y = 2
+
+macos-window-shadow = false
+macos-titlebar-style = hidden
+window-decoration = true
+background-opacity = 1
+background-blur-radius = 0
+# background-opacity = 0.85
+# background-blur-radius = 20
+
+shell-integration-features = no-cursor
+cursor-style = block
+cursor-style-blink = false
+
+
+# Comments start with a `#` and are only valid on their own line.
+# Blank lines are ignored!
+
+keybind = cmd+shift+l=new_split:right
+keybind = cmd+shift+k=new_split:up
+keybind = cmd+shift+j=new_split:down
+keybind = cmd+shift+h=new_split:left
+
+keybind = cmd+ctrl+l=goto_split:right
+keybind = cmd+ctrl+k=goto_split:top
+keybind = cmd+ctrl+j=goto_split:bottom
+keybind = cmd+ctrl+h=goto_split:left
+
+keybind = cmd+shift+space=toggle_quick_terminal
+
+quick-terminal-position = center
+
+# Empty values reset the configuration to the default value
+# font-family =
+
+# theme = rose-pine-moon
+theme = darkearth
