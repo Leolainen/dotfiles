@@ -6,37 +6,37 @@
 # subtle: 500
 theme_rose_pine() {
     # base tokens
-    export SPACING=8
-    export ITEM_HEIGHT=20
-    export BAR_HEIGHT=32
-    export BORDER_WIDTH=2
-    export BORDER_RADIUS=11
-    export FONT="LiterationMono Nerd Font" # Needs to have Regular, Bold, Semibold, Heavy and Black variants
-    export PADDING=12 # All paddings use this value (icon, label, background)
-    export LABEL_SM="$FONT:book:10.0"
-    export LABEL_MD="$FONT:book:12.0"
-    export LABEL_LG="$FONT:book:14.0"
-    export ICON_SM="$FONT:bold:12.0"
-    export ICON_MD="$FONT:bold:14.0"
-    export ICON_LG="$FONT:bold:16.0"
-    export BLUR=0
+    # export SPACING=8
+    # export ITEM_HEIGHT=20
+    # export BAR_HEIGHT=32
+    # export BORDER_WIDTH=2
+    # export BORDER_RADIUS=11
+    # export FONT="LiterationMono Nerd Font" # Needs to have Regular, Bold, Semibold, Heavy and Black variants
+    # export PADDING=12 # All paddings use this value (icon, label, background)
+    # export LABEL_SM="$FONT:book:10.0"
+    # export LABEL_MD="$FONT:book:12.0"
+    # export LABEL_LG="$FONT:book:14.0"
+    # export ICON_SM="$FONT:bold:12.0"
+    # export ICON_MD="$FONT:bold:14.0"
+    # export ICON_LG="$FONT:bold:16.0"
+    # export BLUR=0
 
     # color tokens
     # base: 0xff232136
-    export BLACK=0xff181926
-    export WHITE=0xffe0def4
-    export RED=0xffeb6f92
-    export GREEN=0xff9ccfd8
-    export BLUE=0xff3e8fb0
-    export YELLOW=0xfff6c177
-    export ORANGE=0xffea9a97
-    export MAGENTA=0xffc4a7e7
-    export GREY_50=0xff232136
-    export GREY_100=0xff2a273f
-    export GREY_200=0xff393552
-    export GREY_300=0xff44415a
-    export GREY_400=0xff6e6a86
-    export GREY_500=0xff908caa
+    export BLACK=0xD9181926
+    export WHITE=0xD9e0def4
+    export RED=0xD9eb6f92
+    export GREEN=0xD99ccfd8
+    export BLUE=0xD93e8fb0
+    export YELLOW=0xD9f6c177
+    export ORANGE=0xD9ea9a97
+    export MAGENTA=0xD9c4a7e7
+    export GREY_50=0xD9232136
+    export GREY_100=0xD92a273f
+    export GREY_200=0xD9393552
+    export GREY_300=0xD944415a
+    export GREY_400=0xD96e6a86
+    export GREY_500=0xD9908caa
     export TRANSPARENT=0x00000000
 
     # semantic colors
@@ -53,6 +53,25 @@ theme_rose_pine() {
     export BORDER=$GREY_500
     export BORDER_HIGHLIGHT=$MAGENTA
     export CANVAS=$GREY_50
+
+    export SPACING=8
+    export ITEM_HEIGHT=20
+    export BAR_HEIGHT=32
+    export BORDER_WIDTH=1
+    export BORDER_RADIUS=11
+    # export BORDER_WIDTH=4
+    # export BORDER_RADIUS=0
+    export FONT="Departure Mono"
+    # export FONT="ProggyCleanSZ Nerd Font Mono"
+    export ICON_FONT="LiterationMono Nerd Font" # Separate font for icons
+    export LABEL_SM="$FONT:regular:12.0"
+    export LABEL_MD="$FONT:regular:14.0"
+    export LABEL_LG="$FONT:regular:16.0"
+    export ICON_SM="$ICON_FONT:book:12.0"
+    export ICON_MD="$ICON_FONT:book:14.0"
+    export ICON_LG="$ICON_FONT:book:16.0"
+    export PADDING=12 # All paddings use this value (icon, label, background)
+    export BLUR=0
 }
 
 theme_nordic() {
@@ -148,18 +167,37 @@ theme_darkearth() {
     export SPACING=8
     export ITEM_HEIGHT=20
     export BAR_HEIGHT=32
+
+    # Thin rounded borders
     # export BORDER_WIDTH=1
     # export BORDER_RADIUS=11
+
+    # Thick square borders
     export BORDER_WIDTH=4
     export BORDER_RADIUS=0
-    export FONT="ProggyCleanSZ Nerd Font Mono"
-    export ICON_FONT="LiterationMono Nerd Font" # Separate font for icons
-    export LABEL_SM="$FONT:regular:18.0"
-    export LABEL_MD="$FONT:regular:20.0"
-    export LABEL_LG="$FONT:regular:22.0"
+
+    # Separate font for icons
+    export ICON_FONT="LiterationMono Nerd Font" 
+
+    # Departure Mono font
+    export FONT="Departure Mono"
+    export LABEL_SM="$FONT:regular:12.0"
+    export LABEL_MD="$FONT:regular:14.0"
+    export LABEL_LG="$FONT:regular:16.0"
     export ICON_SM="$ICON_FONT:book:12.0"
     export ICON_MD="$ICON_FONT:book:14.0"
     export ICON_LG="$ICON_FONT:book:16.0"
+    
+    # ProggyCleanSZ font
+    # export FONT="ProggyCleanSZ Nerd Font Mono"
+    # export LABEL_SM="$FONT:book:10.0"
+    # export LABEL_MD="$FONT:book:12.0"
+    # export LABEL_LG="$FONT:book:14.0"
+    # export ICON_SM="$FONT:bold:12.0"
+    # export ICON_MD="$FONT:bold:14.0"
+    # export ICON_LG="$FONT:bold:16.0"
+    
+    # BigBlueTermPlus Font
     # export FONT="BigBlueTermPlus Nerd Font Mono" 
     # export LABEL_SM="$FONT:regular:12.0"
     # export LABEL_MD="$FONT:regular:14.0"
@@ -168,6 +206,7 @@ theme_darkearth() {
     # export ICON_MD="$FONT:regular:14.0"
     # export ICON_LG="$FONT:regular:16.0"
     # export FONT="FixedsysModernV05 NFM"
+
     export PADDING=12 # All paddings use this value (icon, label, background)
     export BLUR=0
 
