@@ -1,0 +1,7 @@
+export palette=("0xff1d202f" "0xfff7768e" "0xff9ece6a" "0xffe0af68" "0xff7aa2f7" "0xffbb9af7" "0xff7dcfff" "0xffa9b1d6" "0xff414868" "0xfff7768e" "0xff9ece6a" "0xffe0af68" "0xff7aa2f7" "0xffbb9af7" "0xff7dcfff" "0xffc0caf5" )
+export background=0xff24283b
+export foreground=0xffc0caf5
+export cursor_color=0xffc0caf5
+export cursor_text=0xff1d202f
+export selection_background=0xff364a82
+export selection_foreground=0xffc0caf5
