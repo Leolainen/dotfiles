@@ -1,0 +1,102 @@
+return {
+  -- "SmiteshP/nvim-navbuddy",
+  -- lazy = false,
+  -- -- event = "VeryLazy",
+  -- dependencies = {
+  --   "SmiteshP/nvim-navic",
+  --   "MunifTanjim/nui.nvim",
+  -- },
+  -- opts = { lsp = { auto_attach = true }, inlay_hints = { enabled = false } },
+  -- cmd = { "Navbuddy" },
+  -- keys = {
+  --   {
+  --
+  --     "<leader>bn",
+  --     "<cmd>Navbuddy<cr>",
+  --     desc = "Navbuddy",
+  --   },
+  -- },
+
+  -- config = function() end,
+
+  -- "SmiteshP/nvim-navbuddy",
+  -- event = "VeryLazy",
+  -- config = function()
+  --   local navbuddy = require("nvim-navbuddy")
+  --
+  --   navbuddy.setup({
+  --     mappings = {
+  --       ["t"] = function(opts)
+  --         -- https://github.com/SmiteshP/nvim-navbuddy/blob/f22bac988f2dd073601d75ba39ea5636ab6e38cb/lua/nvim-navbuddy/actions.lua
+  --         -- TODO: attempt to replace telescope with snacks
+  --         local callback = function(display)
+  --           local status_ok, _ = pcall(require, "snacks")
+  --
+  --           if not status_ok then
+  --             vim.notify("snacks not found", vim.log.levels.ERROR)
+  --             return
+  --           end
+  --         end
+  --
+  --         return {
+  --           callback = callback,
+  --           description = "Fuzzy filter",
+  --         }
+  --       end,
+  --     },
+  --   })
+  -- end,
+}
+-- return {
+-- {
+--         "SmiteshP/nvim-navbuddy",
+--         event = "VeryLazy",
+--         -- keys = { "<leader>n", "<cmd>Navbuddy<CR>", mode = { "n" } },
+--         dependencies = {
+--             "neovim/nvim-lspconfig",
+--             "SmiteshP/nvim-navic",
+--             "MunifTanjim/nui.nvim"
+--         },
+--         opts = {
+--             lsp = {
+--                 auto_attach = true
+--             }
+--         }
+--     }
+-- }
+--
+-- lvim.builtin.which_key.mappings["n"] = { '<cmd>Navbuddy<CR>', "Navbuddy" }
+-- local navbuddySuccess, navbuddy = pcall(require, "nvim-navbuddy")
+-- local lspManager = require "lvim.lsp.manager"
+-- lspManager.setup("tsserver", {
+--     -- on_setup = util.add_hook_before(util.on_setup, add_bun_prefix),
+--     on_attach = function(client, bufnr)
+--         if navbuddySuccess then
+--             navbuddy.attach(client, bufnr)
+--         end
+--     end
+-- })
+-- lspManager.setup("eslint")
+--
+-- lspManager.setup("lua_ls", {
+--     on_attach = function(client, bufnr)
+--         if navbuddySuccess then
+--             navbuddy.attach(client, bufnr)
+--         end
+--     end
+-- })
+-- lspManager.setup("bashls")
+-- lspManager.setup("jsonls", {
+--     on_attach = function(client, bufnr)
+--         if navbuddySuccess then
+--             navbuddy.attach(client, bufnr)
+--         end
+--     end
+-- })
+-- lspManager.setup("markdownlint", {
+--     on_attach = function(client, bufnr)
+--         if navbuddySuccess then
+--             navbuddy.attach(client, bufnr)
+--         end
+--     end
+-- })

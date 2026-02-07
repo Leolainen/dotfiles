@@ -1,0 +1,27 @@
+-- Included in LazyExtras
+-- stylua: ignore
+if true then return {} end
+
+-- return {
+--   "sphamba/smear-cursor.nvim",
+--   event = "VeryLazy",
+--   opts = {
+--     hide_target_hack = true,
+--     cursor_color = "none",
+--   },
+--   specs = {
+--     -- disable mini.animate cursor
+--     {
+--       "echasnovski/mini.animate",
+--       optional = true,
+--       opts = {
+--         cursor = { enable = false },
+--       },
+--     },
+--   },
+--   -- opts = {
+--   --   -- Smear cursor when moving within line or to neighbor lines
+--   --   smear_between_neighbor_lines = true,
+--   --   legacy_computing_symbols_support = true,
+--   -- },
+-- }
