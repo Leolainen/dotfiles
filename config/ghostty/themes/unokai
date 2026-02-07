@@ -1,0 +1,22 @@
+# Auto-generated from Neovim colorscheme
+background = #24211E
+foreground = #f8f8f2
+cursor-color = #000000
+selection-foreground = #24211E
+selection-background = #282923
+palette = 0=#24211E
+palette = 1=#f92672
+palette = 2=#e6db74
+palette = 3=#f92672
+palette = 4=#a6e22e
+palette = 5=#BB7844
+palette = 6=#fd971f
+palette = 7=#f8f8f2
+palette = 8=#74705d
+palette = 9=#f92672
+palette = 10=#80beb5
+palette = 11=#dadada
+palette = 12=#66d9ef
+palette = 13=#ae81ff
+palette = 14=#C9A654
+palette = 15=#000000
