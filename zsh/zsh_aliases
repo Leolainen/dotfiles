@@ -55,7 +55,7 @@ alias composer="php /usr/local/bin/composer.phar"
 
 # lunarvim
 alias lvim="/Users/leo.karlsson/.local/bin/lvim"
-alias vim="lvim"
+alias vim="nvim"
 
 # docker
 alias docker="$HOME/.docker/bin/docker"
