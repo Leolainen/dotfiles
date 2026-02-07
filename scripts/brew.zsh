@@ -152,17 +152,18 @@ intall_apps() {
   info "Installing useful apps ..."
 
   APPS=(
-    "bankid"
-    "java"
-    "slack"
-    "discord"
-    "iterm2"
-    "visual-studio-code"
+    # "bankid"
+    # "java"
+    # "discord"
+    # "iterm2"
+    # "figma"
+    # "postman"
     "docker"
-    "figma"
-    "vlc"
+    "ghostty"
+    "slack"
     "spotify"
-    "postman"
+    "visual-studio-code"
+    "vlc"
   )
 
   for app in "${APPS[@]}"
