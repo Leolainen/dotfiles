@@ -1,5 +1,6 @@
 #!usr/bin/env zsh
 
+
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
 # confirmations, etc.) must go above this block; everything else may go below.
@@ -66,6 +67,7 @@ source ~/.zsh_aliases
 # export PATH="$PYENV_ROOT/bin:$PATH"
 # eval "$(pyenv init --path)"
 
+
 # Run alias to turn off mouse acceleration
 mouseAccOff
 
@@ -78,11 +80,19 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 
 # fix bug: gitstatus_stop_p9k_:zle:41: No handler installed for fd 14
 # https://github.com/romkatv/powerlevel10k/issues/1554#issuecomment-1701598955
-unset ZSH_AUTOSUGGEST_USE_ASYNC
+# unset ZSH_AUTOSUGGEST_USE_ASYNC
 
 # Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
-# export PATH="$HOME/.rvm/bin:$PATH"
-# export PATH="$PATH:$HOME/.rvm/bin"
+export PATH="$HOME/.rvm/bin:$PATH"
+export PATH="$PATH:$HOME/.rvm/bin"
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+#
+# # bun completions
+# [ -s "/Users/leo.karlsson/.bun/_bun" ] && source "/Users/leo.karlsson/.bun/_bun"
+
+export EDITOR=vim
+
+. "$HOME/.local/bin/env"
+
