@@ -3,6 +3,7 @@
 # init antidote plugin manager
 export BREW_HOME=$(brew --prefix)
 export ANTIDOTE_HOME="$BREW_HOME/opt/antidote/share/antidote"
+
 source $ANTIDOTE_HOME/antidote.zsh
 
 zsh_plugins=~/.zsh_plugins.zsh
@@ -17,6 +18,6 @@ ZSH_AUTOSUGGEST_PARTIAL_ACCEPT_WIDGETS=(forward-word forward-char)
 ZSH_AUTOSUGGEST_ACCEPT_WIDGETS=(end-of-line)
 
 antidote load ~/.zsh_plugins.txt
-
-source ~/.zsh_plugins.zsh
-
+#
+# source ~/.zsh_plugins.zsh
+#
