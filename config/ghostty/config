@@ -10,16 +10,16 @@
 font-family = Departure Mono
 
 window-padding-balance = true
-window-padding-x = 2
+window-padding-x = 6
 window-padding-y = 2
 
 macos-window-shadow = false
 macos-titlebar-style = hidden
 window-decoration = true
-background-opacity = 1
-background-blur-radius = 0
-# background-opacity = 0.85
-# background-blur-radius = 20
+# background-opacity = 1
+# background-blur-radius = 0
+background-opacity = 0.85
+background-blur-radius = 20
 
 shell-integration-features = no-cursor
 cursor-style = block
@@ -46,5 +46,9 @@ quick-terminal-position = center
 # Empty values reset the configuration to the default value
 # font-family =
 
-# theme = rose-pine-moon
-theme = darkearth
+# rose-pine-moon
+# tokyonight_moon
+# coffee_theme
+theme = minicyan
+
+
