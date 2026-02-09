@@ -28,12 +28,14 @@ update() {
         updates="off"
         border_color=$TRANSPARENT
         text_color=$TEXT_SECONDARY
+        icon_text_color=$TEXT_SECONDARY
         scroll_texts=off
 
         if [ $PLAYING = "playing" ]; then
           # label_icon=""
           updates="on"
           border_color=$BORDER_HIGHLIGHT
+          icon_text_color="0xff65d46e"
           text_color=$TEXT_PRIMARY
           scroll_texts=on
         fi
@@ -43,10 +45,11 @@ update() {
         percentage=$(echo "scale=2; $POSITION / $TRACK_LENGTH * 100" | bc | awk '{print int($0)}')
 
         args+=(--animate tahn 8
-               --set spotify.anchor     icon="阮"                                     \
+               --set spotify.anchor     icon="󰓇"                                     \
+                     icon.font="$ICON_LG"                                             \
                                         icon.padding_left=8                           \
                                         icon.padding_right=4                          \
-                                        icon.color=$text_color                        \
+                                        icon.color=$icon_text_color                   \
                                         label="$ARTIST – $TRACK"                      \
                                         label.color="$text_color"                     \
                                         label.max_chars=20                            \

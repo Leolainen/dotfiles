@@ -4,23 +4,67 @@ source "$HOME/.config/sketchybar/icons.sh"
 source "$HOME/.config/sketchybar/tokens.sh"
 source "$HOME/.config/sketchybar/mixins.sh"
 
-PR_OPTIONS="--repo=atgse/atgse --author=@me"
+# OPTIONS="--author=@me"
+# OPTIONS="--repo=atgse/design-system --repo=atgse/atgse --author=@me"
+OPTIONS="--repo=atgse/design-system --repo=atgse/atgse"
+# PR_SEARCH="--search author:@me assignee:@me mentions:@me review-requested:@me"
+PR_JSON="--json number"
+# PR_JSON="--json number,title,reviews,url,mergeable,mergeStateStatus"
+# TO_ARRAY="--jq '.[]'"
+TO_ARRAY="--jq '.[] | @base64'"
 
 update() {
     PLUGIN_DIR="$HOME/.config/sketchybar/plugins" # Directory where all the plugin scripts are stored
-    PR_LIST="$(gh pr list $PR_OPTIONS --json number,title,reviews,url,mergeable,mergeStateStatus --jq '.[] | @base64')"
+    # PR_LIST="$(gh pr list $OPTIONS --json number,title,reviews,url,mergeable,mergeStateStatus --jq '.[] | @base64')"
+    # PR_LIST="$(gh pr list --repo=atgse/design-system --repo=atgse/atgse --search "status:success review:required" --limit=10 --json number,title,reviews,url,mergeable,mergeStateStatus --jq '.[] | @base64')"
+    # PR_LIST="$(gh pr list --author=@me --limit=10 --json number,title,reviews,url,mergeable,mergeStateStatus --jq '.[] | @base64')"
+    # PR_LIST="$(gh pr list --repo=atgse/design-system --repo=atgse/atgse --author=@me --limit=10 --json number,title,reviews,url,mergeable,mergeStateStatus --jq '.[] | @base64')"
+    
+    # MY_PR="$(gh pr list $OPTIONS --search 'author:@me' $PR_JSON $TO_ARRAY)"
+    # MENTIONED_PR="$(gh pr list $OPTIONS --search 'mentions:@me' $PR_JSON $TO_ARRAY)"
+    # REVIEW_REQUESTED_PR="$(gh pr list $OPTIONS --search 'review-requested:@me' $PR_JSON $TO_ARRAY)"
+    # PR_LIST="$MY_PR $MENTIONED_PR $REVIEW_REQUESTED_PR"
+
+    # PR_LIST="$(gh pr list $OPTIONS --search 'is:pr is:open review-requested:@me' $PR_JSON $TO_ARRAY)"
+    PR_LIST="$(gh pr list $OPTIONS  --limit=10 --search 'is:pr is:open review-requested:@me' $PR_JSON --jq '.[].number')"
+    # PR_LIST="$(gh pr list $OPTIONS  --limit=10 --search 'is:pr is:open review-requested:@me' $PR_JSON --jq '.[] | @base64')"
+    # PR_LIST="$(gh pr list $OPTIONS --search 'is:pr is:open review-requested:@me' $PR_JSON --jq '.[] | @base64')"
+    # PR_LIST="$(gh pr list $OPTIONS --limit=10 $PR_JSON --jq '.[] | @base64')"
     TOTAL_REVIEWS=0
-    OPEN_PULL_REQUESTS="$(gh pr list $PR_OPTIONS --json 'number' --jq 'length')"
+    # OPEN_PULL_REQUESTS="$(gh pr list $OPTIONS --json 'number' --jq 'length')"
+    OPEN_PULL_REQUESTS="$(gh pr list $OPTIONS --json 'number' --jq 'length')"
+
+    # echo "$PR_LIST"
 
     args+=(--remove '/github.pr\.*/')
 
     for PR in $PR_LIST; do
-        _decoded_pr=$(echo "$PR" | base64 --decode)
+    # printf '%s\n' "$PR_LIST" | while read -r PR; do
+    # printf '%s\n' "$PR_LIST" | while IFS= read -r PR; do
+        _decoded_pr=$(gh pr view "$PR" $OPTIONS --json number,title,url,mergeable,mergeStateStatus)
+        # REVIEWS=$(gh pr view "$PR" $OPTIONS --json reviews --jq 'length')
+    REVIEWS=$(gh pr view "$PR" $OPTIONS --json reviews --jq '.reviews | length')
 
+        # _decoded_pr=$(echo "$PR")
+        # _decoded_pr=$(echo "$PR" | base64 --decode)
+        # REVIEWS=$(echo "$_decoded_pr" | jq -r '.reviews | length')
+
+         _decoded_pr=$(echo "$_decoded_pr" | jq 'del(.reviews)')
+
+        # if _decoded_pr has number field
+        if [ -z "$(echo "$_decoded_pr" | jq -r '.number')" ]; then
+        # if [ -n "$_decoded_pr" ]; then
+        # removes the body field from _decoded_pr
+
+            echo "PR: $_decoded_pr"
         NUMBER=$(echo "$_decoded_pr" | jq -r '.number')
+        echo "NUMBER: $NUMBER"
         TITLE=$(echo "$_decoded_pr" | jq -r '.title')
-        REVIEWS=$(echo "$_decoded_pr" | jq -r '.reviews | length')
+        echo "TITLE: $TITLE"
+        # REVIEWS=$(echo "$_decoded_pr" | jq -r '.reviews | length')
+        echo "REVIEWS: $REVIEWS"
         URL=$(echo "$_decoded_pr" | jq -r '.url')
+        echo "URL: $URL"
 
         TOTAL_REVIEWS=$((TOTAL_REVIEWS+REVIEWS))
 
@@ -58,6 +102,7 @@ update() {
                 --subscribe github.pr.$NUMBER   mouse.entered                \
                                                 mouse.exited                 )
 
+       fi
     done
     
     REV_REVIES=$(sketchybar --query github.bell | jq -r .label.value)
@@ -122,4 +167,5 @@ case "$SENDER" in
     "mouse.clicked") popup toggle
     ;;
 esac
+
 

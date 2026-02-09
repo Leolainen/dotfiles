@@ -4,11 +4,9 @@ POPUP_OFF="sketchybar --set apple.logo popup.drawing=off"
 POPUP_CLICK_SCRIPT="sketchybar --set \$NAME popup.drawing=toggle"
 
 apple_logo=(
-    "${ITEM_MIXIN[@]}"
     padding_right=$PADDING
     icon="$APPLE"
-    icon.font="$LABEL_LG"
-    icon.color=$TEXT_PRIMARY
+    icon.font="$ICON_LG"
     label.drawing=off
     popup.align=left
     script="$PLUGIN_DIR/apple_actions.sh"

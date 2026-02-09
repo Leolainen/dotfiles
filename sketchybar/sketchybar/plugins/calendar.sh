@@ -1,19 +1,17 @@
 #!/usr/bin/env sh
 
 clock=(
-    "${ITEM_MIXIN[@]}"
-    icon.font="$LABEL_MD"
+    icon.padding_right=4
+    label.padding_left=4
     padding_left=$PADDING
-    label.drawing=off
     script="$PLUGIN_DIR/calendar_update.sh"
     updates=on
     update_freq=10 
 )
 
 calendar=(
-    "${ITEM_MIXIN[@]}"
-    icon.font="$LABEL_MD"
-    label.drawing=off
+    icon.padding_right=4
+    label.padding_left=4
     padding_left=$PADDING
     script="$PLUGIN_DIR/calendar_update.sh"
     updates=on

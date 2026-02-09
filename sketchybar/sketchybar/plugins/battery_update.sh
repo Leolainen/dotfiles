@@ -10,25 +10,25 @@ fi
 COLOR=$TEXT_PRIMARY
 
 case ${PERCENTAGE} in
-  9[0-9]|100) ICON=; 
+  9[0-9]|100) ICON=󰁹; 
   ;;
-  8[0-9]|100) ICON=; 
+  8[0-9]|100) ICON=󰂂;
   ;;
-  7[0-9]|100) ICON=; 
+  7[0-9]|100) ICON=󰂁; 
   ;;
-  6[0-9]|100) ICON=; 
+  6[0-9]|100) ICON=󰂀; 
   ;;
-  5[0-9]|100) ICON=; 
+  5[0-9]|100) ICON=󰁿; 
   ;;
-  4[0-9]|100) ICON=; 
+  4[0-9]|100) ICON=󰁽; 
   ;;
-  3[0-9]|100) ICON=; COLOR=$WARNING
+  3[0-9]|100) ICON=󰁼; COLOR=$WARNING
   ;;
-  2[0-9]|100) ICON=; COLOR=$WARNING
+  2[0-9]|100) ICON=󰁻; COLOR=$WARNING
   ;;
-  1[0-9]|100) ICON=; COLOR=$ERROR
+  1[0-9]|100) ICON=󰁺; COLOR=$ERROR
   ;;
-  *) ICON=; COLOR=$ERROR
+  *) ICON=󰁺; COLOR=$ERROR
 esac
 
 if [[ $CHARGING != "" ]]; then
@@ -41,11 +41,11 @@ if [[ $CHARGING != "" ]]; then
 
         counter=$(( counter + 1 ))
 
-        sketchybar --set $NAME icon="$ICON" icon.color=$COLOR label="$PERCENTAGE%" drawing=on
+        sketchybar --set $NAME icon="$ICON" icon.color=$COLOR icon.padding_left=4 label="$PERCENTAGE%" drawing=on
         sleep 0.5
     done
 
     ICON=
 fi
 
-sketchybar --set $NAME icon="$ICON" icon.color=$COLOR label="$PERCENTAGE%" drawing=on
+sketchybar --set $NAME icon="$ICON" icon.color=$COLOR icon.padding_left=4 label="$PERCENTAGE%" drawing=on

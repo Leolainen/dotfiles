@@ -1,51 +1,53 @@
 #!/usr/bin/env bash
 
-symlink_files() {
-  echo "\\n → Linking sketchbar config & plugin files..."
-  # get dir of current script
-  SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd) && cd "$SCRIPT_DIR" || return 1
-
-  CONFIG_DIR=${XDG_CONFIG_HOME:=$HOME/.config}
-  SKETCHYBAR_CONFIG=${SCRIPT_DIR:=/sketchybar}
-
-  ln -sf "$SKETCHYBAR_CONFIG/sketchybarrc"  "$CONFIG_DIR/sketchybar/sketchybarrc"
-  ln -sf "$SKETCHYBAR_CONFIG/icons.sh"      "$CONFIG_DIR/sketchybar/icons.sh"
-  ln -sf "$SKETCHYBAR_CONFIG/colors.sh"     "$CONFIG_DIR/sketchybar/colors.sh"
-
-  for file in $SKETCHYBAR_CONFIG/plugins/*; do
-    ln -sf "$file" "$CONFIG_DIR/sketchybar/plugins/"
-  done
-
-  echo "✓ Sketchybar config & plugins have been linked\\n"
-}
+# symlink_files() {
+#   echo "\\n → Linking sketchbar config & plugin files..."
+#   # get dir of current script
+#
+#   CONFIG_DIR=${XDG_CONFIG_HOME:=$HOME/.config}
+#   SKETCHYBAR_CONFIG=${SCRIPT_DIR:=/sketchybar}
+#
+#   ln -sf "$SKETCHYBAR_CONFIG/sketchybarrc"  "$CONFIG_DIR/sketchybar/sketchybarrc"
+#   ln -sf "$SKETCHYBAR_CONFIG/icons.sh"      "$CONFIG_DIR/sketchybar/icons.sh"
+#   ln -sf "$SKETCHYBAR_CONFIG/colors.sh"     "$CONFIG_DIR/sketchybar/colors.sh"
+#
+#   for file in $SKETCHYBAR_CONFIG/plugins/*; do
+#     ln -sf "$file" "$CONFIG_DIR/sketchybar/plugins/"
+#   done
+#
+#   echo "✓ Sketchybar config & plugins have been linked\\n"
+# }
 
 install_sketchybar() {
-  echo "Installing SketchBar"
-  echo "If problems; read how to setup here –> https://felixkratz.github.io/SketchyBar/setup"
+    SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd) && cd "$SCRIPT_DIR" || return 1
 
-  info "Installing SketchyBar ..."
+    echo "Installing SketchBar"
+    echo "If problems; read how to setup here –> https://felixkratz.github.io/SketchyBar/setup"
 
-  brew tap FelixKratz/formulae
-  brew install sketchybar
+    info "Installing SketchyBar ..."
 
-  echo "✓ SketchyBar has finished installing \\n"
+    brew tap FelixKratz/formulae
+    brew install sketchybar
 
-  read -p "Symlink existing configs?? [y/N]" -n 1 answer
-  echo
+    echo "✓ SketchyBar has finished installing \\n"
 
-  if [ ${answer} == "y" ]; then
-    symlink_files
-  fi
+    read -p "Symlink existing configs?? [y/N]" -n 1 answer
+    echo
 
-  # run bar automatically on startup
-  echo "Starting sketchybar"
-  brew services start sketchybar
+    if [ ${answer} == "y" ]; then
+        mkdir -p "$HOME/.config/sketchybar"
+        stow --restow -vv --target="$HOME/.config/sketchybar" --dir=$SCRIPT_DIR sketchybar
+        # symlink_files
+    fi
+
+    # run bar automatically on startup
+    echo "Starting sketchybar"
+    brew services start sketchybar
 }
 
 read -p "Would you like to install SketchyBar? [y/N]" -n 1 answer
 echo
 
 if [ ${answer} == "y" ]; then
-  install_sketchybar
+    install_sketchybar
 fi
-
