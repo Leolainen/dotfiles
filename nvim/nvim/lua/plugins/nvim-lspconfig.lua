@@ -39,56 +39,69 @@ end
 
 return {
   "neovim/nvim-lspconfig",
-  dependencies = {
-    {
-      "SmiteshP/nvim-navbuddy",
-      -- event = "VeryLazy",
-      dependencies = {
-        "SmiteshP/nvim-navic",
-        "MunifTanjim/nui.nvim",
-      },
-      cmd = "Navbuddy",
-      keys = {
-        {
-          "<leader>bn",
-          "<cmd>Navbuddy<cr>",
-          desc = "Navbuddy",
-        },
-      },
-      opts = {
-        lsp = { auto_attach = true },
-        mappings = {
-          ["g"] = nb_actions.grep(),
-          -- ["g"] = function()
-          --   -- https://github.com/SmiteshP/nvim-navbuddy/blob/f22bac988f2dd073601d75ba39ea5636ab6e38cb/lua/nvim-navbuddy/actions.lua
-          --   local callback = function(display)
-          --     vim.notify("hello", vim.log.levels.ERROR)
-          --     vim.print(display.focus_node.parent.children)
-          --     -- local status_ok, _ = pcall(require, "snacks")
-          --     --
-          --     -- if not status_ok then
-          --     --   vim.notify("snacks not found", vim.log.levels.ERROR)
-          --     --   return
-          --     -- end
-          --
-          --     -- display:close()
-          --   end
-          --
-          --   return {
-          --     callback = callback,
-          --     description = "Fuzzy filter",
-          --   }
-          -- end,
-        },
-      },
-
-      -- config = function() end,
-    },
-  },
+  -- config = function()
+  --   local lspconfig_ok, lspconfig = pcall(require, "lspconfig")
+  --   if not lspconfig_ok then
+  --     vim.notify("nvim-lspconfig not found", vim.log.levels.ERROR)
+  --   end
+  --
+  --   lspconfig.sourcekit.setup({})
+  -- end,
   opts = {
     inlay_hints = { enabled = false },
+    servers = {
+      vtsls = false,
+      tsgo = {},
+      sourcekit = {},
+    },
   },
-
+  -- Navbuddy is turned off
+  -- dependencies = {
+  --   {
+  --     "SmiteshP/nvim-navbuddy",
+  --     -- event = "VeryLazy",
+  --     dependencies = {
+  --       "SmiteshP/nvim-navic",
+  --       "MunifTanjim/nui.nvim",
+  --     },
+  --     cmd = "Navbuddy",
+  --     keys = {
+  --       {
+  --         "<leader>bn",
+  --         "<cmd>Navbuddy<cr>",
+  --         desc = "Navbuddy",
+  --       },
+  --     },
+  --     opts = {
+  --       lsp = { auto_attach = true },
+  --       mappings = {
+  --         ["g"] = nb_actions.grep(),
+  --         -- ["g"] = function()
+  --         --   -- https://github.com/SmiteshP/nvim-navbuddy/blob/f22bac988f2dd073601d75ba39ea5636ab6e38cb/lua/nvim-navbuddy/actions.lua
+  --         --   local callback = function(display)
+  --         --     vim.notify("hello", vim.log.levels.ERROR)
+  --         --     vim.print(display.focus_node.parent.children)
+  --         --     -- local status_ok, _ = pcall(require, "snacks")
+  --         --     --
+  --         --     -- if not status_ok then
+  --         --     --   vim.notify("snacks not found", vim.log.levels.ERROR)
+  --         --     --   return
+  --         --     -- end
+  --         --
+  --         --     -- display:close()
+  --         --   end
+  --         --
+  --         --   return {
+  --         --     callback = callback,
+  --         --     description = "Fuzzy filter",
+  --         --   }
+  --         -- end,
+  --       },
+  --     },
+  --
+  --     -- config = function() end,
+  --   },
+  -- },
   -- config = function()
   --   vim.print("hello")
   --   vim.notify("hello", vim.log.levels.ERROR)
