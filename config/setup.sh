@@ -25,8 +25,7 @@ packages=(
     "stow"
 )
 
-for package in "${packages[@]}"
-do
+for package in "${packages[@]}"; do
     echo "⏳Installing {$package}"
     brew install $package
     echo "---------------------------------------------------------"
@@ -49,10 +48,6 @@ stow --restow -vv --target="$HOME/.config/yabai" --dir=$SCRIPT_DIR yabai
 # skhd
 mkdir -p "$HOME/.config/skhd"
 stow --restow -vv --target="$HOME/.config/skhd" --dir=$SCRIPT_DIR skhd
-
-# sketchybar
-mkdir -p "$HOME/.config/sketchybar"
-stow --restow -vv --target="$HOME/.config/sketchybar" --dir=$SCRIPT_DIR sketchybar
 
 # ghostty
 mkdir -p "$HOME/.config/ghostty"
