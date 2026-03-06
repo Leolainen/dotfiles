@@ -48,6 +48,11 @@ return {
   "nvim-mini/mini.files",
   version = "*",
   event = "VeryLazy",
+  opts = {
+    options = {
+      use_as_default_explorer = true,
+    },
+  },
   config = function()
     require("mini.files").setup()
 
