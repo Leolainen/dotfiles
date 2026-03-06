@@ -186,8 +186,15 @@ return {
   opts = {
     -- turn off animated scrolling
     scroll = { enabled = false },
+    explorer = { enabled = false },
   },
   keys = {
+    -- Disable default file explorer mappings
+    -- I use mini.files instead
+    { "<leader>fe", false },
+    { "<leader>fE", false },
+    { "<leader>E", false },
+    { "<leader>e", false },
     {
       "<leader>ff",
       function()
