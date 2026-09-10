@@ -1,4 +1,8 @@
 #!/usr/bin/env sh
+
+# Ensure homebrew and common tool paths are available when run via launchd/brew services
+export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:$HOME/.bun/bin:$PATH"
+
 source "$HOME/.config/sketchybar/colors.sh"
 source "$HOME/.config/sketchybar/icons.sh"
 source "$HOME/.config/sketchybar/tokens.sh"
@@ -11,7 +15,8 @@ PR_OPTIONS="--repo=atgse/design-system --repo=atgse/atgse --author=@me"
 update() {
     PLUGIN_DIR="$HOME/.config/sketchybar/plugins"
 
-    PRS_JSON="$(bun $PLUGIN_DIR/github_scripts-parser.js)"
+    PRS_JSON="$($HOME/.bun/bin/bun $PLUGIN_DIR/github_scripts-parser.js)"
+    # PRS_JSON="$(bun $PLUGIN_DIR/github_scripts-parser.js)"
 
     # Get all open PRs with details
     # PRS_JSON="$(gh pr list $PR_OPTIONS --state open --json number,title,url,mergeable,mergeStateStatus,reviews --jq '.')"
@@ -47,18 +52,34 @@ update() {
         MERGESTATESTATUS=$(echo "$PR" | jq -r '.mergeStateStatus')
         COMMENTS=$(echo "$PR" | jq -r '.comments')
         REVIEWS=$(echo "$PR" | jq -r '.reviews')
+        APPROVED=$(echo "$PR" | jq -r '.approved')
         # COMMENTS=$(echo "$PR" | jq -r '.comments.totalCount // 0')
         # REVIEWS=$(echo "$PR" | jq -r '.reviews | length')
 
         TOTAL_COMMENTS=$((TOTAL_COMMENTS + COMMENTS))
         TOTAL_REVIEWS=$((TOTAL_REVIEWS + REVIEWS))
 
-        if [ "$MERGEABLE" = "MERGEABLE" ] && [ "$MERGESTATESTATUS" = "CLEAN" ]; then
+        # - `√` green — approved and clean, ready to merge
+        # - `~` accent — blocked, awaiting approval
+        # - `≠` red — conflicting/dirty
+        # - `!` warning — unstable (CI failing)
+        # - `?` muted — unknown state
+        if [ "$APPROVED" = "true" ] && [ "$MERGESTATESTATUS" = "CLEAN" ]; then
             MERGEABLE_ICON="√"
             MERGEABLE_COLOR=$SUCCESS
-        else
-            MERGEABLE_ICON="×"
+        elif [ "$MERGESTATESTATUS" = "BLOCKED" ]; then
+            MERGEABLE_ICON="~"
+            MERGEABLE_COLOR=$INFO
+        elif [ "$MERGEABLE" = "CONFLICTING" ]; then
+        # elif [ "$MERGESTATESTATUS" = "DIRTY" ] || [ "$MERGEABLE" = "CONFLICTING" ]; then
+            MERGEABLE_ICON="≠"
             MERGEABLE_COLOR=$ERROR
+        elif [ "$MERGESTATESTATUS" = "UNSTABLE" ]; then
+            MERGEABLE_ICON="!"
+            MERGEABLE_COLOR=$WARNING
+        else
+            MERGEABLE_ICON="?"
+            MERGEABLE_COLOR=$TEXT_HIGHLIGHT
         fi
 
         github_pr=(
@@ -89,16 +110,24 @@ update() {
     TRANSPARENT_POPUP_BORDER=$GREY_500
 
     args+=(--set github.bell \
-        icon=" $PR_COUNT" \
-        icon.padding_right=8 \
-        label=" $TOTAL_COMMENTS |  $TOTAL_REVIEWS" \
-        label.padding_left=10 \
-        label.padding_right=8 \
-        label.background.height=$ITEM_HEIGHT \
-        label.background.color=$GREY_300 \
-        label.background.corner_radius=$BORDER_RADIUS \
-        label.background.border_width=$BORDER_WIDTH \
+        icon="$BELL" \
+        icon.padding_right=4 \
+        label="$PR_COUNT" \
+        label.background.height=0 \
+        label.background.color=$TRANSPARENT \
         label.background.border_color=$TRANSPARENT \
+
+        # icon=" $PR_COUNT" \
+        # icon.padding_right=8 \
+        # label=" $TOTAL_COMMENTS |  $TOTAL_REVIEWS" \
+        # label.padding_left=10 \
+        # label.padding_right=8 \
+        # label=" $PR_COUNT" \
+        # label.background.height=$ITEM_HEIGHT \
+        # label.background.color=$GREY_300 \
+        # label.background.corner_radius=$BORDER_RADIUS \
+        # label.background.border_width=$BORDER_WIDTH \
+        # label.background.border_color=$TRANSPARENT \
     )
 
     sketchybar -m "${args[@]}"
@@ -124,10 +153,15 @@ popup() {
     fi
 
     if [ "$NAME" = "github.bell" ]; then
-        sketchybar --set $NAME background.border_color=$BELL_BORDER_COLOR label.background.border_color=$BELL_BORDER_COLOR
+        sketchybar --set $NAME background.border_color=$BELL_BORDER_COLOR
     else
         sketchybar --set $NAME background.color=$POPUP_BACKGROUND_COLOR
     fi
+    # if [ "$NAME" = "github.bell" ]; then
+    #     sketchybar --set $NAME background.border_color=$BELL_BORDER_COLOR label.background.border_color=$BELL_BORDER_COLOR
+    # else
+    #     sketchybar --set $NAME background.color=$POPUP_BACKGROUND_COLOR
+    # fi
 }
 
 case "$SENDER" in
