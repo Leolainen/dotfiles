@@ -1,12 +1,19 @@
 const { execSync } = require("child_process");
 
-const cmd = `gh pr list --repo=atgse/design-system --repo=atgse/atgse --author=@me --state open --json number,title,url,mergeable,mergeStateStatus,comments,reviews`;
-let prs = JSON.parse(execSync(cmd, { encoding: "utf8" }));
+// Use absolute path in case PATH is not set correctly (e.g. when run via brew services/launchd)
+const GH = "/opt/homebrew/bin/gh";
+const REPOS = ["atgse/design-system", "atgse/atgse"];
 
-prs = prs.map((pr) => {
-  pr.comments = pr.comments?.length ?? 0;
-  pr.reviews = pr.reviews?.length ?? 0;
-  return pr;
+const prs = REPOS.flatMap((repo) => {
+  const cmd = `${GH} pr list --repo=${repo} --author=@me --state open --json number,title,url,mergeable,mergeStateStatus,comments,reviews`;
+  const result = JSON.parse(execSync(cmd, { encoding: "utf8" }));
+
+  return result.map((pr) => ({
+    ...pr,
+    comments: pr.comments?.length ?? 0,
+    reviews: pr.reviews?.length ?? 0,
+    approved: pr.reviews?.some((r) => r.state === "APPROVED") ?? false,
+  }));
 });
 
 // Output as JSON for shell script to parse
