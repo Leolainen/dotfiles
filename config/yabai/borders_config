@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Yabai dropped border support
+# This uses jankyborders
+# https://github.com/FelixKratz/JankyBorders
+
 source "$HOME/.config/sketchybar/palette.sh"
 
 SILVER="${palette[7]}"
@@ -8,7 +12,7 @@ BORDER="${GREY}"
 BORDER_HIGHLIGHT="$SILVER"
 
 rounded=(
-    order=below
+    order=above
     style=round
     width=1.0
     hidpi=on
@@ -19,6 +23,7 @@ squared=(
     order=above
     width=8.0
     style=square
+
 )
 
 theme=(
@@ -28,8 +33,8 @@ theme=(
 )
 
 options=(
-    ${squared[@]}
+    ${rounded[@]}
     ${theme[@]}
 )
 
-borders "${options[@]}"
+# borders "${options[@]}"
