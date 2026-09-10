@@ -1,6 +1,8 @@
 {
   "extras": [
     "lazyvim.plugins.extras.editor.mini-diff",
+    "lazyvim.plugins.extras.lang.clangd",
+    "lazyvim.plugins.extras.lang.typescript",
     "lazyvim.plugins.extras.ui.smear-cursor"
   ],
   "install_version": 8,
