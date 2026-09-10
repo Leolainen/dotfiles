@@ -1,7 +1,166 @@
+local ok_local, local_paths = pcall(require, "local.codecompanion_paths")
+local agentskills_paths = (ok_local and local_paths.agentskills_paths) or {}
+
+local function get_git_root()
+  local result = vim.fn.system("git rev-parse --show-toplevel 2>/dev/null")
+  if vim.v.shell_error ~= 0 then
+    return nil
+  end
+  return vim.trim(result)
+end
+
+local function build_agentskills_paths()
+  local paths = vim.deepcopy(agentskills_paths)
+  local git_root = get_git_root()
+  if git_root then
+    local skills_path = git_root .. "/.github/skills"
+    if vim.fn.isdirectory(skills_path) == 1 then
+      -- avoid duplicates
+      local exists = false
+      for _, p in ipairs(paths) do
+        if p == skills_path then
+          exists = true
+          break
+        end
+      end
+      if not exists then
+        table.insert(paths, skills_path)
+      end
+    end
+  end
+  return paths
+end
+
 return {
   "olimorris/codecompanion.nvim",
+  dependencies = {
+    "nvim-lua/plenary.nvim",
+    "nvim-treesitter/nvim-treesitter",
+    "ravitemer/codecompanion-history.nvim",
+    "cairijun/codecompanion-agentskills.nvim",
+  },
   config = function()
+    local models = {
+      { label = "GPT-4.1", model = "gpt-4.1" },
+      {
+        label = "Claude Sonnet 4",
+        model = "claude-sonnet-4",
+      },
+      {
+        label = "Claude Sonnet 4.5",
+        model = "claude-sonnet-4.5",
+      },
+      {
+        label = "Claude Haiku 4.5",
+        model = "claude-haiku-4.5",
+      },
+      {
+        label = "Claude Opus 4.5",
+        model = "claude-opus-4.5",
+      },
+      {
+        label = "Claude Opus 4.6",
+        model = "claude-opus-4.6",
+      },
+      {
+        label = "Gemini 2.5 Pro",
+        model = "gemini-2.5-pro",
+      },
+      {
+        label = "GPT-5.2-Codex",
+        model = "gpt-5.2-codex",
+      },
+      {
+        label = "GPT-5.3-Codex",
+        model = "gpt-5.3-codex",
+      },
+      {
+        label = "GPT-5",
+        model = "gpt-5",
+      },
+      {
+        label = "GPT-5 mini",
+        model = "gpt-5-mini",
+      },
+      {
+        label = "GPT-5.1",
+        model = "gpt-5.1",
+      },
+      {
+        label = "GPT-5.1-Codex",
+        model = "gpt-5.1-codex",
+      },
+      {
+        label = "GPT-5.1-Codex-Max",
+        model = "gpt-5.1-codex-max",
+      },
+      {
+        label = "GPT-5.2",
+        model = "gpt-5.2",
+      },
+      {
+        label = "Grok Code Fast 1",
+        model = "grok-code-fast-1",
+      },
+    }
+
+    -- local model_actions = {
+    --   ["Chat"] = {
+    --     strategy = "chat",
+    --     desc = "Start chat (default Copilot model)",
+    --     adapter = { name = "copilot" },
+    --     prompts = {
+    --       { role = "user", content = "Start a new chat session.", opts = { auto_submit = false } },
+    --     },
+    --   },
+    -- }
+    --
+    -- for _, m in ipairs(models) do
+    --   model_actions["Chat/" .. m.label] = {
+    --     strategy = "chat",
+    --     desc = "Start chat with Copilot " .. m.label,
+    --     adapter = {
+    --       name = "copilot",
+    --       model = m.model,
+    --     },
+    --     prompts = {
+    --       { role = "user", content = "Start a new chat session.", opts = { auto_submit = false } },
+    --     },
+    --   }
+    -- end
+
+    local function build_model_picker_items()
+      local items = {}
+
+      for _, m in ipairs(models) do
+        table.insert(items, {
+          name = m.label,
+          -- use chat interaction for opening a new chat flow
+          interaction = "chat",
+          description = "Start chat with Copilot " .. m.label,
+          callback = function(context)
+            require("codecompanion").chat({
+              buffer_context = context,
+              adapter = {
+                name = "copilot",
+                model = m.model,
+              },
+              messages = {
+                {
+                  role = "user",
+                  content = "Start a new chat session.",
+                },
+              },
+            })
+          end,
+        })
+      end
+
+      return items
+    end
+
     return require("codecompanion").setup({
+      -- actions = vim.tbl_extend("force", model_actions),
       extensions = {
         vectorcode = {
           ---@type VectorCode.CodeCompanion.ExtensionOpts
@@ -45,6 +204,96 @@ return {
             },
           },
         },
+        history = {
+          enabled = true,
+          opts = {
+            -- Keymap to open history from chat buffer (default: gh)
+            keymap = "gh",
+            -- Keymap to save the current chat manually (when auto_save is disabled)
+            save_chat_keymap = "sc",
+            -- Save all chats by default (disable to save only manually using 'sc')
+            auto_save = true,
+            -- Number of days after which chats are automatically deleted (0 to disable)
+            expiration_days = 0,
+            -- Picker interface (auto resolved to a valid picker)
+            picker = "snacks", --- ("telescope", "snacks", "fzf-lua", or "default")
+            ---Optional filter function to control which chats are shown when browsing
+            chat_filter = nil, -- function(chat_data) return boolean end
+            -- Customize picker keymaps (optional)
+            picker_keymaps = {
+              rename = { n = "r", i = "<M-r>" },
+              delete = { n = "d", i = "<M-d>" },
+              duplicate = { n = "<C-y>", i = "<C-y>" },
+            },
+            ---Automatically generate titles for new chats
+            auto_generate_title = true,
+            title_generation_opts = {
+              ---Adapter for generating titles (defaults to current chat adapter)
+              adapter = nil, -- "copilot"
+              ---Model for generating titles (defaults to current chat model)
+              model = nil, -- "gpt-4o"
+              ---Number of user prompts after which to refresh the title (0 to disable)
+              refresh_every_n_prompts = 0, -- e.g., 3 to refresh after every 3rd user prompt
+              ---Maximum number of times to refresh the title (default: 3)
+              max_refreshes = 3,
+              format_title = function(original_title)
+                -- this can be a custom function that applies some custom
+                -- formatting to the title.
+                return original_title
+              end,
+            },
+            ---On exiting and entering neovim, loads the last chat on opening chat
+            continue_last_chat = false,
+            ---When chat is cleared with `gx` delete the chat from history
+            delete_on_clearing_chat = false,
+            ---Directory path to save the chats
+            dir_to_save = vim.fn.stdpath("data") .. "/codecompanion-history",
+            ---Enable detailed logging for history extension
+            enable_logging = false,
+
+            -- Summary system
+            summary = {
+              -- Keymap to generate summary for current chat (default: "gcs")
+              create_summary_keymap = "gcs",
+              -- Keymap to browse summaries (default: "gbs")
+              browse_summaries_keymap = "gbs",
+
+              generation_opts = {
+                adapter = nil, -- defaults to current chat adapter
+                model = nil, -- defaults to current chat model
+                context_size = 90000, -- max tokens that the model supports
+                include_references = true, -- include slash command content
+                include_tool_outputs = true, -- include tool execution results
+                system_prompt = nil, -- custom system prompt (string or function)
+                format_summary = nil, -- custom function to format generated summary e.g to remove <think/> tags from summary
+              },
+            },
+
+            -- Memory system (requires VectorCode CLI)
+            memory = {
+              -- Automatically index summaries when they are generated
+              auto_create_memories_on_summary_generation = true,
+              -- Path to the VectorCode executable
+              vectorcode_exe = "vectorcode",
+              -- Tool configuration
+              tool_opts = {
+                -- Default number of memories to retrieve
+                default_num = 10,
+              },
+              -- Enable notifications for indexing progress
+              notify = true,
+              -- Index all existing memories on startup
+              -- (requires VectorCode 0.6.12+ for efficient incremental indexing)
+              index_on_startup = false,
+            },
+          },
+        },
+        -- readme: https://github.com/cairijun/codecompanion-agentskills.nvim
+        agentskills = {
+          opts = {
+            paths = build_agentskills_paths(),
+          },
+        },
       },
       display = {
         action_palette = {
@@ -59,7 +308,20 @@ return {
           },
         },
       },
-      prompt_library = {
+      prompt_library = vim.tbl_extend("force", {
+        ["Chat with Copilot model ..."] = {
+          strategy = "chat",
+          description = "Pick a Copilot model, then start chat",
+          opts = {
+            stop_context_insertion = true,
+          },
+          picker = {
+            prompt = "Select Copilot model",
+            columns = { "name", "description" },
+            items = build_model_picker_items,
+          },
+        },
+      }, {
         ["Commit DS Message"] = {
           strategy = "chat",
           description = "Generates a DS commit message",
@@ -75,15 +337,50 @@ return {
               role = "user",
               content = function()
                 return string.format(
-                  [[You are an expert at following the Conventional Commit specification. Given the git diff listed below, please generate a commit message for me:
+                  [[You are an expert at following the Conventional Commit specification. Given the git diff listed below, generate a commit message for me:
 
 Format it as type(library/ComponentName): summary
-Write it as a cli command where every line has it's own -m flag. Write it all as one line.
-The first message can be max 100 characters. The rest may be longer.
+The "ComponentName" is the file name and must be without the file extension.
+If a file that is not necessarily a component, like a util or test file, treat it as a filename but omit the last extension.
+Example: "hasEntries.test.ts" would become "hasEntries.test".
+This format is strictly necessary for our versioning tools to be able to parse our commits.
 
-You may use the following commit types: feat, fix, docs, refactor, test, chore.
-Only use feat when a new feature that hasn't existed is actually added. 
+Write it as a cli command where every line has it's own -m flag. Write it all as one line.
+The first message can be max 100 characters and its summary must be lower case. The rest may be longer but still concise, and has no casing requirements.
+
+You can use the following commit types: feat, fix, docs, refactor, test, chore.
+Only use feat when a new user-facing feature is added.
+Use fix when changing existing functionality that is user-facing.
+Use docs when the main purpose of the change is to update documentation.
 If you can't determine a type, use chore by default.
+
+The messages must be concise and to the point. Avoid unnecessary words and extra details that can be deciphered from the type, library and file name.
+It must be clear and easy to understand at a glance while scanning through commit history.
+Common shortened words are encouraged, such as "docs" instead of "documentation" and "md file" instead of "markdown file".
+Abbreviations are discouraged, like "cfg" to mean "config", unless they are extremely common, such as "api".
+
+Avoid using words that can be ambigous such as "improves" or "better". Be specific such as "lowers" or "removes".
+An example of what I mean is this:
+```
+# Not like this
+chore(components/ListItemOption): updates selector to use :where for lower specificity
+
+# Like this
+chore(components/ListItemOption): updates selector to use :where for lower specificity
+```
+
+Here are a few other examples of outputs I like:
+```
+git cm -m "docs(backend/GettingStarted.md): updates Redis installation and usage" -m "Adds link to Redis docs regarding installation"
+                  
+git cm -m "chore(backend/requireAuth.ts): moves requireAuth helper to a separate util file" -m "Implements user extraction from session cookie and returns 401 response if unauthenticated" -m "Uses validateSession from session.service to verify session token"
+
+git cm -m "fix(horse-shared/CompactGameTypeMenu.tsx): fixes crash caused by stale item id" -m "Migrates menu implementation to newly recommended pattern"
+
+git cm -m "feat(components/Select.tsx): adds hideLabel and disableItemWrap props" -m "Improves accessibility with better labeling and updated roles" -m "Fixes unwanted label truncation when only one item is selected"
+```
+
+Do note that you don't NEED to include more lines if the first sufficiently describes the change. Only include more lines if they add important context that isn't already clear from the first line.
 
 ```diff
 %s
@@ -94,9 +391,8 @@ If you can't determine a type, use chore by default.
 * Commit type should include the library name.
 * The component name should be in pascal case.
 * Max 100 characters in the first line.
-* In the first line, try to refer to what is being solved, not how.
-* In the following lines, explain what was actually changed.
-* When explaining what was changed, be concise and to the point.
+* In the first line, try to concisely explain what has changed.
+* In the following lines, provide more details regarding how and why if not immediately clear, but keep it concise.
 
 
 ]],
@@ -376,13 +672,9 @@ Please:
             },
           },
         },
-      },
+      }),
     })
   end,
-  dependencies = {
-    "nvim-lua/plenary.nvim",
-    "nvim-treesitter/nvim-treesitter",
-  },
   keys = {
     { "<leader>ac", "<cmd>CodeCompanionChat Toggle<cr>", desc = "Chat", mode = "n" },
     { "<leader>ac", "<cmd>CodeCompanionChat Add<cr>", desc = "Add to chat", mode = "v" },
