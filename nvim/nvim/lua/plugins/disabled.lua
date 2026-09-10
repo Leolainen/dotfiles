@@ -8,6 +8,12 @@ return {
     -- disabled due to issues with JSX and TSX
     "echanovski/mini.ai",
     -- conflicts with surround
+    enabled = true,
+    -- enabled = false,
+  },
+  {
+    -- Not used
+    "SmiteshP/nvim-navbuddy",
     enabled = false,
   },
 }
