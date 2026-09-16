@@ -259,8 +259,8 @@ return {
       function()
         snacks.picker.projects({
           max_depth = 8,
-          dev = { "~/ATG/atgse", "~/ATG/design-system" },
-          patterns = { "package.json", "init.lua" },
+          dev = { "~/ATG/atgse", "~/ATG/design-system", "~/Projects" },
+          patterns = { "git.init", "package.json", "init.lua" },
           -- patterns = { ".git", "package.json", "project.json", "init.lua" },
           confirm = function(picker, item)
             if item then
