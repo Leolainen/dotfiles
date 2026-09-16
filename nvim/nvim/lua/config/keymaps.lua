@@ -19,6 +19,8 @@ map("n", "å", "]", { remap = true })
 map("n", "<leader>w", "<cmd>w<cr>", { desc = "Save", silent = true })
 map("n", "ﬁ", "$", { desc = "Jump to end", silent = true })
 map("n", "˛", "^", { desc = "Jump to start", silent = true })
+map("n", "<A-l>", "$", { desc = "Jump to end", silent = true })
+map("n", "<A-h>", "^", { desc = "Jump to start", silent = true })
 
 -- clone line to line below/above
 map("n", "<C-√>", "yyp", { desc = "Clone line down", silent = true })
