@@ -59,7 +59,9 @@ return {
     vim.keymap.set("n", "<leader>e", "<cmd>lua MiniFiles.open(vim.api.nvim_buf_get_name(0))<CR>", { desc = "Explorer" })
 
     local set_mark = function(id, path, desc)
-      MiniFiles.set_bookmark(id, path, { desc = desc })
+      if vim.fn.isdirectory(path) == 1 then
+        MiniFiles.set_bookmark(id, path, { desc = desc })
+      end
     end
 
     local copy_path_to_clipboard = function()
