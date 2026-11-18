@@ -1,53 +1,54 @@
 #!/usr/bin/env bash
 
-# symlink_files() {
-#   echo "\\n → Linking sketchbar config & plugin files..."
-#   # get dir of current script
-#
-#   CONFIG_DIR=${XDG_CONFIG_HOME:=$HOME/.config}
-#   SKETCHYBAR_CONFIG=${SCRIPT_DIR:=/sketchybar}
-#
-#   ln -sf "$SKETCHYBAR_CONFIG/sketchybarrc"  "$CONFIG_DIR/sketchybar/sketchybarrc"
-#   ln -sf "$SKETCHYBAR_CONFIG/icons.sh"      "$CONFIG_DIR/sketchybar/icons.sh"
-#   ln -sf "$SKETCHYBAR_CONFIG/colors.sh"     "$CONFIG_DIR/sketchybar/colors.sh"
-#
-#   for file in $SKETCHYBAR_CONFIG/plugins/*; do
-#     ln -sf "$file" "$CONFIG_DIR/sketchybar/plugins/"
-#   done
-#
-#   echo "✓ Sketchybar config & plugins have been linked\\n"
-# }
+set -e
+
+info() { echo -e "\033[1;34m[INFO]\033[0m $*"; }
+success() { echo -e "\033[1;32m[SUCCESS]\033[0m $*"; }
+warn() { echo -e "\033[1;33m[WARN]\033[0m $*"; }
+error() { echo -e "\033[1;31m[ERROR]\033[0m $*"; }
+
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd) && cd "$SCRIPT_DIR" || exit 1
+
+# SketchyBar is macOS only
+if [ "$(uname -s)" != "Darwin" ]; then
+    warn "SketchyBar is macOS only, skipping."
+    exit 0
+fi
 
 install_sketchybar() {
-    SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd) && cd "$SCRIPT_DIR" || return 1
+    info "If problems; read how to setup here -> https://felixkratz.github.io/SketchyBar/setup"
 
-    echo "Installing SketchBar"
-    echo "If problems; read how to setup here –> https://felixkratz.github.io/SketchyBar/setup"
+    if brew list --formula sketchybar >/dev/null 2>&1; then
+        success "SketchyBar already installed."
+    else
+        info "Installing SketchyBar ..."
+        brew tap FelixKratz/formulae
+        brew install sketchybar
+        success "SketchyBar has finished installing."
+    fi
 
-    info "Installing SketchyBar ..."
-
-    brew tap FelixKratz/formulae
-    brew install sketchybar
-
-    echo "✓ SketchyBar has finished installing \\n"
-
-    read -p "Symlink existing configs?? [y/N]" -n 1 answer
+    read -r -p "Symlink existing configs? [y/N] " -n 1 answer
     echo
 
-    if [ ${answer} == "y" ]; then
+    if [[ $answer =~ ^[Yy]$ ]]; then
+        if ! command -v stow >/dev/null 2>&1; then
+            info "Installing stow..."
+            brew install stow
+        fi
         mkdir -p "$HOME/.config/sketchybar"
-        stow --restow -vv --target="$HOME/.config/sketchybar" --dir=$SCRIPT_DIR sketchybar
-        # symlink_files
+        stow --restow -vv --target="$HOME/.config/sketchybar" --dir="$SCRIPT_DIR" sketchybar
     fi
 
     # run bar automatically on startup
-    echo "Starting sketchybar"
+    info "Starting sketchybar"
     brew services start sketchybar
 }
 
-read -p "Would you like to install SketchyBar? [y/N]" -n 1 answer
+read -r -p "Would you like to install SketchyBar? [y/N] " -n 1 answer
 echo
 
-if [ ${answer} == "y" ]; then
+if [[ $answer =~ ^[Yy]$ ]]; then
     install_sketchybar
+else
+    warn "SketchyBar setup skipped."
 fi
