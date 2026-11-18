@@ -8,13 +8,8 @@ sudo -v
 # Keep-alive: update existing `sudo` time stamp until `.osx` has finished.
 while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
 
-cd $DOTFILES/scripts
+cd "${0:A:h}"
 
-if [[ `uname` == 'Darwin' ]]; then
-    . ./brew.zsh
-    . ./nodejs.zsh
-    cd -
-else
-    echo "You're not using a mac!"
-    exit 1
-fi
+. ./brew.zsh
+. ./nodejs.zsh
+cd -
