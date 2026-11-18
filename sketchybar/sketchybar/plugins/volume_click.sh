@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 toggle_mute() {
   # INITIAL_WIDTH=$(sketchybar --query volume | jq ".icon.width")

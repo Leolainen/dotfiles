@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 WIDTH=100
 SLIDER_NAME=volume_slider

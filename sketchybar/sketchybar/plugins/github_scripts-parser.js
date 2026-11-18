@@ -1,7 +1,7 @@
 const { execSync } = require("child_process");
 
-// Use absolute path in case PATH is not set correctly (e.g. when run via brew services/launchd)
-const GH = "/opt/homebrew/bin/gh";
+// Resolved via PATH, which github_scripts.sh exports for launchd/brew services
+const GH = "gh";
 const REPOS = ["atgse/design-system", "atgse/atgse"];
 
 const prs = REPOS.flatMap((repo) => {

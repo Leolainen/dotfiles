@@ -46,7 +46,7 @@ sketchybar --add        item            apple.logo left                         
            --set        apple.prefs     "${menu_item[@]}"                           \
                                         icon="$PREFERENCES"                         \
                                         label="Preferences"                         \
-                                        click_script="open -a 'System Preferences';
+                                        click_script="open -a 'System Settings';
                                                       $POPUP_OFF"                   \
            --subscribe  apple.prefs     "${interactions[@]}"                        \
                                                                                     \

@@ -31,7 +31,7 @@ update() {
         icon_text_color=$TEXT_SECONDARY
         scroll_texts=off
 
-        if [ $PLAYING = "playing" ]; then
+        if [ "$PLAYING" = "playing" ]; then
           # label_icon=""
           updates="on"
           border_color=$BORDER_HIGHLIGHT
@@ -44,7 +44,7 @@ update() {
 
         percentage=$(echo "scale=2; $POSITION / $TRACK_LENGTH * 100" | bc | awk '{print int($0)}')
 
-        args+=(--animate tahn 8
+        args+=(--animate tanh 8
                --set spotify.anchor     icon="󰓇"                                     \
                      icon.font="$ICON_LG"                                             \
                                         icon.padding_left=8                           \
