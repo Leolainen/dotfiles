@@ -2,79 +2,81 @@
 
 set -e
 
-info() { echo -e "\033[1;34m[INFO]\033[0m $*"; }
-success() { echo -e "\033[1;32m[SUCCESS]\033[0m $*"; }
-warn() { echo -e "\033[1;33m[WARN]\033[0m $*"; }
-error() { echo -e "\033[1;31m[ERROR]\033[0m $*"; }
-
-# get dir of current script
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd) && cd "$SCRIPT_DIR" || exit 1
+# shellcheck source=../lib/ui.sh
+. "$SCRIPT_DIR/../lib/ui.sh"
 
-detect_os() {
-    case "$(uname -s)" in
-    Darwin) OS="macos" ;;
-    Linux)
-        OS="linux"
-        if [ -r /etc/os-release ]; then
-            # shellcheck disable=SC1091
-            . /etc/os-release
-            case " $ID $ID_LIKE " in
-            *" arch "*) OS="arch" ;;
-            *" ubuntu "* | *" debian "*) OS="ubuntu" ;;
-            esac
+detect_os || exit 1
+FAILED=0
+
+# usage: pkg_install <brew-name> <apt-name> <pacman-name> [command]
+# Skips when the command or package exists; empty name = unavailable on that OS.
+pkg_install() {
+    local brew_pkg="$1" apt_pkg="$2" pacman_pkg="$3" cmd="${4:-$1}" pkg
+    local label="${brew_pkg:-${apt_pkg:-$pacman_pkg}}"
+    case "$OS" in
+    macos) pkg="$brew_pkg" ;;
+    ubuntu) pkg="$apt_pkg" ;;
+    arch) pkg="$pacman_pkg" ;;
+    esac
+    if [ -z "$pkg" ]; then
+        warn "No $OS package for $label, install it manually."
+        return 0
+    fi
+    if [ -n "$cmd" ] && _exists "$cmd"; then
+        skip "$label already installed"
+        return 0
+    fi
+    case "$OS" in
+    macos)
+        if [ "${DOTFILES_DRY_RUN:-0}" != 1 ] && ! _exists brew; then
+            error "Homebrew is required to install $pkg"
+            return 1
         fi
+        if brew list --formula "$pkg" >/dev/null 2>&1; then
+            skip "$label already installed"
+            return 0
+        fi
+        ui_run "Installing $pkg" brew install "$pkg"
         ;;
-    *) OS="unknown" ;;
+    ubuntu)
+        if dpkg -s "$pkg" >/dev/null 2>&1; then
+            skip "$label already installed"
+            return 0
+        fi
+        ensure_sudo || return 1
+        ui_run "Installing $pkg" sudo apt-get install -y "$pkg"
+        ;;
+    arch)
+        if pacman -Qi "$pkg" >/dev/null 2>&1; then
+            skip "$label already installed"
+            return 0
+        fi
+        ensure_sudo || return 1
+        ui_run "Installing $pkg" sudo pacman -S --needed --noconfirm "$pkg"
+        ;;
     esac
 }
 
-# usage: pkg_install <brew-name> <apt-name> <pacman-name>; empty name = unavailable
-pkg_install() {
-    local brew_pkg="$1" apt_pkg="$2" pacman_pkg="$3"
-    case "$OS" in
-    macos)
-        if brew list --formula "$brew_pkg" >/dev/null 2>&1; then
-            success "$brew_pkg already installed."
-        else
-            info "Installing $brew_pkg..."
-            brew install "$brew_pkg"
-        fi
-        ;;
-    ubuntu)
-        if [ -z "$apt_pkg" ]; then
-            warn "No apt package for $brew_pkg, install it manually."
-        elif dpkg -s "$apt_pkg" >/dev/null 2>&1; then
-            success "$apt_pkg already installed."
-        else
-            info "Installing $apt_pkg..."
-            sudo apt-get install -y "$apt_pkg"
-        fi
-        ;;
-    arch)
-        if [ -z "$pacman_pkg" ]; then
-            warn "No pacman package for $brew_pkg, install it manually."
-        elif pacman -Qi "$pacman_pkg" >/dev/null 2>&1; then
-            success "$pacman_pkg already installed."
-        else
-            info "Installing $pacman_pkg..."
-            sudo pacman -S --needed --noconfirm "$pacman_pkg"
-        fi
-        ;;
-    *)
-        warn "Unsupported OS, install $brew_pkg manually."
-        ;;
-    esac
+# ui_run cannot prompt, so make sure sudo credentials are cached first.
+ensure_sudo() {
+    [ "${DOTFILES_DRY_RUN:-0}" = 1 ] && return 0
+    [ "$(id -u)" -eq 0 ] && return 0
+    sudo -n true 2>/dev/null || ui_sudo_keepalive
 }
 
 # Link a file into $HOME, backing up an existing regular file first.
 link_file() {
-    local src="$1" dest="$2"
+    local src="$1" dest="$2" backup
     if [ -L "$dest" ] && [ "$(readlink "$dest")" = "$src" ]; then
-        success "$dest already linked."
-        return
+        skip "$dest already linked"
+        return 0
+    fi
+    if [ "${DOTFILES_DRY_RUN:-0}" = 1 ]; then
+        info "Would link $dest -> $src"
+        return 0
     fi
     if [ -e "$dest" ] || [ -L "$dest" ]; then
-        local backup
         backup="$dest.bak.$(date +%Y%m%d%H%M%S)"
         warn "Backing up existing $dest to $backup"
         mv "$dest" "$backup"
@@ -83,23 +85,17 @@ link_file() {
     success "Linked $dest"
 }
 
-detect_os
-info "Detected OS: $OS"
-
-pkg_install zsh zsh zsh
+pkg_install zsh zsh zsh || FAILED=1
 
 # antidote: brew formula on macOS, git clone fallback elsewhere (not in apt)
 if [ "$OS" = "macos" ]; then
-    pkg_install antidote "" ""
+    pkg_install antidote "" "" || FAILED=1
+elif [ -d "$HOME/.antidote" ]; then
+    skip "antidote already cloned"
+elif _exists git; then
+    ui_run "Cloning antidote to ~/.antidote" git clone --depth=1 https://github.com/mattmc3/antidote.git "$HOME/.antidote" || FAILED=1
 else
-    if [ -d "$HOME/.antidote" ]; then
-        success "antidote already cloned."
-    elif command -v git >/dev/null 2>&1; then
-        info "Cloning antidote to ~/.antidote..."
-        git clone --depth=1 https://github.com/mattmc3/antidote.git "$HOME/.antidote"
-    else
-        warn "git not found, install antidote manually: https://antidote.sh"
-    fi
+    warn "git not found, install antidote manually: https://antidote.sh"
 fi
 
 # link_file "$SCRIPT_DIR/zsh_env"          ~/.zsh_env
@@ -115,13 +111,19 @@ link_file "$SCRIPT_DIR/zsh_plugins" "$HOME/.zsh_plugins.txt"
 # mkdir -p ~/.zsh_completions
 # link_file "$SCRIPT_DIR/completions/_jq" ~/.zsh_completions/_jq
 
-if [[ "$SHELL" != *zsh* ]]; then
-    if command -v zsh >/dev/null 2>&1; then
-        info "Changing default shell to zsh..."
-        chsh -s "$(command -v zsh)" || warn "chsh failed, run 'chsh -s $(command -v zsh)' manually."
-    else
-        warn "zsh not found, default shell not changed."
-    fi
+if [[ "$SHELL" == *zsh* ]]; then
+    skip "zsh is already the default shell"
+elif ! _exists zsh && [ "${DOTFILES_DRY_RUN:-0}" != 1 ]; then
+    warn "zsh not found, default shell not changed."
+elif [ "${DOTFILES_DRY_RUN:-0}" != 1 ] && [ ! -t 0 ]; then
+    warn "Not interactive, run 'chsh -s $(command -v zsh)' to make zsh your default shell."
+else
+    ui_live "Changing default shell to zsh" chsh -s "$(command -v zsh || echo zsh)" ||
+        warn "chsh failed, run 'chsh -s $(command -v zsh)' manually."
 fi
 
-success "zsh setup complete!"
+if [ "$FAILED" -ne 0 ]; then
+    error "zsh finished with errors, see $DOTFILES_LOG"
+    exit 1
+fi
+success "zsh ready"
