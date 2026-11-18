@@ -1,64 +1,18 @@
 #!/usr/bin/env zsh
 
-e='\033'
-RESET="${e}[0m"
-BOLD="${e}[1m"
-CYAN="${e}[0;96m"
-RED="${e}[0;91m"
-YELLOW="${e}[0;93m"
-GREEN="${e}[0;92m"
+# Installs CLI tools and apps: Brewfile on macOS, apt/pacman equivalents on Linux.
+# Runs standalone or through installer.sh. Honours DOTFILES_YES and DOTFILES_DRY_RUN.
 
-info() {
-  echo -e "${CYAN}${*}${RESET}"
-}
+DOTFILES="${DOTFILES:-${0:A:h:h}}"
+if [[ -r "${0:A:h}/../lib/ui.sh" ]]; then
+  source "${0:A:h}/../lib/ui.sh"
+else
+  source "${DOTFILES}/lib/ui.sh"
+fi
 
-ask() {
-  printf "${YELLOW}%s [y/N]: ${RESET}" "${*}"
-}
-
-error() {
-  echo -e "${RED}${*}${RESET}"
-}
-
-success() {
-  echo -e "${GREEN}${*}${RESET}"
-}
-
-# End section
-finish() {
-  success "Done!"
-  echo
-  sleep 1
-}
-
-# Sets OS to macos, ubuntu or arch
-detect_os() {
-  case "$(uname -s)" in
-    Darwin)
-      OS="macos"
-      ;;
-    Linux)
-      local ids=""
-      [[ -r /etc/os-release ]] && ids=$(. /etc/os-release && echo "${ID:-} ${ID_LIKE:-}")
-      case " ${ids} " in
-        *" arch "*)
-          OS="arch"
-          ;;
-        *" ubuntu "*|*" debian "*)
-          OS="ubuntu"
-          ;;
-        *)
-          error "Unsupported Linux distribution (only Ubuntu and Arch are supported)"
-          exit 1
-          ;;
-      esac
-      ;;
-    *)
-      error "Unsupported OS: $(uname -s)"
-      exit 1
-      ;;
-  esac
-}
+FAILED=()
+INSTALLED_COUNT=0
+SKIPPED_COUNT=0
 
 # Maps a generic name to the package(s) for the current OS.
 # Prints nothing when the package is not available through the package manager.
@@ -66,23 +20,22 @@ pkg_name() {
   case "${OS}:${1}" in
     ubuntu:fd) echo "fd-find" ;;
     arch:gh) echo "github-cli" ;;
-    ubuntu:gh) echo "gh" ;;
     ubuntu:ruby) echo "ruby-full build-essential" ;;
     arch:ruby) echo "ruby base-devel" ;;
+    arch:awscli) echo "aws-cli" ;;
+    ubuntu:timewarrior) echo "timewarrior" ;;
+    arch:timewarrior) echo "timew" ;;
+    ubuntu:docker) echo "docker.io" ;;
     # yarn from apt is not the JS package manager, antidote is cloned instead
     ubuntu:yarn|ubuntu:antidote|arch:antidote) ;;
-    # GUI apps: casks on macOS, packages on Linux where they exist
-    ubuntu:docker) echo "docker.io" ;;
-    arch:docker) echo "docker" ;;
-    ubuntu:ghostty) ;;
-    arch:ghostty) echo "ghostty" ;;
-    ubuntu:vlc|arch:vlc) echo "vlc" ;;
-    arch:firefox) echo "firefox" ;;
-    ubuntu:firefox) ;;
-    ubuntu:obsidian) ;;
+    # not packaged for the distro (or only in the AUR)
+    ubuntu:lazygit|ubuntu:stylua|ubuntu:watchman|ubuntu:tasksh|ubuntu:aws-vault) ;;
+    ubuntu:helm|ubuntu:kubectl|ubuntu:terraform|ubuntu:terragrunt|ubuntu:granted) ;;
+    arch:watchman|arch:tasksh|arch:terraform|arch:terragrunt|arch:granted) ;;
+    ubuntu:ghostty|ubuntu:firefox|ubuntu:obsidian) ;;
     ubuntu:slack|ubuntu:spotify|ubuntu:visual-studio-code) ;;
     ubuntu:google-chrome|ubuntu:opera|ubuntu:microsoft-edge) ;;
-    arch:slack|arch:spotify|arch:visual-studio-code) ;;
+    arch:obsidian|arch:slack|arch:spotify|arch:visual-studio-code) ;;
     arch:google-chrome|arch:opera|arch:microsoft-edge) ;;
     *) echo "${1}" ;;
   esac
@@ -92,7 +45,6 @@ is_installed() {
   local pkg
   for pkg in ${=1}; do
     case "${OS}" in
-      macos) brew list "${pkg}" >/dev/null 2>&1 || return 1 ;;
       ubuntu) dpkg -s "${pkg}" >/dev/null 2>&1 || return 1 ;;
       arch) pacman -Qi "${pkg}" >/dev/null 2>&1 || return 1 ;;
     esac
@@ -100,277 +52,173 @@ is_installed() {
   return 0
 }
 
-# Installs the mapped packages, $2 = "cask" installs a macOS cask
+# Installs one generic package on Linux, failures are recorded and never abort
 pkg_install() {
   local pkgs
   pkgs="$(pkg_name "$1")"
 
   if [[ -z "${pkgs}" ]]; then
-    info "No ${OS} package for $1, skipping ..."
-    return
+    skip "$1 has no ${OS} package"
+    SKIPPED_COUNT=$((SKIPPED_COUNT + 1))
+    return 0
   fi
 
   if is_installed "${pkgs}"; then
-    info "$1 is already installed, skipping ..."
-    return
+    skip "$1 is already installed"
+    SKIPPED_COUNT=$((SKIPPED_COUNT + 1))
+    return 0
   fi
 
+  local rc=0
   case "${OS}" in
-    macos)
-      if [[ "$2" == "cask" ]]; then
-        brew install --cask "${pkgs}"
-      else
-        brew install "${pkgs}"
-      fi
-      ;;
-    ubuntu) sudo apt-get install -y ${=pkgs} ;;
-    arch) sudo pacman -S --needed --noconfirm ${=pkgs} ;;
+    ubuntu) ui_run "Installing $1" sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y ${=pkgs} || rc=$? ;;
+    arch) ui_run "Installing $1" sudo pacman -S --needed --noconfirm ${=pkgs} || rc=$? ;;
   esac
-}
 
-on_start() {
-  info "                         ____   _____  "
-  info "                        / __ \ / ____| "
-  info "   _ __ ___   __ _  ___| |  | | (___   "
-  info "  | '_ \` _ \ / _\` |/ __| |  | |\___ \  "
-  info "  | | | | | | (_| | (__| |__| |____) | "
-  info "  |_| |_| |_|\__,_|\___|\____/|_____/  "
-  info "                                       "
-  info "This script will guide you through installing applications and cli tools (macOS, Ubuntu, Arch)."
-  echo "It will not install anything without your direct agreement!"
-
-  echo
-  ask "Do you want to proceed with installation?" && read -r answer
-  echo
-
-  if [[ "${answer}" != "y" ]]; then
-    exit 1
-  fi
-}
-
-check_updates() {
-  case "${OS}" in
-    macos)
-      info "Updating brew ..."
-      brew update
-
-      info "Upgrading apps ..."
-      brew upgrade
-      ;;
-    ubuntu)
-      info "Updating apt ..."
-      sudo apt-get update
-      ;;
-    arch)
-      info "Updating pacman ..."
-      sudo pacman -Syu --noconfirm
-      ;;
-  esac
-}
-
-# $1 = generic package name, $2 = "cask" for macOS casks (mapped packages on Linux)
-brew_install() {
-  ask "Do you want to install $1?" && read -r answer
-
-  if [[ "${answer}" != 'y' ]]; then
-    success "Skipping ..."
-    return
+  if (( rc == 0 )); then
+    INSTALLED_COUNT=$((INSTALLED_COUNT + 1))
   else
-    info "Installing $1 ..."
-    pkg_install "$1" "$2"
+    warn "Could not install $1, continuing"
+    FAILED+=("$1")
   fi
-
-  finish
-}
-
-brew_cask_install() {
-  brew_install "$1" cask
+  return 0
 }
 
 install_antidote() {
   [[ "${OS}" == "macos" ]] && return
 
   if [[ -d "${ZDOTDIR:-$HOME}/.antidote" ]]; then
-    info "antidote is already installed, skipping ..."
+    skip "antidote is already installed"
     return
   fi
 
-  ask "Do you want to install antidote (git clone to ~/.antidote)?" && read -r answer
-
-  if [[ "${answer}" != 'y' ]]; then
-    success "Skipping ..."
-    return
-  fi
-
-  git clone --depth=1 https://github.com/mattmc3/antidote.git "${ZDOTDIR:-$HOME}/.antidote"
-
-  finish
-}
-
-install_cli_tools() {
-  info "Installing CLI tools ..."
-
-  CLI_TOOLS=(
-    "tree"
-    "wget"
-    "yarn"
-    "fd"
-    "gh"
-  )
-
-  for tool in "${CLI_TOOLS[@]}"
-  do
-    brew_install "${tool}"
-  done
-
-
-  success "CLI Tools installed successfully!"
-
-  unset -v CLI_TOOLS
-}
-
-install_binaries() {
-  info "Installing useful binaries ..."
-
-  BINARIES=(
-    "zsh"
-    # "zplug"
-    "antidote" # fast replacement for zplug
-    "git"
-    "ruby"    # required for colorls
-    "htop"    # monitor CPU, RAM and processes
-    # "thefuck" # Corrects misspelled console commands
-    # "ncdu"    # find where diskspace went
-    "fzf"
-    # "git-flow"
-    # "ansible" # possibly useful but not used today
-  )
-
-  for binary in "${BINARIES[@]}"
-  do
-    if [[ "${binary}" == "antidote" && "${OS}" != "macos" ]]; then
-      install_antidote
-    else
-      brew_install "${binary}"
-    fi
-  done
-
-  success "Binaries installed successfully!"
-
-  unset -v BINARIES
-
-  # Special install for colorls as it's Ruby based
-  info "Installing colorls ..."
-
-  if [[ "${OS}" == "macos" ]]; then
-    gem install colorls
-  else
-    gem install --user-install colorls
-  fi
-}
-
-install_apps() {
-  info "Installing useful apps ..."
-
-  APPS=(
-    # "bankid"
-    # "java"
-    # "discord"
-    # "iterm2"
-    # "figma"
-    # "postman"
-    "docker"
-    "ghostty"
-    "obsidian"
-    "slack"
-    "spotify"
-    "visual-studio-code"
-    "vlc"
-  )
-
-  for app in "${APPS[@]}"
-  do
-    brew_cask_install "${app}"
-  done
-
-
-  success "Apps installed successfully!"
-
-  unset -v APPS
-
-  install_herdr
+  ui_run "Installing antidote" git clone --depth=1 https://github.com/mattmc3/antidote.git "${ZDOTDIR:-$HOME}/.antidote" ||
+    FAILED+=("antidote")
 }
 
 # Herdr is not packaged, it ships its own installer script
 install_herdr() {
   if command -v herdr-app >/dev/null 2>&1 || [[ -x "${HOME}/.local/bin/herdr-app" ]]; then
-    info "herdr is already installed, skipping ..."
+    skip "herdr is already installed"
     return
   fi
 
-  ask "Do you want to install herdr?" && read -r answer
+  ask_yn "Install herdr?" y || { skip "herdr"; return; }
 
-  if [[ "${answer}" != 'y' ]]; then
-    success "Skipping ..."
-    return
-  fi
-
-  info "Installing herdr ..."
-  curl -fsSL https://releases.herdr.dev/app/install.sh | sh
-
-  finish
+  ui_live "Installing herdr" sh -c 'curl -fsSL https://releases.herdr.dev/app/install.sh | sh' ||
+    FAILED+=("herdr")
 }
 
-install_browsers() {
-  info "Installing browsers ..."
+# colorls is a Ruby gem, prefer the ruby installed by Homebrew on macOS
+install_colorls() {
+  local gem_cmd="gem" brew_ruby
+  local -a gem_args=()
 
-  BROWSERS=(
-    "google-chrome"
-    "firefox"
-    "opera"
-    "microsoft-edge"
+  if [[ "${OS}" == "macos" ]] && brew_ruby="$(brew --prefix ruby 2>/dev/null)" && [[ -x "${brew_ruby}/bin/gem" ]]; then
+    gem_cmd="${brew_ruby}/bin/gem"
+  else
+    gem_args=(--user-install)
+  fi
+
+  if ! command -v "${gem_cmd}" >/dev/null 2>&1; then
+    if [[ "${DOTFILES_DRY_RUN:-0}" == 1 ]]; then
+      ui_run "Installing colorls" gem install colorls
+    else
+      warn "ruby is not available, skipping colorls"
+      FAILED+=("colorls")
+    fi
+    return
+  fi
+
+  if "${gem_cmd}" list -i '^colorls$' >/dev/null 2>&1; then
+    skip "colorls is already installed"
+    return
+  fi
+
+  ui_run "Installing colorls" "${gem_cmd}" install "${gem_args[@]}" colorls || FAILED+=("colorls")
+}
+
+install_macos() {
+  if ! _exists brew; then
+    error "Homebrew is not installed, run installer.sh first"
+    exit 1
+  fi
+
+  local -a bundle_env=()
+
+  if ask_yn "Install browsers (Firefox, Chrome, Edge, Opera)?" y; then
+    :
+  else
+    bundle_env=(HOMEBREW_BUNDLE_CASK_SKIP="firefox google-chrome microsoft-edge opera")
+    skip "Browsers"
+  fi
+
+  ui_run "Updating Homebrew" brew update || warn "brew update failed, continuing"
+
+  # live output: cask installs may ask for your password
+  ui_live "Installing Brewfile packages and apps" \
+    env "${bundle_env[@]}" brew bundle --file="${DOTFILES}/Brewfile" ||
+    FAILED+=("brew bundle")
+
+  install_colorls
+  install_herdr
+
+  ui_run "Cleaning up" brew cleanup || true
+}
+
+install_linux() {
+  local -a tools=(
+    zsh git curl wget tree jq fd ripgrep fzf htop btop ncdu stow gh
+    neovim lazygit stylua luarocks watchman pre-commit mkcert
+    httpie imagemagick diff-so-fancy yarn antidote ruby
+    tasksh timewarrior
+    awscli aws-vault helm kubectl terraform terragrunt granted
+    docker ghostty obsidian slack spotify visual-studio-code vlc
+    firefox google-chrome microsoft-edge opera
   )
 
-  for browser in "${BROWSERS[@]}"
-  do
-    brew_cask_install "${browser}"
+  info "Skipping yabai, skhd, borders and sketchybar (macOS only)"
+
+  # Only needed when sudo has no cached credentials and a human can type
+  if [[ "${DOTFILES_DRY_RUN:-0}" != 1 && -t 0 ]] && ! sudo -n true 2>/dev/null; then
+    ui_sudo_keepalive || { error "sudo is required"; exit 1; }
+  fi
+
+  case "${OS}" in
+    ubuntu) ui_run "Updating apt" sudo apt-get update || warn "apt update failed, continuing" ;;
+    arch) ui_run "Updating pacman" sudo pacman -Syu --noconfirm || warn "pacman update failed, continuing" ;;
+  esac
+
+  local tool
+  for tool in "${tools[@]}"; do
+    if [[ "${tool}" == "antidote" ]]; then
+      install_antidote
+    else
+      pkg_install "${tool}"
+    fi
   done
 
+  install_colorls
+  install_herdr
 
-  success "Browsers installed sucessfully!"
-
-  unset -v BROWSERS
+  info "${INSTALLED_COUNT} installed, ${SKIPPED_COUNT} skipped, ${#FAILED[@]} failed"
 }
-
-on_finish() {
-  echo
-  success "Applications were successfully installed"
-  echo
-}
-
-on_error() {
-  echo
-  error "Something went wrong!"
-  error "Exiting installation ..."
-  echo
-
-  exit 1
-}
-
-trap on_error ERR INT TERM
 
 main() {
-  detect_os
-  on_start "$*"
-  check_updates "$*"
-  install_cli_tools "$*"
-  install_binaries "$*"
-  install_apps "$*"
-  install_browsers "$*"
-  if [[ "${OS}" == "macos" ]]; then
-    brew cleanup
+  detect_os || exit 1
+
+  ui_step "Packages and apps"
+
+  case "${OS}" in
+    macos) install_macos ;;
+    *) install_linux ;;
+  esac
+
+  if (( ${#FAILED[@]} > 0 )); then
+    warn "Failed: ${FAILED[*]} (see ${DOTFILES_LOG})"
+  else
+    success "Packages and apps are set up"
   fi
-  on_finish "$*"
 }
 
-main "$*"
+main
