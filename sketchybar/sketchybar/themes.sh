@@ -171,12 +171,13 @@ theme_darkearth() {
     export BAR_HEIGHT=32
 
     # Thin rounded borders
+    export BORDER_WIDTH=0
     # export BORDER_WIDTH=1
-    # export BORDER_RADIUS=11
+    export BORDER_RADIUS=11
 
     # Thick square borders
-    export BORDER_WIDTH=4
-    export BORDER_RADIUS=0
+    # export BORDER_WIDTH=4
+    # export BORDER_RADIUS=0
 
     # Separate font for icons
     export ICON_FONT="LiterationMono Nerd Font"
@@ -252,11 +253,12 @@ layout() {
 borders() {
     # Thin rounded borders
     # export BORDER_WIDTH=1
-    # export BORDER_RADIUS=11
+    export BORDER_WIDTH=0
+    export BORDER_RADIUS=11
 
     # Thick square borders
-    export BORDER_WIDTH=4
-    export BORDER_RADIUS=0
+    # export BORDER_WIDTH=4
+    # export BORDER_RADIUS=0
 
 }
 
