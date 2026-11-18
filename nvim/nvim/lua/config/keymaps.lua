@@ -49,13 +49,13 @@ map("n", "X", '"_X', { desc = "Delete previous char without yanking", silent = t
 
 -- quick console log word under cursor in JS
 map("n", "cl", 'viwyoconsole.log("<C-R>% ~ line: <C-R>=line(".")+1<CR> ~ <C-R>0", <C-R>0);<Esc>h', {
-    desc = "quick console log word under cursor in JS",
-    silent = true,
+  desc = "quick console log word under cursor in JS",
+  silent = true,
 })
 
 -- Show hover
 map("n", "gh", "<cmd>lua vim.lsp.buf.hover()<cr>", {
-    desc = "Open hover window",
+  desc = "Open hover window",
 })
 
 -- move "marks" key from ` to ¨ for convenience on swedish keyboard
@@ -91,7 +91,7 @@ map("v", ">", ">gv", { desc = "Indent right without leaving visual mode" })
 -- map("v", 'ª', ':m .-2<CR>==', { desc = ""})
 
 map("v", "cl", 'y<esc>oconsole.log("<C-R>% ~ line: <C-R>=line(".")+1<CR> ~ <C-R>0", <C-R>0);<Esc>h', {
-    desc = "quick console log selection in JS",
+  desc = "quick console log selection in JS",
 })
 
 -- Copilot keymaps
