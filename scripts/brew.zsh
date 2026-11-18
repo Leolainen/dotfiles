@@ -32,11 +32,11 @@ pkg_name() {
     ubuntu:lazygit|ubuntu:stylua|ubuntu:watchman|ubuntu:tasksh|ubuntu:aws-vault) ;;
     ubuntu:helm|ubuntu:kubectl|ubuntu:terraform|ubuntu:terragrunt|ubuntu:granted) ;;
     arch:watchman|arch:tasksh|arch:terraform|arch:terragrunt|arch:granted) ;;
-    ubuntu:ghostty|ubuntu:firefox|ubuntu:obsidian) ;;
+    ubuntu:ghostty|ubuntu:obsidian) ;;
     ubuntu:slack|ubuntu:spotify|ubuntu:visual-studio-code) ;;
-    ubuntu:google-chrome|ubuntu:opera|ubuntu:microsoft-edge) ;;
+    ubuntu:google-chrome|ubuntu:brave-browser) ;;
     arch:obsidian|arch:slack|arch:spotify|arch:visual-studio-code) ;;
-    arch:google-chrome|arch:opera|arch:microsoft-edge) ;;
+    arch:google-chrome|arch:brave-browser) ;;
     *) echo "${1}" ;;
   esac
 }
@@ -146,10 +146,10 @@ install_macos() {
 
   local -a bundle_env=()
 
-  if ask_yn "Install browsers (Firefox, Chrome, Edge, Opera)?" y; then
+  if ask_yn "Install browsers (Chrome, Brave)?" y; then
     :
   else
-    bundle_env=(HOMEBREW_BUNDLE_CASK_SKIP="firefox google-chrome microsoft-edge opera")
+    bundle_env=(HOMEBREW_BUNDLE_CASK_SKIP="google-chrome brave-browser")
     skip "Browsers"
   fi
 
@@ -174,7 +174,7 @@ install_linux() {
     tasksh timewarrior
     awscli aws-vault helm kubectl terraform terragrunt granted
     docker ghostty obsidian slack spotify visual-studio-code vlc
-    firefox google-chrome microsoft-edge opera
+    google-chrome brave-browser
   )
 
   info "Skipping yabai, skhd, borders and sketchybar (macOS only)"
