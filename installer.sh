@@ -1,50 +1,130 @@
 #!/usr/bin/env bash
+#
+# One command to set up a whole machine (macOS, Ubuntu or Arch).
+#
+#   Fresh machine:  bash -c "$(curl -fsSL https://raw.githubusercontent.com/Leolainen/dotfiles/master/installer.sh)" -- --all
+#   From a clone:   ./installer.sh            pick what to install from a checklist
+#                   ./installer.sh --all      install everything, no questions
+#                   ./installer.sh --only zsh,nvim
+#                   ./installer.sh --help
 
-set -e
+REPO_URL="https://github.com/Leolainen/dotfiles.git"
+HOMEBREW_INSTALLER_URL="https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh"
 
-e='\033'
-RESET="${e}[0m"
-BOLD="${e}[1m"
-CYAN="${e}[0;96m"
-RED="${e}[0;91m"
-YELLOW="${e}[0;93m"
-GREEN="${e}[0;92m"
+# key|label|script|shell|default
+MODULES=(
+    "packages|Packages and apps (Brewfile / apt / pacman)|scripts/brew.zsh|zsh|1"
+    "node|Node.js and npm setup|scripts/nodejs.zsh|zsh|1"
+    "zsh|zsh, antidote and aliases|zsh/setup.sh|bash|1"
+    "nvim|Neovim (LazyVim)|nvim/setup.sh|bash|1"
+    "config|git, taskwarrior, ghostty, herdr, obsidian, yabai and skhd|config/setup.sh|bash|1"
+    "fonts|Nerd Fonts|fonts/setup.sh|bash|1"
+    "sketchybar|SketchyBar (macOS only)|sketchybar/setup.sh|bash|1"
+)
 
-_exists() {
-    command -v "$1" >/dev/null 2>&1
+usage() {
+    cat <<EOF
+Usage: installer.sh [options] [module...]
+
+Options:
+  -a, --all, -y, --yes   install everything without asking questions
+      --only a,b         install only the listed modules (implies --yes)
+      --dir PATH         where the dotfiles live / are cloned (default: this repo, or ~/dotfiles)
+      --dry-run          show what would happen without changing anything
+      --list             list the available modules
+      --no-color         plain output
+  -h, --help             show this help
+
+Modules: packages node zsh nvim config fonts sketchybar
+Command output is logged to ~/.dotfiles-install.log
+EOF
 }
 
-# Sets OS to macos, ubuntu or arch
-detect_os() {
-    case "$(uname -s)" in
-    Darwin)
-        OS="macos"
+# --- argument parsing -------------------------------------------------------
+ONLY=""
+while [ $# -gt 0 ]; do
+    case "$1" in
+    -a | --all | -y | --yes) export DOTFILES_YES=1 ;;
+    --only)
+        ONLY="$2"
+        export DOTFILES_YES=1
+        shift
         ;;
-    Linux)
-        local ids=""
-        [ -r /etc/os-release ] && ids=$(. /etc/os-release && echo "${ID:-} ${ID_LIKE:-}")
-        case " ${ids} " in
-        *" arch "*)
-            OS="arch"
-            ;;
-        *" ubuntu "* | *" debian "*)
-            OS="ubuntu"
-            ;;
-        *)
-            error "Unsupported Linux distribution (only Ubuntu and Arch are supported)"
-            exit 1
-            ;;
-        esac
+    --dir)
+        DOTFILES_DIR_ARG="$2"
+        shift
+        ;;
+    --dry-run) export DOTFILES_DRY_RUN=1 ;;
+    --no-color) export NO_COLOR=1 ;;
+    --list)
+        for m in "${MODULES[@]}"; do
+            IFS='|' read -r key label _ <<<"$m"
+            printf '%-12s %s\n' "$key" "$label"
+        done
+        exit 0
+        ;;
+    -h | --help)
+        usage
+        exit 0
+        ;;
+    -*)
+        echo "Unknown option: $1" >&2
+        usage >&2
+        exit 2
         ;;
     *)
-        error "Unsupported OS: $(uname -s)"
-        exit 1
+        ONLY="${ONLY:+$ONLY,}$1"
+        export DOTFILES_YES=1
         ;;
     esac
-}
+    shift
+done
 
-# Package names are identical on macOS (brew), Ubuntu (apt) and Arch (pacman)
-# for everything installed here (git, zsh).
+# --- running via curl: clone the repo and hand over --------------------------
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" 2>/dev/null && pwd)
+if [ -z "$SCRIPT_DIR" ] || [ ! -f "$SCRIPT_DIR/lib/ui.sh" ]; then
+    target="${DOTFILES_DIR_ARG:-${DOTFILES:-$HOME/dotfiles}}"
+    echo "→ Fetching dotfiles into $target"
+    if ! command -v git >/dev/null 2>&1; then
+        case "$(uname -s)" in
+        Darwin)
+            echo "→ git is missing, installing the Command Line Tools (follow the dialog)..."
+            xcode-select --install 2>/dev/null
+            until command -v git >/dev/null 2>&1; do sleep 5; done
+            ;;
+        *)
+            if command -v apt-get >/dev/null 2>&1; then
+                sudo apt-get update && sudo apt-get install -y git
+            elif command -v pacman >/dev/null 2>&1; then
+                sudo pacman -S --needed --noconfirm git
+            else
+                echo "Please install git and run this again." >&2
+                exit 1
+            fi
+            ;;
+        esac
+    fi
+    if [ -d "$target/.git" ]; then
+        git -C "$target" pull --ff-only --no-recurse-submodules || true
+    else
+        git clone --depth 1 "$REPO_URL" "$target" || exit 1
+    fi
+    args=()
+    [ "${DOTFILES_YES:-0}" = 1 ] && [ -z "$ONLY" ] && args+=(--all)
+    [ -n "$ONLY" ] && args+=(--only "$ONLY")
+    [ "${DOTFILES_DRY_RUN:-0}" = 1 ] && args+=(--dry-run)
+    exec bash "$target/installer.sh" "${args[@]}"
+fi
+
+cd "$SCRIPT_DIR" || exit 1
+export DOTFILES="${DOTFILES_DIR_ARG:-$SCRIPT_DIR}"
+# shellcheck source=lib/ui.sh
+. "$SCRIPT_DIR/lib/ui.sh"
+export DOTFILES_LOG
+
+trap 'echo; error "Interrupted, partial progress is kept. Re-run the installer to continue."; exit 130' INT TERM
+
+# Package names are identical on macOS (brew), Ubuntu (apt) and Arch (pacman) for git, zsh and curl.
 pkg_install() {
     case "$OS" in
     macos) brew install "$@" ;;
@@ -53,351 +133,153 @@ pkg_install() {
     esac
 }
 
-# Success reporter
-info() {
-    echo -e "${CYAN}${*}${RESET}"
-}
-
-# Error reporter
-error() {
-    echo -e "${RED}${*}${RESET}"
-}
-
-# Success reporter
-success() {
-    echo -e "${GREEN}${*}${RESET}"
-}
-
-# End section
-finish() {
-    success "Done!"
-    echo
-    sleep 1
-}
-
-GITHUB_REPO_URL_BASE="https://github.com/leolainen/dotfiles"
-HOMEBREW_INSTALLER_URL="https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh"
-
-# get the dir of the current script
-SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd) && cd "$SCRIPT_DIR" || exit 1
-
-if [ -n "$1" ]; then
-    export DOTFILES="$1"
-elif [ -f "$SCRIPT_DIR/zsh/setup.sh" ]; then
-    export DOTFILES="$SCRIPT_DIR"
-else
-    export DOTFILES="$HOME/dotfiles"
-fi
-
-on_start() {
-
-    info "   _____   ____ _______ ______ _____ _      ______  _____  "
-    info "  |  __ \ / __ \__   __|  ____|_   _| |    |  ____|/ ____| "
-    info "  | |  | | |  | | | |  | |__    | | | |    | |__  | (___   "
-    info "  | |  | | |  | | | |  |  __|   | | | |    |  __|  \___ \  "
-    info "  | |__| | |__| | | |  | |     _| |_| |____| |____ ____) | "
-    info "  |_____/ \____/  |_|  |_|    |_____|______|______|_____/  "
-    info "                                                           "
-    info "       by @Leolainen (Stolen from @Ahmedabdulrahman)       "
-
-    info "This script will guide you through installing essentials for macOS, Ubuntu or Arch Linux."
-    echo "It will not install anything without your direct agreement!"
-    echo
-    read -r -p "Do you want to proceed with installation? [y/N] " -n 1 answer
-    echo
-
-    if [[ "${answer}" != "y" ]]; then
-        exit 1
-    fi
-
-}
-
-install_cli_tools() {
-    # Install Cli Tools.
-    echo
-
-    if [[ "$OS" != "macos" ]]; then
-        info "No Command Line Tools needed on $OS, skipping ... 💨"
-        return
-    fi
-
-    info "Trying to detect installed Command Line Tools..."
-
-    if ! xcode-select -p >/dev/null 2>&1; then
-        echo "You don't have Command Line Tools installed!"
-        read -r -p "Do you agree to install Command Line Tools? [y/N] " -n 1 answer
-        echo
-        if [[ "${answer}" != "y" ]]; then
-            exit 1
-        fi
-
-        info "Installing Command Line Tools..."
-        echo "Please, wait until Command Line Tools will be installed, before continue."
-
-        xcode-select --install
-    else
-        success "You already have Command Line Tools installed, nothing to do here skipping ... 💨"
-    fi
-
-    finish
-}
-
-install_package_manager() {
-    echo
-    read -r -p "Do you agree to proceed with Homebrew installation? [y/N] " -n 1 answer
-    echo
-
-    if [[ "${answer}" != "y" ]]; then
-        info "Exiting installation ..."
-        exit 1
-    fi
-
-    info "Installing Homebrew ..."
-    echo "This may take a while"
-
-    /bin/bash -c "$(curl -fsSL "${HOMEBREW_INSTALLER_URL}")"
-
+load_brew() {
     if [ -x /opt/homebrew/bin/brew ]; then
         eval "$(/opt/homebrew/bin/brew shellenv)"
     elif [ -x /usr/local/bin/brew ]; then
         eval "$(/usr/local/bin/brew shellenv)"
     fi
-
-    # Make sure we’re using the latest Homebrew.
-    brew update
-
-    # Upgrade any already-installed formulae.
-    brew upgrade
-
-    finish
 }
 
-ask_install_package_manager() {
-    echo
-
-    if [[ "$OS" == "ubuntu" ]]; then
-        info "Using apt as package manager"
-        read -r -p "Would you like to update the apt package index? [y/N] " -n 1 answer
-        echo
-        if [[ "${answer}" == "y" ]]; then
-            sudo apt-get update
-        fi
-        return
-    elif [[ "$OS" == "arch" ]]; then
-        info "Using pacman as package manager"
-        read -r -p "Would you like to update the system (pacman -Syu)? [y/N] " -n 1 answer
-        echo
-        if [[ "${answer}" == "y" ]]; then
-            sudo pacman -Syu --noconfirm
-        fi
-        return
-    fi
-
-    info "Checking if Homebrew is installed..."
-
-    if ! _exists brew; then
-        echo "Homebrew not found!"
-        install_package_manager
-    else
-        info "Homebrew is already installed"
-        echo "Skipping to next step.  ... 💨"
-        echo
-
-        return
-    fi
-
-    finish
+install_homebrew() {
+    NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL "$HOMEBREW_INSTALLER_URL")"
 }
 
-install_git() {
-    echo
-    read -r -p "Would you like to install Git? [y/N] " -n 1 answer
-    echo
+# --- prerequisites ----------------------------------------------------------
+install_prerequisites() {
+    ui_step "System prerequisites"
 
-    if [[ "${answer}" != "y" ]]; then
-        exit 1
-    fi
-
-    info "Installing Git"
-
-    pkg_install git
-
-    finish
-}
-
-ask_install_git() {
-    echo
-    info "Checking if Git is installed..."
-
-    if ! _exists git; then
-        echo "Git not found!"
-        install_git
-    else
-        info "Git is already installed"
-        echo "Skipping to next step.  ... 💨"
-        echo
-
-        return
-    fi
-
-    finish
-}
-
-install_zsh() {
-    # Install ZSH
-    echo
-    info "Checking if Zsh is installed ..."
-
-    if ! _exists zsh; then
-        echo "Zsh not found!"
-        read -r -p "Would you like to install Zsh? [y/N] " -n 1 answer
-        echo
-
-        if [[ "${answer}" != "y" ]]; then
-            exit 1
+    case "$OS" in
+    macos)
+        if xcode-select -p >/dev/null 2>&1; then
+            skip "Command Line Tools already installed"
+        else
+            ui_live "Installing Command Line Tools, follow the dialog that opens" xcode-select --install
+            if [ "${DOTFILES_DRY_RUN:-0}" != 1 ]; then
+                until xcode-select -p >/dev/null 2>&1; do sleep 5; done
+                success "Command Line Tools installed"
+            fi
         fi
 
-        info "Installing Zsh ..."
-
-        pkg_install zsh
-    else
-        success "Zsh is already installed! Skipping installation ..."
-    fi
-
-    if _exists zsh; then
-        info "Setting up Zsh as default shell..."
-
-        echo "The script will ask you the password for sudo when changing your default shell via chsh -s"
-        echo
-
-        chsh -s /bin/zsh || chsh -s "$(command -v zsh)" || error "Error: Cannot set Zsh as default shell!"
-        echo "You'll need to log out for this to take effect"
-    fi
-
-    finish
-}
-
-install_dotfiles() {
-    echo
-    info "Looking for dotfiles in $DOTFILES ..."
-
-    if [ ! -d "$DOTFILES" ]; then
-        echo "No dotfiles directory was found!"
-        read -r -p "Would you like to install Dotfiles? [y/N] " -n 1 answer
-        echo
-
-        if [[ "${answer}" != "y" ]]; then
-            exit 1
+        load_brew
+        if _exists brew; then
+            skip "Homebrew already installed"
+        else
+            ui_live "Installing Homebrew (this takes a while)" install_homebrew || return 1
+            load_brew
         fi
+        ;;
+    ubuntu)
+        ui_run "Updating the apt package index" sudo apt-get update || return 1
+        ;;
+    arch)
+        if ask_yn "Upgrade all installed packages first (pacman -Syu)?" n; then
+            ui_run "Upgrading the system" sudo pacman -Syu --noconfirm || return 1
+        else
+            ui_run "Refreshing the package database" sudo pacman -Sy || return 1
+        fi
+        ;;
+    esac
 
-        echo "Cloning dotfiles ..."
-        git clone --recursive "$GITHUB_REPO_URL_BASE.git" "$DOTFILES"
-
-    else
-        success "Dotfiles were found! Skipping ..."
-    fi
-
-    dotfiles_selection
-
-    finish
-}
-
-dotfiles_selection() {
-    echo
-    echo "Please select what you want to install: "
-    dotfiles=("zsh" "fonts" "config" "nvim")
-    [[ "$OS" == "macos" ]] && dotfiles+=("sketchybar")
-
-    PS3='Enter your choice: '
-    options=("${dotfiles[@]}" "Install all" "Skip this step" "Exit install")
-
-    select opt in "${options[@]}"; do
-        case $opt in
-        "zsh" | "fonts" | "config" | "nvim" | "sketchybar")
-            install_selected_dotfile "$opt"
-            ;;
-        "Install all")
-            for module in "${dotfiles[@]}"; do
-                install_selected_dotfile "${module}"
-            done
-            break
-            ;;
-        "Skip this step")
-            echo "Skipping dotfiles installation ..."
-            return
-            ;;
-        "Exit install")
-            echo "Exiting installation ..."
-            exit 1
-            ;;
-        *) echo "invalid option $REPLY" ;;
-        esac
+    local tool
+    for tool in git zsh curl; do
+        if _exists "$tool"; then
+            skip "$tool already installed"
+        else
+            ui_run "Installing $tool" pkg_install "$tool" || return 1
+        fi
     done
 }
 
-install_selected_dotfile() {
-    echo
-    info "Installing $1 config ..."
-
-    if [[ ! -f "$DOTFILES/$1/setup.sh" ]]; then
-        error "$1 config not found!"
-        return 0
-    fi
-
-    bash "$DOTFILES/$1/setup.sh" && success "$1 config installed successfully!"
-}
-
-bootstrap() {
-    read -r -p "Would you like to bootstrap your environment by installing packages and tools? [y/N] " -n 1 answer
-    echo
-
-    if [[ "${answer}" != "y" ]]; then
+run_module() {
+    local key="$1" label="$2" script="$3" shell="$4"
+    ui_step "$label"
+    if [ ! -f "$DOTFILES/$script" ]; then
+        error "$script not found"
+        ui_record fail "$label" "missing $script"
         return
     fi
-
-    zsh "$DOTFILES/scripts/bootstrap.zsh"
-
-    finish
+    if [ "${DOTFILES_DRY_RUN:-0}" = 1 ]; then
+        info "dry run: would run $shell $script"
+        ui_record skip "$label" "dry run"
+        return
+    fi
+    if "$shell" "$DOTFILES/$script"; then
+        ui_record ok "$label"
+    else
+        ui_record fail "$label" "see $DOTFILES_LOG"
+    fi
 }
 
-on_finish() {
-    echo
-    success "Setup was successfully done!"
-    echo
-    echo -ne $RED'-_-_-_-_-_-_-_-_-_-_-_-_-_-_'
-    echo -e $RESET$BOLD',------,'$RESET
-    echo -ne $YELLOW'-_-_-_-_-_-_-_-_-_-_-_-_-_-_'
-    echo -e $RESET$BOLD'|   /\_/\\'$RESET
-    echo -ne $GREEN'-_-_-_-_-_-_-_-_-_-_-_-_-_-'
-    echo -e $RESET$BOLD'~|__( ^ .^)'$RESET
-    echo -ne $CYAN'-_-_-_-_-_-_-_-_-_-_-_-_-_-_'
-    echo -e $RESET$BOLD'""  ""'$RESET
-    echo
-    info "P.S: Don't forget to restart a terminal!"
-    echo "Cheers"
-    echo
-}
-
-on_error() {
-    echo
-    error "Something went wrong!"
-    error "I have no idea what!!"
-    echo
-    exit 1
-}
-
-trap on_error ERR SIGINT SIGTERM
-
+# --- main -------------------------------------------------------------------
 main() {
-    detect_os
-    on_start "$*"
-    install_cli_tools "$*"
-    ask_install_package_manager "$*"
-    ask_install_git "$*"
-    install_zsh "$*"
-    install_dotfiles "$*"
-    bootstrap "$*"
-    on_finish "$*"
+    local start=$SECONDS m key label script shell default selected="" choices=()
+
+    ui_banner
+    detect_os || exit 1
+    info "Detected ${BOLD}$OS${RESET}, dotfiles in ${BOLD}$DOTFILES${RESET}"
+
+    for m in "${MODULES[@]}"; do
+        IFS='|' read -r key label script shell default <<<"$m"
+        [ "$key" = sketchybar ] && [ "$OS" != macos ] && continue
+        choices+=("$key|$label|$default")
+    done
+
+    if [ -n "$ONLY" ]; then
+        selected="${ONLY//,/ }"
+        local k
+        for k in $selected; do
+            case " ${choices[*]} " in
+            *"$k|"*) ;;
+            *)
+                error "Unknown or unavailable module: $k (see --list)"
+                exit 2
+                ;;
+            esac
+        done
+    else
+        ui_pick "What should be installed?" "${choices[@]}"
+        selected="$PICKED"
+        if [ -z "$selected" ]; then
+            warn "Nothing selected, bye."
+            exit 0
+        fi
+        if [ "${DOTFILES_YES:-0}" != 1 ] && ! ask_yn "Install $(wc -w <<<"$selected" | tr -d ' ') item(s) now?" y; then
+            exit 0
+        fi
+    fi
+
+    local count
+    count=$(wc -w <<<"$selected" | tr -d ' ')
+    export DOTFILES_TOTAL_STEPS=$((count + 1))
+
+    if [ "$OS" != macos ] && [ "${DOTFILES_DRY_RUN:-0}" != 1 ]; then
+        ui_sudo_keepalive || exit 1
+    fi
+
+    if install_prerequisites; then
+        ui_record ok "System prerequisites"
+    else
+        ui_record fail "System prerequisites" "see $DOTFILES_LOG"
+        ui_summary
+        error "Cannot continue without the prerequisites."
+        exit 1
+    fi
+
+    for m in "${MODULES[@]}"; do
+        IFS='|' read -r key label script shell default <<<"$m"
+        case " $selected " in
+        *" $key "*) run_module "$key" "$label" "$script" "$shell" ;;
+        esac
+    done
+
+    ui_summary
+    printf '  %sFinished in %ss. Log: %s%s\n' "$DIM" "$((SECONDS - start))" "$DOTFILES_LOG" "$RESET"
+    case "$DOTFILES_RESULTS" in
+    *"fail|"*) warn "Some steps failed. Fix the cause and re-run, finished steps are skipped." ;;
+    *) success "All done. Open a new terminal (or run: exec zsh) to start using it." ;;
+    esac
+    echo
 }
 
-main "$*"
+main
