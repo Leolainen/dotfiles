@@ -72,4 +72,5 @@ cask "vlc"
 
 # browsers
 cask "brave-browser"
+cask "firefox"
 cask "google-chrome"
