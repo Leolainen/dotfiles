@@ -71,7 +71,5 @@ cask "visual-studio-code"
 cask "vlc"
 
 # browsers
-cask "firefox"
+cask "brave-browser"
 cask "google-chrome"
-cask "microsoft-edge"
-cask "opera"
