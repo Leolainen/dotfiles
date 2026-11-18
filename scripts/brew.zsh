@@ -32,7 +32,7 @@ pkg_name() {
     ubuntu:lazygit|ubuntu:stylua|ubuntu:watchman|ubuntu:tasksh|ubuntu:aws-vault) ;;
     ubuntu:helm|ubuntu:kubectl|ubuntu:terraform|ubuntu:terragrunt|ubuntu:granted) ;;
     arch:watchman|arch:tasksh|arch:terraform|arch:terragrunt|arch:granted) ;;
-    ubuntu:ghostty|ubuntu:obsidian) ;;
+    ubuntu:ghostty|ubuntu:firefox|ubuntu:obsidian) ;;
     ubuntu:slack|ubuntu:spotify|ubuntu:visual-studio-code) ;;
     ubuntu:google-chrome|ubuntu:brave-browser) ;;
     arch:obsidian|arch:slack|arch:spotify|arch:visual-studio-code) ;;
@@ -146,10 +146,10 @@ install_macos() {
 
   local -a bundle_env=()
 
-  if ask_yn "Install browsers (Chrome, Brave)?" y; then
+  if ask_yn "Install browsers (Firefox, Chrome, Brave)?" y; then
     :
   else
-    bundle_env=(HOMEBREW_BUNDLE_CASK_SKIP="google-chrome brave-browser")
+    bundle_env=(HOMEBREW_BUNDLE_CASK_SKIP="firefox google-chrome brave-browser")
     skip "Browsers"
   fi
 
@@ -174,7 +174,7 @@ install_linux() {
     tasksh timewarrior
     awscli aws-vault helm kubectl terraform terragrunt granted
     docker ghostty obsidian slack spotify visual-studio-code vlc
-    google-chrome brave-browser
+    firefox google-chrome brave-browser
   )
 
   info "Skipping yabai, skhd, borders and sketchybar (macOS only)"
