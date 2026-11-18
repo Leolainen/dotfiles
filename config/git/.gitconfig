@@ -10,32 +10,32 @@
 [alias]
 	# branch
 	br = branch --sort=-committerdate --verbose --format='%(HEAD) %(color:red)%(objectname:short)%(color:reset) - %(color:yellow)%(refname:short)%(color:reset) - %(contents:subject) - %(color:green)(%(committerdate:relative))%(color:reset) %(color:blue)<%(authorname)>%(color:reset)'
-	brs = br -a
+	brs = !git br -a
 	co = checkout
 	cb = checkout -b
 	# commit
 	amend = commit --amend --no-edit
 	cm = commit
 	# diff
-	d = diff --patch-with-stat
-	dc = d --staged
-	dm = d --word-diff-regex=.
+	dc = diff --patch-with-stat --staged
+	dm = diff --patch-with-stat --word-diff-regex=.
 	doctor = remote -v show origin
-	stat = --no-pager diff --stat
+	stat = !git --no-pager diff --stat
 
-	fl = l -u
+	# aliases cannot call other aliases, so l is invoked through the shell
+	l = log --graph --pretty=format:'%C(yellow)%h%Creset -%C(auto)%d%Creset %s %C(green)(%cr) %C(bold blue)<%an>%Creset'
+	fl = !git l -u
 	grr = grep --break --heading --line-number
 	hide = update-index --assume-unchanged
 	unhide = update-index --no-assume-unchanged
 	hidden = !git ls-files -v | grep \"^[a-z]\"
 	# list
-	la = l --all --simplify-by-decoration
+	la = !git l --all --simplify-by-decoration
 	lastchange = log -p --follow -n 1
 	ll = log --cc
-	lnm = l --no-merges
+	lnm = !git l --no-merges
 
 	cherry = cherry-pick
-	
 	cp = cherry-pick
 	addall = !sh -c 'git add . && git add -u'
 	ign = ls-files -o -i --exclude-standard	# Show files ignored by git
@@ -47,7 +47,7 @@
 	recentall = for-each-ref --count=10 --sort=-committerdate --format='%(committerdate:short) %(refname:short) [%(committername)]'
 	recentlocal = for-each-ref --count=10 --sort=-committerdate refs/heads/ --format='%(committerdate:short) %(refname:short) [%(committername)]'
 
-	patch = !git --no-pager diff --no-color | pbcopy | echo "Patch copied to clipboard"
+	patch = "!f() { if command -v pbcopy >/dev/null 2>&1; then c=pbcopy; elif command -v wl-copy >/dev/null 2>&1; then c=wl-copy; elif command -v xclip >/dev/null 2>&1; then c='xclip -selection clipboard'; else echo 'No clipboard tool found (pbcopy, wl-copy, xclip)' >&2; return 1; fi; git --no-pager diff --no-color | $c && echo 'Patch copied to clipboard'; }; f"
 	st = status -sb
 	stashes = stash list
 	# push
@@ -72,7 +72,7 @@
 	excludesfile = ~/.gitignore
 	attributesfile = ~/.gitattributes
 	untrackedCache = true
-	pager = diff-so-fancy | less --tabs=4 -RFX
+	pager = "{ command -v diff-so-fancy >/dev/null 2>&1 && diff-so-fancy || cat; } | less --tabs=4 -RFX"
 	commentChar = %
 
 [fetch]
@@ -80,9 +80,9 @@
   fsckObjects = true
 
 [pager]
-	# insanely beautiful diffs ==> npm install -g diff-so-fancy
-	diff = diff-so-fancy | less --tabs=2 -RFX
-	show = diff-so-fancy | less --tabs=2 -RFX
+	# insanely beautiful diffs ==> npm install -g diff-so-fancy (falls back to plain less when missing)
+	diff = "{ command -v diff-so-fancy >/dev/null 2>&1 && diff-so-fancy || cat; } | less --tabs=2 -RFX"
+	show = "{ command -v diff-so-fancy >/dev/null 2>&1 && diff-so-fancy || cat; } | less --tabs=2 -RFX"
 
 [interactive]
   # disabled until github.com/so-fancy/diff-so-fancy/pull/172 is resolved :(
@@ -118,13 +118,13 @@
 	changed = yellow
 	untracked = red
 
-# URL shorthands
+# URL shorthands (fetch over https, push over ssh; git:// is unauthenticated and dropped by GitHub)
 [url "git@github.com:"]
   insteadOf = "gh:"
   pushInsteadOf = "github:"
   pushInsteadOf = "git://github.com/"
 
-[url "git://github.com/"]
+[url "https://github.com/"]
   insteadOf = "github:"
 
 [url "git@gist.github.com:"]
@@ -132,7 +132,7 @@
   pushInsteadOf = "gist:"
   pushInsteadOf = "git://gist.github.com/"
 
-[url "git://gist.github.com/"]
+[url "https://gist.github.com/"]
   insteadOf = "gist:"
 
 [url "git@gitlab.com:"]
@@ -140,7 +140,7 @@
   pushInsteadOf = gitlab:
   pushInsteadOf = git://gitlab.com/
 
-[url "git://gitlab.com/"]
+[url "https://gitlab.com/"]
   insteadOf = gitlab:
 
 [url "git@bitbucket.org:"]
@@ -148,7 +148,7 @@
   pushInsteadOf = bitbucket:
   pushInsteadOf = git://bitbucket.org/
 
-[url "git://bitbucket.org/"]
+[url "https://bitbucket.org/"]
   insteadOf = bitbucket:
 
 # correct typos
@@ -162,9 +162,6 @@
 
 [pull]
   rebase = true
-
-[fetch]
-	prune = true
 
 [rebase]
   autosquash = true
@@ -193,7 +190,8 @@
   recurse = true
 
 [tag]
-  forceSignAnnotated = true
+  # needs user.signingkey in ~/.gitconfig.local; otherwise annotated tags fail to sign
+  # forceSignAnnotated = true
 
 [apply]
   whitespace = nowarn
