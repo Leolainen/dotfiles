@@ -1,4 +1,4 @@
-#!usr/bin/env zsh
+#!/usr/bin/env zsh
 
 
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
@@ -27,7 +27,7 @@ fi
 # source ruby version manager scripts to allow default ruby version to be set
 # necessary for colorls autocomplete
 [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
-export PATH=$(ruby -e 'puts Gem.bindir'):$PATH
+(( $+commands[ruby] )) && export PATH=$(ruby -e 'puts Gem.bindir'):$PATH
 
 # -- Android studio --
 # TURN ON WHEN NEEDED
@@ -50,7 +50,11 @@ export PATH=$(ruby -e 'puts Gem.bindir'):$PATH
 # source ~/.zsh_functions
 
 # -- colorls autocomplete --
-source $(dirname $(gem which colorls))/tab_complete.sh
+if (( $+commands[gem] )); then
+  colorls_path=$(gem which colorls 2>/dev/null)
+  [[ -n $colorls_path ]] && source $(dirname $colorls_path)/tab_complete.sh
+  unset colorls_path
+fi
 
 # exports zPlug
 # source $ZPLUG_HOME/init.zsh
@@ -69,10 +73,12 @@ source ~/.zsh_aliases
 
 
 # Run alias to turn off mouse acceleration
-mouseAccOff
+if [[ $OSTYPE == darwin* ]]; then
+  mouseAccOff
 
-# allow key repeat – necessary for h,j,k,l keys in vscode
-defaults write com.microsoft.VSCode ApplePressAndHoldEnabled -bool false
+  # allow key repeat – necessary for h,j,k,l keys in vscode
+  defaults write com.microsoft.VSCode ApplePressAndHoldEnabled -bool false
+fi
 
 # bun
 export BUN_INSTALL="$HOME/.bun"
@@ -94,5 +100,5 @@ export PATH="$PATH:$HOME/.rvm/bin"
 
 export EDITOR=vim
 
-. "$HOME/.local/bin/env"
+[[ -f "$HOME/.local/bin/env" ]] && . "$HOME/.local/bin/env"
 
