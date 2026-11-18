@@ -1,10 +1,17 @@
 #!/usr/bin/env zsh
 
 # init antidote plugin manager
-export BREW_HOME=$(brew --prefix)
-export ANTIDOTE_HOME="$BREW_HOME/opt/antidote/share/antidote"
+# Homebrew (macOS) first, then Linux install locations
+if (( $+commands[brew] )); then
+  export BREW_HOME=$(brew --prefix)
+  export ANTIDOTE_HOME="$BREW_HOME/opt/antidote/share/antidote"
+elif [[ -d "$HOME/.antidote" ]]; then
+  export ANTIDOTE_HOME="$HOME/.antidote"
+elif [[ -d /usr/share/zsh-antidote ]]; then
+  export ANTIDOTE_HOME=/usr/share/zsh-antidote
+fi
 
-source $ANTIDOTE_HOME/antidote.zsh
+[[ -r $ANTIDOTE_HOME/antidote.zsh ]] && source $ANTIDOTE_HOME/antidote.zsh
 
 zsh_plugins=~/.zsh_plugins.zsh
 
@@ -17,7 +24,7 @@ bindkey '^[[B' history-substring-search-down;
 ZSH_AUTOSUGGEST_PARTIAL_ACCEPT_WIDGETS=(forward-word forward-char)
 ZSH_AUTOSUGGEST_ACCEPT_WIDGETS=(end-of-line)
 
-antidote load ~/.zsh_plugins.txt
+(( $+functions[antidote] )) && antidote load ~/.zsh_plugins.txt
 #
 # source ~/.zsh_plugins.zsh
 #
