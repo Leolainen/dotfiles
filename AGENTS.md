@@ -53,7 +53,7 @@ structure, naming, and style of each tool's config. The default branch is `maste
 
 Run the smallest relevant check; never claim an unrun check passed.
 
-- Lua: `stylua --check nvim/nvim`.
+- Lua: `cd nvim/nvim && stylua --check .` (stylua reads `stylua.toml` from the cwd).
 - Shell: `bash -n <file>` (and `shellcheck` if installed); `zsh -n zsh/zshrc` for zsh files.
 - Cross-platform changes: reason through each of macOS, Ubuntu, and Arch code
   paths, and state which were actually exercised.
