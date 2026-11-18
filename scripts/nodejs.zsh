@@ -1,193 +1,115 @@
 #!/usr/bin/env zsh
 
-e='\033'
-RESET="${e}[0m"
-BOLD="${e}[1m"
-CYAN="${e}[0;96m"
-RED="${e}[0;91m"
-YELLOW="${e}[0;93m"
-GREEN="${e}[0;92m"
+# Installs Node.js and npm, configures npm init and global packages.
+# Runs standalone or through installer.sh. Honours DOTFILES_YES and DOTFILES_DRY_RUN.
 
-info() {
-  echo -e "${CYAN}${*}${RESET}"
-}
-
-ask() {
-  printf "${YELLOW}%s${RESET}" "${*}"
-}
-
-# Error reporter
-error() {
-  echo -e "${RED}${*}${RESET}"
-}
-
-# Success reporter
-success() {
-  echo -e "${GREEN}${*}${RESET}"
-}
-
-# End section
-finish() {
-  success "Done!"
-  echo
-  sleep 1
-}
-
-# Sets OS to macos, ubuntu or arch
-detect_os() {
-  case "$(uname -s)" in
-    Darwin)
-      OS="macos"
-      ;;
-    Linux)
-      local ids=""
-      [[ -r /etc/os-release ]] && ids=$(. /etc/os-release && echo "${ID:-} ${ID_LIKE:-}")
-      case " ${ids} " in
-        *" arch "*)
-          OS="arch"
-          ;;
-        *" ubuntu "*|*" debian "*)
-          OS="ubuntu"
-          ;;
-        *)
-          error "Unsupported Linux distribution (only Ubuntu and Arch are supported)"
-          exit 1
-          ;;
-      esac
-      ;;
-    *)
-      error "Unsupported OS: $(uname -s)"
-      exit 1
-      ;;
-  esac
-}
-
-on_start() {
-  info "   _   _           _           _  _____  "
-  info "  | \ | |         | |         | |/ ____| "
-  info "  |  \| | ___   __| | ___     | | (___   "
-  info "  | .   |/ _ \ / _  |/ _ \_   | |\___ \  "
-  info "  | |\  | (_) | (_| |  __/ |__| |____) | "
-  info "  |_| \_|\___/ \__,_|\___|\____/|_____/  "
-  info "                                         "
-  info "This script will guide you through installing Node.js, nvm, etc."
-
-  echo
-  ask "Do you want to proceed with installation? [y/N] " && read -r answer
-  echo
-
-  if [[ "${answer}" != "y" ]]; then
-    exit 1
-  fi
-}
+DOTFILES="${DOTFILES:-${0:A:h:h}}"
+if [[ -r "${0:A:h}/../lib/ui.sh" ]]; then
+  source "${0:A:h}/../lib/ui.sh"
+else
+  source "${DOTFILES}/lib/ui.sh"
+fi
 
 install_node() {
-  info "Installing Node.js ..."
-
-  if command -v node >/dev/null 2>&1 && command -v npm >/dev/null 2>&1; then
-    success "Node.js is already installed, skipping ..."
-    return
+  if _exists node && _exists npm; then
+    skip "Node.js is already installed"
+    return 0
   fi
 
   case "${OS}" in
-    macos) brew install node ;;
-    ubuntu) sudo apt-get install -y nodejs npm ;;
-    arch) sudo pacman -S --needed --noconfirm nodejs npm ;;
+    macos) ui_run "Installing Node.js" brew install node ;;
+    ubuntu) ui_run "Installing Node.js" sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y nodejs npm ;;
+    arch) ui_run "Installing Node.js" sudo pacman -S --needed --noconfirm nodejs npm ;;
   esac
-
-  finish
 }
 
 # Handled and lazyloaded by a zsh plugin for faster startup
 # install_nvm() {
-#   info "Installing Node Version Manager ..."
-
 #   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.1/install.sh | bash
-
-#   finish
 # }
 
 configure_npm_init() {
-  # Ask required parameters
-  info "Configuring npm init ..."
-
   # Defaults from git config, if set
   local name="$(git config --get user.name)"
   local email="$(git config --get user.email)"
   local website=""
-  local NAME EMAIL WEBSITE
 
-  ask "Enter your name: ($name)" && read -r NAME
-  ask "Enter your e-mail: ($email)" && read -r EMAIL
-  ask "Enter your website: ($website)" && read -r WEBSITE
+  if [[ -n "${name}" && -n "${email}" ]] && ask_yn "Use ${name} <${email}> for npm init?" y; then
+    :
+  elif [[ "${DOTFILES_YES:-0}" != 1 && -t 0 ]]; then
+    local input
+    printf '  %s?%s Name %s[%s]%s: ' "${YELLOW}" "${RESET}" "${DIM}" "${name}" "${RESET}"
+    read -r input; name="${input:-${name}}"
+    printf '  %s?%s E-mail %s[%s]%s: ' "${YELLOW}" "${RESET}" "${DIM}" "${email}" "${RESET}"
+    read -r input; email="${input:-${email}}"
+    printf '  %s?%s Website %s[%s]%s: ' "${YELLOW}" "${RESET}" "${DIM}" "${website}" "${RESET}"
+    read -r input; website="${input:-${website}}"
+  fi
 
-  # If required parameters are not enterd, set default values
-  : ${NAME:="$name"}
-  : ${EMAIL:="$email"}
-  : ${WEBSITE:="$website"}
+  if [[ -z "${name}${email}${website}" ]]; then
+    skip "npm init defaults (no author details)"
+    return 0
+  fi
 
-  echo "Author name set to: $NAME"
-  npm set init.author.name "$NAME"
-  echo "Author email set to: $EMAIL"
-  npm set init.author.email "$EMAIL"
-  echo "Author website set to: $WEBSITE"
-  npm set init.author.url "$WEBSITE"
-  echo
-
-  finish
+  ui_run "Setting npm init author to ${name:-?} <${email:-?}>" sh -c '
+    npm set init.author.name "$1" &&
+    npm set init.author.email "$2" &&
+    npm set init.author.url "$3"' sh "${name}" "${email}" "${website}"
 }
 
 # Global installs need a user writable npm prefix (e.g. apt/pacman put it in /usr)
 fix_npm_permissions() {
-  info "Checking npm permissions ..."
-
   local npm_prefix="$(npm config get prefix)"
 
-  if [[ ! -w "${npm_prefix}" ]]; then
-    mkdir -p "$HOME/.npm-global"
-    npm config set prefix "$HOME/.npm-global"
-    info "npm prefix set to ~/.npm-global, make sure ~/.npm-global/bin is in your PATH"
+  if [[ -w "${npm_prefix}" ]]; then
+    skip "npm prefix ${npm_prefix} is writable"
+    return 0
   fi
 
-  finish
+  mkdir -p "$HOME/.npm-global" &&
+    ui_run "Setting npm prefix to ~/.npm-global" npm config set prefix "$HOME/.npm-global" &&
+    info "Make sure ~/.npm-global/bin is in your PATH"
 }
 
 install_global_packages() {
-  info "Installing NPM global packges"
+  local -a packages=(nodemon)
+  local pkg
 
-  NPM_PACKAGES=(
-    "nodemon"
-  )
-
-  npm install -g "${NPM_PACKAGES[@]}"
-
-  # Removes NPM_PACKAGES variable
-  unset -v NPM_PACKAGES
+  for pkg in "${packages[@]}"; do
+    if npm ls -g --depth=0 "${pkg}" >/dev/null 2>&1; then
+      skip "${pkg} is already installed"
+    else
+      ui_run "Installing ${pkg} globally" npm install -g "${pkg}"
+    fi
+  done
 }
-
-on_finish() {
-  success "Done!"
-  success "Node.js was successfully installed!"
-  echo
-}
-
-on_error() {
-  error "Something went wrong!"
-  error "Exiting installation ..."
-  exit 1
-}
-
-trap on_error ERR INT TERM
 
 main() {
-  detect_os
-  on_start "$*"
-  install_node "$*"
-  # install_nvm "$*"
-  configure_npm_init "$*"
-  fix_npm_permissions "$*"
-  install_global_packages "$*"
-  on_finish "$*"
+  detect_os || exit 1
+
+  ui_step "Node.js"
+
+  # Only needed when sudo has no cached credentials and a human can type
+  if [[ "${OS}" != macos && "${DOTFILES_DRY_RUN:-0}" != 1 && -t 0 ]] && ! _exists node && ! sudo -n true 2>/dev/null; then
+    ui_sudo_keepalive || { error "sudo is required"; exit 1; }
+  fi
+
+  install_node || { error "Node.js installation failed, see ${DOTFILES_LOG}"; exit 1; }
+
+  if ! _exists npm; then
+    if [[ "${DOTFILES_DRY_RUN:-0}" == 1 ]]; then
+      info "npm is not installed yet, skipping npm configuration (dry run)"
+      return 0
+    fi
+    error "npm not found"
+    exit 1
+  fi
+
+  configure_npm_init || warn "Could not configure npm init"
+  fix_npm_permissions || warn "Could not fix npm permissions"
+  install_global_packages || warn "Some global npm packages failed"
+
+  success "Node.js is set up"
 }
 
-main "$*"
+main
