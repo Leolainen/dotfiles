@@ -1,8 +1,5 @@
 #!/usr/bin/env zsh
 
-set -e
-trap on_error SIGKILL SIGTERM
-
 e='\033'
 RESET="${e}[0m"
 BOLD="${e}[1m"
@@ -16,7 +13,7 @@ info() {
 }
 
 ask() {
-  printf "${YELLOW}${*}${RESET}"
+  printf "${YELLOW}%s${RESET}" "${*}"
 }
 
 # Error reporter
@@ -36,6 +33,35 @@ finish() {
   sleep 1
 }
 
+# Sets OS to macos, ubuntu or arch
+detect_os() {
+  case "$(uname -s)" in
+    Darwin)
+      OS="macos"
+      ;;
+    Linux)
+      local ids=""
+      [[ -r /etc/os-release ]] && ids=$(. /etc/os-release && echo "${ID:-} ${ID_LIKE:-}")
+      case " ${ids} " in
+        *" arch "*)
+          OS="arch"
+          ;;
+        *" ubuntu "*|*" debian "*)
+          OS="ubuntu"
+          ;;
+        *)
+          error "Unsupported Linux distribution (only Ubuntu and Arch are supported)"
+          exit 1
+          ;;
+      esac
+      ;;
+    *)
+      error "Unsupported OS: $(uname -s)"
+      exit 1
+      ;;
+  esac
+}
+
 on_start() {
   info "   _   _           _           _  _____  "
   info "  | \ | |         | |         | |/ ____| "
@@ -47,7 +73,7 @@ on_start() {
   info "This script will guide you through installing Node.js, nvm, etc."
 
   echo
-  ask "Do you want to proceed with installation? [y/N] " && read answer
+  ask "Do you want to proceed with installation? [y/N] " && read -r answer
   echo
 
   if [[ "${answer}" != "y" ]]; then
@@ -58,12 +84,16 @@ on_start() {
 install_node() {
   info "Installing Node.js ..."
 
-  if [[ "$(uname)" == 'Darwin' ]]; then
-    brew install node
-  else
-    error "You’re not using a Mac! Exiting ..."
-    exit 1
+  if command -v node >/dev/null 2>&1 && command -v npm >/dev/null 2>&1; then
+    success "Node.js is already installed, skipping ..."
+    return
   fi
+
+  case "${OS}" in
+    macos) brew install node ;;
+    ubuntu) sudo apt-get install -y nodejs npm ;;
+    arch) sudo pacman -S --needed --noconfirm nodejs npm ;;
+  esac
 
   finish
 }
@@ -72,12 +102,7 @@ install_node() {
 # install_nvm() {
 #   info "Installing Node Version Manager ..."
 
-#   if [[ "$(uname)" == 'Darwin' ]]; then
-#     curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.1/install.sh | bash
-#   else
-#     error "You’re not using a Mac! Exiting ..."
-#     exit 1
-#   fi
+#   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.1/install.sh | bash
 
 #   finish
 # }
@@ -86,14 +111,15 @@ configure_npm_init() {
   # Ask required parameters
   info "Configuring npm init ..."
 
-  # Defaults
-  local name="Leolainen"
-  local email="Leolainen2@gmail.com"
+  # Defaults from git config, if set
+  local name="$(git config --get user.name)"
+  local email="$(git config --get user.email)"
   local website=""
+  local NAME EMAIL WEBSITE
 
-  ask "Enter your name: ($name)" && read NAME
-  ask "Enter your e-mail: ($email)" && read EMAIL
-  ask "Enter your website: ($website)" && read WEBSITE
+  ask "Enter your name: ($name)" && read -r NAME
+  ask "Enter your e-mail: ($email)" && read -r EMAIL
+  ask "Enter your website: ($website)" && read -r WEBSITE
 
   # If required parameters are not enterd, set default values
   : ${NAME:="$name"}
@@ -111,17 +137,16 @@ configure_npm_init() {
   finish
 }
 
+# Global installs need a user writable npm prefix (e.g. apt/pacman put it in /usr)
 fix_npm_permissions() {
-  # Fixing npm permissions
-  info "Fixing npm persmissions ..."
+  info "Checking npm permissions ..."
 
-  NPM_PREFIX="$(npm config get prefix)"
+  local npm_prefix="$(npm config get prefix)"
 
-  if [ "${NPM_PREFIX}" = '/usr/local' ]; then
-    sudo chown -R $(whoami) $(npm config get prefix)/{lib/node_modules,bin,share}
-  elif [ ! $NPM_PREFIX = '/usr' ]; then
-    [ ! -d ~/.npm-global ] && mkdir ~/.npm-global
-    npm config set prefix '~/.npm-global'
+  if [[ ! -w "${npm_prefix}" ]]; then
+    mkdir -p "$HOME/.npm-global"
+    npm config set prefix "$HOME/.npm-global"
+    info "npm prefix set to ~/.npm-global, make sure ~/.npm-global/bin is in your PATH"
   fi
 
   finish
@@ -131,11 +156,10 @@ install_global_packages() {
   info "Installing NPM global packges"
 
   NPM_PACKAGES=(
-    "npx"
     "nodemon"
   )
 
-	yarn global add "${NPM_PACKAGES[@]}"
+  npm install -g "${NPM_PACKAGES[@]}"
 
   # Removes NPM_PACKAGES variable
   unset -v NPM_PACKAGES
@@ -153,12 +177,17 @@ on_error() {
   exit 1
 }
 
+trap on_error ERR INT TERM
+
 main() {
+  detect_os
   on_start "$*"
   install_node "$*"
   # install_nvm "$*"
   configure_npm_init "$*"
+  fix_npm_permissions "$*"
   install_global_packages "$*"
+  on_finish "$*"
 }
 
 main "$*"
