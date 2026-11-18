@@ -4,7 +4,7 @@ data.location=~/.task
 
 # Show the tracking of time
 journal.time=on
-# Do not use color
+# Use color
 color=on
 
 # Priority
@@ -19,7 +19,7 @@ alias.dailystatus=status:completed end.after:today all
 alias.punt=modify wait:1d
 alias.someday=mod +someday wait:someday
 
-# default start on Sunday - I temporarily had mine start on Monday and went back to Sunday
+# Week starts on Monday
 weekstart=monday
 
 # Make searches case insensitive, personal preference
@@ -37,18 +37,12 @@ report.ready.columns=id,start.active,depends.indicator,project,due.relative,desc
 report.ready.labels= ,,Depends, Project, Due, Description
 #if none of the tasks in a report have a particular column, it will not show in the report
 
-# Color theme (uncomment one to use)
-#include /usr/local/Cellar/task/2.5.1/share/doc/task/rc/light-16.theme
-#include /usr/local/Cellar/task/2.5.1/share/doc/task/rc/light-256.theme
-#include /usr/local/Cellar/task/2.5.1/share/doc/task/rc/dark-16.theme
-#include /usr/local/Cellar/task/2.5.1/share/doc/task/rc/dark-256.theme
-#include /usr/local/Cellar/task/2.5.1/share/doc/task/rc/dark-red-256.theme
-#include /usr/local/Cellar/task/2.5.1/share/doc/task/rc/dark-green-256.theme
-#include /usr/local/Cellar/task/2.5.1/share/doc/task/rc/dark-blue-256.theme
-#include /usr/local/Cellar/task/2.5.1/share/doc/task/rc/dark-violets-256.theme
-#include /usr/local/Cellar/task/2.5.1/share/doc/task/rc/dark-yellow-green.theme
-# include /usr/local/Cellar/task/2.5.1/share/doc/task/rc/dark-gray-256.theme
-include /usr/local/Cellar/task/2.5.1/share/doc/task/rc/dark-gray-blue-256.theme
-#include /usr/local/Cellar/task/2.5.1/share/doc/task/rc/solarized-dark-256.theme
-#include /usr/local/Cellar/task/2.5.1/share/doc/task/rc/solarized-light-256.theme
-#include /usr/local/Cellar/task/2.5.1/share/doc/task/rc/no-color.theme
+# Color theme: taskwarrior has no conditionals, so uncomment ONE include for your OS.
+# Theme dir: macOS (Homebrew) /opt/homebrew/share/doc/task/rc (Intel: /usr/local/share/doc/task/rc),
+# Arch /usr/share/doc/task/rc, Ubuntu /usr/share/doc/taskwarrior/rc
+# Available themes: light-16, light-256, dark-16, dark-256, dark-red-256, dark-green-256,
+# dark-blue-256, dark-violets-256, dark-yellow-green, dark-gray-256, dark-gray-blue-256,
+# solarized-dark-256, solarized-light-256, no-color
+include /opt/homebrew/share/doc/task/rc/dark-gray-blue-256.theme
+#include /usr/share/doc/task/rc/dark-gray-blue-256.theme
+#include /usr/share/doc/taskwarrior/rc/dark-gray-blue-256.theme
