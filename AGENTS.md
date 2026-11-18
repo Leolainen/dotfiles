@@ -8,8 +8,13 @@ structure, naming, and style of each tool's config. The default branch is `maste
 
 - Layout: `nvim/nvim` (LazyVim, Lua), `zsh/` (antidote plugins, p10k, aliases),
   `sketchybar/sketchybar` (bash plugins and theme files), `config/` (ghostty, git,
-  skhd, yabai, taskwarrior, colorls), `scripts/` (brew/node/bootstrap),
-  `fonts/`, `installer.sh`.
+  skhd, yabai, taskwarrior, colorls, herdr, obsidian), `scripts/` (brew/node), `lib/ui.sh`
+  (shared terminal UI helpers), `Brewfile` (macOS programs), `fonts/`, `installer.sh`.
+- `installer.sh` is the single entry point (`--all`, `--only`, `--dry-run`); it runs each
+  module's script. Scripts source `lib/ui.sh` for output (`info/success/warn/error/skip`,
+  `ui_run`, `ask_yn`) instead of defining their own helpers, never prompt when
+  `DOTFILES_YES=1`, and honour `DOTFILES_DRY_RUN=1`. New programs go in the `Brewfile`
+  (macOS) and the Linux map in `scripts/brew.zsh`.
 - Each tool has a `setup.sh` that installs prerequisites and links config
   (`stow --restow` for nvim and sketchybar, `ln -sf` for zsh). Edit files in this repo, never
   the symlink targets in `$HOME`/`~/.config`, and never run setup scripts, package
