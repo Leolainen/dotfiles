@@ -3,43 +3,51 @@ My dotfiles. Based on https://github.com/AhmedAbdulrahman
 
 Supports macOS, Ubuntu (apt) and Arch Linux (pacman). sketchybar, yabai and skhd are macOS only.
 
-## Install
+## Quick start
 
-On a brand new machine, one command installs the programs, links the configs and sets up the shell:
+New machine, one command (installs git if needed, clones to `~/dotfiles`, runs everything):
 
 ```sh
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/Leolainen/dotfiles/master/installer.sh)" -- --all
 ```
 
-It installs git if needed, clones this repo to `~/dotfiles` and runs everything unattended.
-Drop `--all` to get a checklist of what to install instead.
+Drop `--all` to get an interactive checklist instead.
+
+## Usage
 
 From an existing clone:
 
 ```sh
-./installer.sh                  # checklist, pick what to install
-./installer.sh --all            # everything, no questions
-./installer.sh --only zsh,nvim  # only some modules
-./installer.sh --dry-run        # show what would happen
-./installer.sh --list           # available modules
+./installer.sh                         # checklist, pick modules
+./installer.sh --all                   # everything, no questions
+./installer.sh --only zsh,nvim         # only some modules
+./installer.sh --dry-run --all         # preview, changes nothing
+./installer.sh --list                  # list modules
+./installer.sh --dir ~/code/dotfiles   # clone location (remote mode)
+./installer.sh --no-color              # plain output
 ```
 
-Modules: `packages`, `node`, `zsh`, `nvim`, `config`, `fonts`, `sketchybar` (macOS). Each one can
-also be run on its own, e.g. `nvim/setup.sh`. The installer is safe to re-run: finished steps are
-skipped, existing files are backed up (`*.bak.<timestamp>`) before being linked. Command output
-is logged to `~/.dotfiles-install.log`.
+Environment: `DOTFILES_YES=1` (no prompts), `DOTFILES_DRY_RUN=1`, `DOTFILES_LOG=<file>`,
+`OBSIDIAN_VAULT=<path>` (vault whose `.obsidian` config gets tracked).
 
-## What it sets up
-* macOS packages and apps from the [`Brewfile`](Brewfile) (`brew bundle`); the Linux equivalents
-  are mapped in `scripts/brew.zsh`. Add a program by adding it to the Brewfile.
-* Neovim (LazyVim); `nvim/setup.sh` installs its prerequisites (e.g. lazygit, ripgrep)
-* sketchybar (macOS only)
-* zsh using antidote plugin manager & p10k prompt
-* config for ghostty, git, taskwarrior, colorls, herdr (settings, keys, layouts, themes),
-  obsidian (per-vault `.obsidian` config, set `OBSIDIAN_VAULT` or enter the path) and
-  yabai + skhd (macOS only)
-* Node.js with npm (nodemon)
-* herdr (its own install script)
-* nerd fonts
+## What it does
 
-Shared terminal output helpers live in `lib/ui.sh`.
+1. **Prerequisites**: Command Line Tools + Homebrew (macOS), `apt update` (Ubuntu) or pacman sync (Arch), then git, zsh, curl.
+2. **Modules**, in order:
+
+| Module | Sets up |
+| --- | --- |
+| `packages` | CLI tools and apps from the [`Brewfile`](Brewfile) (Linux equivalents mapped in `scripts/brew.zsh`), colorls, herdr |
+| `node` | Node.js, npm defaults, nodemon |
+| `zsh` | zsh, antidote plugins, p10k prompt, aliases, default shell |
+| `nvim` | Neovim (LazyVim) and its prerequisites |
+| `config` | Stows ghostty, git, taskwarrior, herdr, obsidian, and yabai + skhd (macOS) |
+| `fonts` | Nerd Fonts |
+| `sketchybar` | SketchyBar config (macOS only) |
+
+3. **Summary** with per-module status, elapsed time and log path (`~/.dotfiles-install.log`).
+
+Re-running is safe: finished steps are skipped, and existing files that would conflict are
+backed up as `*.bak.<timestamp>` before linking. Each module also runs alone, e.g. `bash nvim/setup.sh`.
+
+Add a program by adding it to the `Brewfile`. Shared output helpers live in `lib/ui.sh`.
