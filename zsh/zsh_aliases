@@ -4,10 +4,14 @@
 alias ..="cd .."
 alias ...="cd ../.."
 alias cd..="cd .."
-alias oo='open .'
+if [[ $OSTYPE == darwin* ]]; then
+  alias oo='open .'
+else
+  alias oo='xdg-open .'
+fi
 
 # --- Shortcust ---
-alias dot='cd ~/dotfiles'
+alias dot='cd ${DOTFILES:-$HOME/dotfiles}'
 alias dl="cd ~/Downloads"
 alias dt="cd ~/Desktop"
 alias atg="cd ~/ATG"
@@ -17,17 +21,23 @@ alias dc='docker-compose'
 
 
 # --- utils ---
-alias getip='ifconfig | grep 192'
+if (( $+commands[ifconfig] )); then
+  alias getip='ifconfig | grep 192'
+else
+  alias getip='ip -4 addr | grep 192'
+fi
 alias getssh='cat ~/.ssh/id_ed25519.pub'
 alias unixTime='date +%s'
-alias chrome='/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome'
+[[ $OSTYPE == darwin* ]] && alias chrome='/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome'
 
 # better ls
 # alias ls='pwd; ls -color'
-alias ls='colorls'
-alias la='colorls -a'
-alias l='colorls -al'
-alias ll='colorls -l'
+if (( $+commands[colorls] )); then
+  alias ls='colorls'
+  alias la='colorls -a'
+  alias l='colorls -al'
+  alias ll='colorls -l'
+fi
 
 # npm
 alias flush-npm="rm -rf node_modules && npm i && echo NPM is done"
@@ -42,20 +52,22 @@ alias loga='git log --graph --decorate --pretty=oneline --abbrev-commit --all'
 alias logd='git log --graph --decorate --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset --abbrev-commit --date=relative --all"'
 
 # Togglers
-alias show="defaults write com.apple.finder AppleShowAllFiles -bool true && killall Finder"
-alias hide="defaults write com.apple.finder AppleShowAllFiles -bool false && killall Finder"
-alias mouseAccOff="defaults write .GlobalPreferences com.apple.mouse.scaling -1"
-alias mouseAccOff2="defaults write com.apple.mouse.scaling 2.0"
-alias mouseAccOn="defaults write .GlobalPreferences com.apple.mouse.scaling 1"
+if [[ $OSTYPE == darwin* ]]; then
+  alias show="defaults write com.apple.finder AppleShowAllFiles -bool true && killall Finder"
+  alias hide="defaults write com.apple.finder AppleShowAllFiles -bool false && killall Finder"
+  alias mouseAccOff="defaults write .GlobalPreferences com.apple.mouse.scaling -1"
+  alias mouseAccOff2="defaults write com.apple.mouse.scaling 2.0"
+  alias mouseAccOn="defaults write .GlobalPreferences com.apple.mouse.scaling 1"
+fi
 
 alias refresh="source ~/.zshrc"
 
 # php
-alias composer="php /usr/local/bin/composer.phar"
+[[ -f /usr/local/bin/composer.phar ]] && alias composer="php /usr/local/bin/composer.phar"
 
 # lunarvim
-alias lvim="/Users/leo.karlsson/.local/bin/lvim"
+[[ -x "$HOME/.local/bin/lvim" ]] && alias lvim="$HOME/.local/bin/lvim"
 alias vim="nvim"
 
 # docker
-alias docker="$HOME/.docker/bin/docker"
+[[ -x "$HOME/.docker/bin/docker" ]] && alias docker="$HOME/.docker/bin/docker"
