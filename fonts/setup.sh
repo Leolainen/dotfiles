@@ -2,12 +2,14 @@
 
 set -e
 
-info() { echo -e "\033[1;34m[INFO]\033[0m $*"; }
-success() { echo -e "\033[1;32m[SUCCESS]\033[0m $*"; }
-warn() { echo -e "\033[1;33m[WARN]\033[0m $*"; }
-error() { echo -e "\033[1;31m[ERROR]\033[0m $*"; }
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd) && cd "$SCRIPT_DIR" || exit 1
+# shellcheck source=../lib/ui.sh
+. "$SCRIPT_DIR/../lib/ui.sh"
 
-if ! command -v git >/dev/null 2>&1; then
+detect_os || exit 1
+FAILED=0
+
+if ! _exists git; then
     error "git is required to install Nerd Fonts."
     exit 1
 fi
@@ -17,17 +19,14 @@ fi
 directory="$HOME/.ghq/github.com/ryanoasis"
 repo="$directory/nerd-fonts"
 
-mkdir -p "$directory"
+[ "${DOTFILES_DRY_RUN:-0}" = 1 ] || mkdir -p "$directory"
 
 if [ -d "$repo/.git" ]; then
-    info "nerd-fonts already cloned, updating..."
-    git -C "$repo" pull --ff-only || warn "Could not update nerd-fonts, using existing clone."
+    ui_run "Updating nerd-fonts" git -C "$repo" pull --ff-only || warn "Could not update nerd-fonts, using existing clone."
 else
-    info "Cloning nerd-fonts..."
-    git clone --depth 1 https://github.com/ryanoasis/nerd-fonts "$repo"
+    ui_run "Cloning nerd-fonts" git clone --depth 1 https://github.com/ryanoasis/nerd-fonts "$repo" || exit 1
 fi
 
-info "Installing Nerd Fonts..."
-(cd "$repo" && ./install.sh)
+ui_run "Installing Nerd Fonts (takes a while)" bash -c 'cd "$1" && ./install.sh' _ "$repo" || exit 1
 
-success "Nerd Fonts installed."
+success "Nerd Fonts ready"
