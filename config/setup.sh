@@ -131,7 +131,44 @@ stow_pkg taskwarrior "$HOME" "taskwarrior (.taskrc)" || FAILED=1
 # yabai and skhd are macOS only
 if [ "$OS" = "macos" ]; then
     stow_pkg yabai "$HOME/.config/yabai" || FAILED=1
+
+    if ! _exists skhd; then
+        if [ "${DOTFILES_DRY_RUN:-0}" = 1 ]; then
+            ui_run "Installing skhd" brew install asmvik/formulae/skhd
+        elif ! _exists brew; then
+            error "Homebrew is required to install skhd"
+            FAILED=1
+        else
+            ui_run "Installing skhd" brew install asmvik/formulae/skhd || FAILED=1
+        fi
+    else
+        skip "skhd already installed"
+    fi
+
     stow_pkg skhd "$HOME/.config/skhd" || FAILED=1
+    if [ "${DOTFILES_DRY_RUN:-0}" = 1 ]; then
+        info "Would reload or start skhd service"
+    elif _exists skhd; then
+        if skhd --reload >/dev/null 2>&1; then
+            success "skhd config reloaded"
+        else
+            ui_run "Starting skhd at login" skhd --start-service || FAILED=1
+        fi
+    fi
+
+    SHORTCUT_SHEET_SOURCE="$SCRIPT_DIR/skhd/shortcut_sheet.swift"
+    SHORTCUT_SHEET_BIN="$HOME/.local/bin/dotfiles-shortcut-sheet"
+    if [ -x "$SHORTCUT_SHEET_BIN" ] && [ "$SHORTCUT_SHEET_BIN" -nt "$SHORTCUT_SHEET_SOURCE" ]; then
+        skip "Shortcut sheet is up to date"
+    elif [ "${DOTFILES_DRY_RUN:-0}" = 1 ]; then
+        info "Would build the floating shortcut sheet"
+    elif ! command -v swiftc >/dev/null 2>&1; then
+        error "Swift compiler is required to build the shortcut sheet"
+        FAILED=1
+    else
+        mkdir -p "${SHORTCUT_SHEET_BIN%/*}"
+        ui_run "Building the floating shortcut sheet" swiftc -O "$SHORTCUT_SHEET_SOURCE" -o "$SHORTCUT_SHEET_BIN" || FAILED=1
+    fi
 else
     skip "yabai and skhd (macOS only)"
 fi
