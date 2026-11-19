@@ -50,4 +50,26 @@ Environment: `DOTFILES_YES=1` (no prompts), `DOTFILES_DRY_RUN=1`, `DOTFILES_LOG=
 Re-running is safe: finished steps are skipped, and existing files that would conflict are
 backed up as `*.bak.<timestamp>` before linking. Each module also runs alone, e.g. `bash nvim/setup.sh`.
 
+### macOS window-management services
+
+Yabai, skhd, and SketchyBar should stay running for window management, keyboard shortcuts,
+and the menu bar. Start or restart them from Terminal:
+
+```sh
+yabai --start-service
+yabai --restart-service || yabai --start-service
+
+skhd --start-service
+skhd --restart-service
+skhd --reload  # reload the config without restarting the service
+
+brew services start sketchybar
+brew services restart sketchybar
+```
+
+The floating shortcut sheet is a small on-demand window, not a background service. Press
+`ctrl + alt + space` to open or close it. To launch it directly, run
+`~/.local/bin/dotfiles-shortcut-sheet`; run `pkill -TERM -f '/dotfiles-shortcut-sheet$'`
+to close it.
+
 Add a program by adding it to the `Brewfile`. Shared output helpers live in `lib/ui.sh`.
