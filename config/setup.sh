@@ -130,15 +130,45 @@ stow_pkg taskwarrior "$HOME" "taskwarrior (.taskrc)" || FAILED=1
 
 # yabai and skhd are macOS only
 if [ "$OS" = "macos" ]; then
+    if ! _exists yabai; then
+        if [ "${DOTFILES_DRY_RUN:-0}" = 1 ]; then
+            ui_run "Adding the Asmvik/formulae tap" brew tap asmvik/formulae
+            ui_run "Trusting the Yabai formula" brew trust --formula asmvik/formulae/yabai
+            ui_run "Installing yabai" brew install asmvik/formulae/yabai
+        elif ! _exists brew; then
+            error "Homebrew is required to install yabai"
+            FAILED=1
+        else
+            ui_run "Adding the Asmvik/formulae tap" brew tap asmvik/formulae || FAILED=1
+            ui_run "Trusting the Yabai formula" brew trust --formula asmvik/formulae/yabai || FAILED=1
+            ui_run "Installing yabai" brew install asmvik/formulae/yabai || FAILED=1
+        fi
+    else
+        skip "yabai already installed"
+    fi
+
     stow_pkg yabai "$HOME/.config/yabai" || FAILED=1
+    if [ "${DOTFILES_DRY_RUN:-0}" = 1 ]; then
+        info "Would restart or start yabai service"
+    elif _exists yabai; then
+        if yabai --restart-service >/dev/null 2>&1; then
+            success "yabai service restarted"
+        else
+            ui_run "Starting yabai at login" yabai --start-service || FAILED=1
+        fi
+    fi
 
     if ! _exists skhd; then
         if [ "${DOTFILES_DRY_RUN:-0}" = 1 ]; then
+            ui_run "Adding the Asmvik/formulae tap" brew tap asmvik/formulae
+            ui_run "Trusting the skhd formula" brew trust --formula asmvik/formulae/skhd
             ui_run "Installing skhd" brew install asmvik/formulae/skhd
         elif ! _exists brew; then
             error "Homebrew is required to install skhd"
             FAILED=1
         else
+            ui_run "Adding the Asmvik/formulae tap" brew tap asmvik/formulae || FAILED=1
+            ui_run "Trusting the skhd formula" brew trust --formula asmvik/formulae/skhd || FAILED=1
             ui_run "Installing skhd" brew install asmvik/formulae/skhd || FAILED=1
         fi
     else

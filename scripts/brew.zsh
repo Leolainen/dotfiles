@@ -176,6 +176,13 @@ install_macos() {
 
   ui_run "Updating Homebrew" brew update || warn "brew update failed, continuing"
 
+  # Trust third-party formulas before brew bundle attempts to install them.
+  ui_run "Adding the Asmvik/formulae tap" brew tap asmvik/formulae || FAILED+=("tap asmvik/formulae")
+  ui_run "Trusting the Yabai formula" brew trust --formula asmvik/formulae/yabai || FAILED+=("trust yabai")
+  ui_run "Trusting the skhd formula" brew trust --formula asmvik/formulae/skhd || FAILED+=("trust skhd")
+  ui_run "Adding the FelixKratz/formulae tap" brew tap felixkratz/formulae || FAILED+=("tap felixkratz/formulae")
+  ui_run "Trusting the SketchyBar formula" brew trust --formula felixkratz/formulae/sketchybar || FAILED+=("trust sketchybar")
+
   # live output: cask installs may ask for your password
   ui_live "Installing Brewfile packages and apps" \
     env "${bundle_env[@]}" brew bundle --file="${DOTFILES}/Brewfile" ||
