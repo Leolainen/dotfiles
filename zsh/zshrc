@@ -14,8 +14,12 @@ fi
 # Get the current Ruby version
 # ruby_version=$(rvm current)
 
-# fzf plugin
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+# fzf key bindings, including Ctrl-R history search
+if (( $+commands[fzf] )); then
+  source <(fzf --zsh)
+elif [[ -f ~/.fzf.zsh ]]; then
+  source ~/.fzf.zsh
+fi
 
 # -- RUBY --
 # TURN ON WHEN NEEDED

@@ -86,6 +86,7 @@ link_file() {
 }
 
 pkg_install zsh zsh zsh || FAILED=1
+pkg_install fzf fzf fzf || FAILED=1
 
 # antidote: brew formula on macOS, git clone fallback elsewhere (not in apt)
 if [ "$OS" = "macos" ]; then
