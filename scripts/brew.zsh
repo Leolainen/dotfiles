@@ -138,6 +138,27 @@ install_colorls() {
   ui_run "Installing colorls" "${gem_cmd}" install "${gem_args[@]}" colorls || FAILED+=("colorls")
 }
 
+install_ai_clis() {
+  [[ "${OS}" == "macos" ]] && return
+
+  if ! command -v npm >/dev/null 2>&1; then
+    warn "npm is not available, skipping Codex and Copilot CLI"
+    FAILED+=("codex" "copilot")
+    return
+  fi
+
+  local cli package
+  for cli in "codex:@openai/codex" "copilot:@github/copilot"; do
+    package="${cli#*:}"
+    cli="${cli%%:*}"
+    if command -v "${cli}" >/dev/null 2>&1; then
+      skip "${cli} CLI is already installed"
+    else
+      ui_run "Installing ${cli} CLI" npm install --global "${package}" || FAILED+=("${cli}")
+    fi
+  done
+}
+
 install_macos() {
   if ! _exists brew; then
     error "Homebrew is not installed, run installer.sh first"
@@ -199,6 +220,7 @@ install_linux() {
   done
 
   install_colorls
+  install_ai_clis
   install_herdr
 
   info "${INSTALLED_COUNT} installed, ${SKIPPED_COUNT} skipped, ${#FAILED[@]} failed"

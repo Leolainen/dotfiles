@@ -59,6 +59,7 @@ brew "felixkratz/formulae/sketchybar"
 
 # apps
 cask "copilot-cli"
+cask "codex"
 cask "docker-desktop"
 cask "figma"
 cask "ghostty"
