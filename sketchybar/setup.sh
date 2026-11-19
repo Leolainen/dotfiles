@@ -54,6 +54,7 @@ if brew list --formula sketchybar >/dev/null 2>&1; then
     skip "SketchyBar already installed"
 else
     ui_run "Adding the FelixKratz/formulae tap" brew tap FelixKratz/formulae || exit 1
+    ui_run "Trusting the SketchyBar formula" brew trust --formula felixkratz/formulae/sketchybar || exit 1
     ui_run "Installing SketchyBar" brew install sketchybar || exit 1
 fi
 
