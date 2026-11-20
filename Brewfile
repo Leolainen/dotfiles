@@ -71,6 +71,9 @@ cask "spotify"
 cask "visual-studio-code"
 cask "vlc"
 
+# fonts (sketchybar label font; the Nerd Font icons come from fonts/setup.sh)
+cask "font-departure-mono"
+
 # browsers
 cask "brave-browser"
 cask "firefox"
