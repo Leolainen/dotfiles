@@ -1,6 +1,8 @@
 #!/usr/bin/env sh
 
-source "$HOME/.config/sketchybar/parseTheme.sh" # Loads ghostty theme
+if [ ! -r "${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/palette.sh" ]; then
+    source "$HOME/.config/sketchybar/parseTheme.sh" # Loads ghostty theme
+fi
 source "$HOME/.config/sketchybar/colors.sh" # Loads all defined colors
 # source "$HOME/.config/sketchybar/tokens.sh" # Loads all defined widths & stuffs
 # source "$HOME/.config/sketchybar/themes.sh" # Loads all defined icons
