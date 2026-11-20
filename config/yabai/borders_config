@@ -11,6 +11,10 @@ GREY="${palette[8]}"
 BORDER="${GREY}"
 BORDER_HIGHLIGHT="$SILVER"
 
+if [ -r "${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/palette.sh" ]; then
+    source "${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/palette.sh"
+fi
+
 rounded=(
     order=above
     style=round
