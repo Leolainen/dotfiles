@@ -5,9 +5,9 @@ typography_smooth() {
     export LABEL_SM="$FONT:book:10.0"
     export LABEL_MD="$FONT:book:12.0"
     export LABEL_LG="$FONT:book:14.0"
-    export ICON_SM="$ICON_FONT:book:12.0"
-    export ICON_MD="$ICON_FONT:book:14.0"
-    export ICON_LG="$ICON_FONT:book:16.0"
+    export ICON_SM="$ICON_FONT:regular:12.0"
+    export ICON_MD="$ICON_FONT:regular:14.0"
+    export ICON_LG="$ICON_FONT:regular:16.0"
 }
 
 typography_pixel() {
@@ -18,9 +18,9 @@ typography_pixel() {
     export LABEL_SM="$FONT:regular:10.0"
     export LABEL_MD="$FONT:regular:12.0"
     export LABEL_LG="$FONT:regular:14.0"
-    export ICON_SM="$ICON_FONT:book:12.0"
-    export ICON_MD="$ICON_FONT:book:14.0"
-    export ICON_LG="$ICON_FONT:book:16.0"
+    export ICON_SM="$ICON_FONT:regular:12.0"
+    export ICON_MD="$ICON_FONT:regular:14.0"
+    export ICON_LG="$ICON_FONT:regular:16.0"
 }
 
 export -f typography_smooth
