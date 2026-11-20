@@ -51,6 +51,6 @@ quick-terminal-position = center
 # rose-pine-moon
 # tokyonight_moon
 # coffee_theme
-theme = minicyan
+theme = /Users/leo.karlsson/.config/dotfiles/generated/ghostty-theme
 
 
