@@ -1,0 +1,40 @@
+{
+  "id": "darkearth",
+  "name": "Darkearth",
+  "source": {
+    "type": "preset",
+    "ghostty": "darkearth"
+  },
+  "appearance": "dark",
+  "colors": {
+    "background": "#24211E",
+    "foreground": "#d7c484",
+    "surface": "#77824A",
+    "selection": "#77824A",
+    "cursor": "#D7C484",
+    "accent": "#B36B42",
+    "border": "#B36B42",
+    "muted": "#675642",
+    "error": "#B3664D",
+    "success": "#5F865F",
+    "warning": "#C9A654"
+  },
+  "ansi": [
+    "#24211E",
+    "#B3664D",
+    "#5F865F",
+    "#77824A",
+    "#B36B42",
+    "#BB7844",
+    "#C9A654",
+    "#D7C484",
+    "#675642",
+    "#AC987D",
+    "#5F865F",
+    "#77824A",
+    "#B36B42",
+    "#BB7844",
+    "#C9A654",
+    "#D7C484"
+  ]
+}

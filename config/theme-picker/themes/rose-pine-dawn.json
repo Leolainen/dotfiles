@@ -1,0 +1,45 @@
+{
+  "id": "rose-pine-dawn",
+  "name": "Rosé Pine Dawn",
+  "source": {
+    "type": "preset",
+    "ghostty": "rose-pine-dawn"
+  },
+  "appearance": "light",
+  "colors": {
+    "background": "#faf4ed",
+    "foreground": "#464261",
+    "surface": "#eae2e3",
+    "selection": "#eae2e3",
+    "cursor": "#cecacd",
+    "accent": "#d7827e",
+    "border": "#d7827e",
+    "muted": "#797593",
+    "error": "#b4637a",
+    "success": "#56949f",
+    "warning": "#ea9d34"
+  },
+  "ansi": [
+    "#faf4ed",
+    "#286983",
+    "#ea9d34",
+    "#77824A",
+    "#d7827e",
+    "#286983",
+    "#56949f",
+    "#464261",
+    "#797593",
+    "#b4637a",
+    "#56949f",
+    "#d7827e",
+    "#464261",
+    "#ea9d34",
+    "#797593",
+    "#cecacd"
+  ],
+  "apps": {
+    "ghostty": {
+      "background-opacity": 1
+    }
+  }
+}

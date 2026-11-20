@@ -1,0 +1,40 @@
+{
+  "id": "unokai",
+  "name": "Unokai",
+  "source": {
+    "type": "preset",
+    "ghostty": "unokai"
+  },
+  "appearance": "dark",
+  "colors": {
+    "background": "#24211E",
+    "foreground": "#f8f8f2",
+    "surface": "#282923",
+    "selection": "#282923",
+    "cursor": "#000000",
+    "accent": "#a6e22e",
+    "border": "#a6e22e",
+    "muted": "#74705d",
+    "error": "#f92672",
+    "success": "#a6e22e",
+    "warning": "#e6db74"
+  },
+  "ansi": [
+    "#24211E",
+    "#f92672",
+    "#e6db74",
+    "#f92672",
+    "#a6e22e",
+    "#BB7844",
+    "#fd971f",
+    "#f8f8f2",
+    "#74705d",
+    "#f92672",
+    "#80beb5",
+    "#dadada",
+    "#66d9ef",
+    "#ae81ff",
+    "#C9A654",
+    "#000000"
+  ]
+}

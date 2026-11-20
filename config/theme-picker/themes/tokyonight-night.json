@@ -1,0 +1,45 @@
+{
+  "id": "tokyonight-night",
+  "name": "Tokyo Night",
+  "source": {
+    "type": "preset",
+    "ghostty": "tokyonight-night"
+  },
+  "appearance": "dark",
+  "colors": {
+    "background": "#1a1b26",
+    "foreground": "#c0caf5",
+    "surface": "#283457",
+    "selection": "#283457",
+    "cursor": "#c0caf5",
+    "accent": "#7aa2f7",
+    "border": "#7aa2f7",
+    "muted": "#565f89",
+    "error": "#db4b4b",
+    "success": "#2ac3de",
+    "warning": "#ff9e64"
+  },
+  "ansi": [
+    "#1a1b26",
+    "#bb9af7",
+    "#9ece6a",
+    "#7dcfff",
+    "#7aa2f7",
+    "#7dcfff",
+    "#2ac3de",
+    "#c0caf5",
+    "#565f89",
+    "#db4b4b",
+    "#2ac3de",
+    "#1a1b26",
+    "#bb9af7",
+    "#ff9e64",
+    "#89ddff",
+    "#c0caf5"
+  ],
+  "apps": {
+    "ghostty": {
+      "background-opacity": 0.85
+    }
+  }
+}

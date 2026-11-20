@@ -1,0 +1,40 @@
+{
+  "id": "tokyonight-moon",
+  "name": "Tokyo Night Moon",
+  "source": {
+    "type": "preset",
+    "ghostty": "tokyonight-moon"
+  },
+  "appearance": "dark",
+  "colors": {
+    "background": "#222436",
+    "foreground": "#c8d3f5",
+    "surface": "#2d3f76",
+    "selection": "#2d3f76",
+    "cursor": "#c8d3f5",
+    "accent": "#82aaff",
+    "border": "#82aaff",
+    "muted": "#636da6",
+    "error": "#c53b53",
+    "success": "#65bcff",
+    "warning": "#ff966c"
+  },
+  "ansi": [
+    "#222436",
+    "#c099ff",
+    "#c3e88d",
+    "#86e1fc",
+    "#82aaff",
+    "#86e1fc",
+    "#65bcff",
+    "#c8d3f5",
+    "#636da6",
+    "#c53b53",
+    "#65bcff",
+    "#222436",
+    "#c099ff",
+    "#ff966c",
+    "#89ddff",
+    "#c8d3f5"
+  ]
+}

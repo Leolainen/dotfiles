@@ -1,0 +1,40 @@
+{
+  "id": "minicyan",
+  "name": "Minicyan",
+  "source": {
+    "type": "preset",
+    "ghostty": "minicyan"
+  },
+  "appearance": "dark",
+  "colors": {
+    "background": "#0a2a2a",
+    "foreground": "#d0d0d0",
+    "surface": "#556868",
+    "selection": "#556868",
+    "cursor": "#0a2a2a",
+    "accent": "#a9d4ff",
+    "border": "#a9d4ff",
+    "muted": "#788a8a",
+    "error": "#bb6d9b",
+    "success": "#82e3ba",
+    "warning": "#ebcd91"
+  },
+  "ansi": [
+    "#0a2a2a",
+    "#ebcd91",
+    "#82e3ba",
+    "#209870",
+    "#a9d4ff",
+    "#ffb9e5",
+    "#209870",
+    "#d0d0d0",
+    "#788a8a",
+    "#0a2a2a",
+    "#bb6d9b",
+    "#209870",
+    "#ebcd91",
+    "#9f8340",
+    "#d0d0d0",
+    "#0a2a2a"
+  ]
+}

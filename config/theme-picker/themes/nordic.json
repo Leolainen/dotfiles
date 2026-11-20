@@ -1,0 +1,40 @@
+{
+  "id": "nordic",
+  "name": "Nordic",
+  "source": {
+    "type": "preset",
+    "ghostty": "nordic"
+  },
+  "appearance": "dark",
+  "colors": {
+    "background": "#24211E",
+    "foreground": "#d8dee9",
+    "surface": "#434c5e",
+    "selection": "#434c5e",
+    "cursor": "#2e3440",
+    "accent": "#d8dee9",
+    "border": "#d8dee9",
+    "muted": "#667084",
+    "error": "#bf616a",
+    "success": "#a3be8c",
+    "warning": "#ebcb8b"
+  },
+  "ansi": [
+    "#24211E",
+    "#81a1c1",
+    "#a3be8c",
+    "#5e81ac",
+    "#d8dee9",
+    "#81a1c1",
+    "#8fbcbb",
+    "#d8dee9",
+    "#667084",
+    "#bf616a",
+    "#ebcb8b",
+    "#d08770",
+    "#d8dee9",
+    "#d8dee9",
+    "#81a1c1",
+    "#2e3440"
+  ]
+}
