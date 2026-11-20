@@ -1,4 +1,6 @@
 #!/bin/bash
+# launchd (brew services) has a minimal PATH, so fall back to the app bundle binary
+export PATH="/opt/homebrew/bin:/usr/local/bin:/Applications/Ghostty.app/Contents/MacOS:$PATH"
 ghostty_theme=$(ghostty +show-config | grep theme | awk '{print $3}')
 # get palette from built in themes
 palette=$(cat /Applications/Ghostty.app/Contents/Resources/ghostty/themes/$ghostty_theme)
