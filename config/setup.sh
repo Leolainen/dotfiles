@@ -199,6 +199,20 @@ if [ "$OS" = "macos" ]; then
         mkdir -p "${SHORTCUT_SHEET_BIN%/*}"
         ui_run "Building the floating shortcut sheet" swiftc -O "$SHORTCUT_SHEET_SOURCE" -o "$SHORTCUT_SHEET_BIN" || FAILED=1
     fi
+
+    THEME_PICKER_SOURCE="$SCRIPT_DIR/theme-picker/theme_picker.swift"
+    THEME_PICKER_BIN="$HOME/.local/bin/dotfiles-theme-picker"
+    if [ -x "$THEME_PICKER_BIN" ] && [ "$THEME_PICKER_BIN" -nt "$THEME_PICKER_SOURCE" ]; then
+        skip "Theme picker is up to date"
+    elif [ "${DOTFILES_DRY_RUN:-0}" = 1 ]; then
+        info "Would build the floating theme picker"
+    elif ! command -v swiftc >/dev/null 2>&1; then
+        error "Swift compiler is required to build the theme picker"
+        FAILED=1
+    else
+        mkdir -p "${THEME_PICKER_BIN%/*}"
+        ui_run "Building the floating theme picker" swiftc -O "$THEME_PICKER_SOURCE" -o "$THEME_PICKER_BIN" || FAILED=1
+    fi
 else
     skip "yabai and skhd (macOS only)"
 fi
