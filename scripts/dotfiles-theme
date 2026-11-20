@@ -1,0 +1,338 @@
+#!/usr/bin/env python3
+"""List, validate, apply and restore dotfiles theme manifests."""
+import argparse
+import base64
+import datetime
+import fcntl
+import hashlib
+import json
+import os
+from pathlib import Path
+import re
+import stat
+import subprocess
+import sys
+import tempfile
+
+sys.dont_write_bytecode = True
+from theme_adapters import apply_extra
+from wallpaper_palette import theme_from_image
+
+CONFIG = Path(os.environ.get("XDG_CONFIG_HOME") or Path.home() / ".config")
+STATE = Path(os.environ.get("XDG_STATE_HOME") or Path.home() / ".local/state") / "dotfiles/theme"
+PRESETS = Path(__file__).resolve().parents[1] / "config/theme-picker/themes"
+THEMES = CONFIG / "dotfiles/themes"
+ROLES = "background surface foreground muted accent selection cursor border error success warning".split()
+ID = r"[A-Za-z0-9][A-Za-z0-9_.-]*"
+
+
+def require(condition, message):
+    if not condition:
+        raise ValueError(message)
+
+
+def luminance(color):
+    rgb = [int(color[i:i + 2], 16) / 255 for i in (1, 3, 5)]
+    linear = [v / 12.92 if v <= .04045 else ((v + .055) / 1.055) ** 2.4 for v in rgb]
+    return sum(a * b for a, b in zip(linear, (.2126, .7152, .0722)))
+
+
+def contrast(colors, first, second):
+    low, high = sorted(luminance(colors[key]) for key in (first, second))
+    return (high + .05) / (low + .05)
+
+
+def accessibility(t):
+    pairs = (("foreground", "background", 4.5), ("foreground", "surface", 4.5),
+             ("foreground", "selection", 4.5), ("muted", "background", 4.5),
+             ("cursor", "background", 3), ("border", "background", 3))
+    lines = []
+    for first, second, target in pairs:
+        ratio = contrast(t["colors"], first, second)
+        status = "Pass" if ratio >= target else "Low contrast"
+        lines.append(f"{status} · {first} on {second}: {ratio:.2f}:1 (target {target}:1)")
+    opacity = t.get("apps", {}).get("ghostty", {}).get("background-opacity")
+    if opacity is None:
+        lines.append("Ghostty keeps its configured opacity. Ratios above assume opaque colors.")
+    elif opacity < 1:
+        bg = t["colors"]["background"]
+        channels = [int(bg[i:i + 2], 16) for i in (1, 3, 5)]
+        for backdrop, value in (("black", 0), ("white", 255)):
+            blended = "#" + "".join(f"{round(c * opacity + value * (1 - opacity)):02x}" for c in channels)
+            colors = dict(t["colors"], background=blended)
+            ratio = contrast(colors, "foreground", "background")
+            status = "Pass" if ratio >= 4.5 else "Low contrast"
+            lines.append(f"{status} · Ghostty over {backdrop} (estimated): {ratio:.2f}:1 (target 4.5:1)")
+        lines.append("Actual transparency contrast depends on the content behind the window.")
+    return lines
+
+
+def validate(t):
+    require(re.fullmatch(ID, t["id"]), "invalid theme id")
+    require(isinstance(t["name"], str) and t["name"].strip(), "missing theme name")
+    require(isinstance(t.get("source"), dict), "expected source metadata object")
+    require(t["source"].get("type") in ("preset", "neovim", "wallpaper", "file"), "invalid source")
+    if t["source"]["type"] == "neovim" or "colorscheme" in t["source"]:
+        name = t["source"].get("colorscheme")
+        require(isinstance(name, str) and name not in ("", ".", "..") and "/" not in name
+                and name.isprintable(), "invalid colorscheme")
+    require(t["appearance"] in ("light", "dark", "system"), "invalid appearance")
+    require(isinstance(t["ansi"], list) and len(t["ansi"]) == 16, "expected 16 ANSI colors")
+    require(all(role in t["colors"] for role in ROLES), "missing semantic color")
+    require(t["name"].isprintable(), "invalid theme name")
+    wallpaper = t.get("wallpaper")
+    if wallpaper is not None:
+        path = wallpaper.get("path") if isinstance(wallpaper, dict) else wallpaper
+        require(isinstance(path, str) and path.isprintable() and path, "invalid wallpaper path")
+    for color in t["ansi"] + list(t["colors"].values()):
+        require(re.fullmatch(r"#[0-9a-fA-F]{6}", color), "invalid hex color")
+    require(contrast(t["colors"], "background", "foreground") >= 4.5, "foreground/background contrast below 4.5:1")
+    opacity = t.get("apps", {}).get("ghostty", {}).get("background-opacity", 1)
+    require(type(opacity) in (int, float) and 0 <= opacity <= 1, "invalid Ghostty opacity")
+    return t
+
+
+def load(theme_id):
+    require(re.fullmatch(ID, theme_id), "invalid theme id")
+    for directory in (THEMES, PRESETS):
+        path = directory / (theme_id + ".json")
+        if path.is_file():
+            t = validate(json.loads(path.read_bytes()))
+            require(t["id"] == theme_id, "id must match filename")
+            return t
+    raise ValueError("unknown theme " + theme_id)
+
+
+def atomic(path, data):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.NamedTemporaryFile(dir=path.parent, delete=False) as f:
+        tmp = Path(f.name)
+        try:
+            if path.exists():
+                os.fchmod(f.fileno(), stat.S_IMODE(path.stat().st_mode))
+            f.write(data)
+            f.flush()
+            os.fsync(f.fileno())
+            os.replace(tmp, path)
+        finally:
+            tmp.unlink(missing_ok=True)
+
+
+def encoded(obj):
+    return (json.dumps(obj, indent=2, ensure_ascii=False) + "\n").encode()
+
+
+def digest(data):
+    return hashlib.sha256(data).hexdigest() if data is not None else None
+
+
+class Session:
+    def __init__(self):
+        self.path = STATE / "session.json"
+        self.data = json.loads(self.path.read_bytes()) if self.path.exists() else {"files": {}}
+
+    def save(self):
+        atomic(self.path, encoded(self.data))
+
+    def write(self, path, data):
+        origin = Path(path).absolute()
+        path = origin.resolve()
+        require(not origin.is_symlink() or origin.exists(), "broken managed link: " + str(origin))
+        require(not path.exists() or path.is_file(), "expected regular file: " + str(path))
+        old = path.read_bytes() if path.exists() else None
+        files = self.data["files"]
+        for target, saved in files.items():
+            if saved.get("origin") == str(origin):
+                require(str(path) == target, "managed path was redirected: " + str(origin))
+        entry = files.get(str(path))
+        if entry:
+            require(digest(old) in entry["allowed"], "file changed outside theme engine: " + str(path))
+        if old == data:
+            return
+        if not entry:
+            entry = files[str(path)] = {"origin": str(origin),
+                                        "original": base64.b64encode(old).decode() if old is not None else None}
+        entry["allowed"] = [digest(old), digest(data)]
+        self.save()
+        atomic(path, data)
+        entry["allowed"] = [digest(data)]
+        self.save()
+
+    def restore(self):
+        if not self.data["files"]:
+            self.path.unlink(missing_ok=True)
+            print("No managed files to restore.")
+            return
+        def inspect(name, entry):
+            path = Path(name)
+            origin = Path(entry.get("origin", name))
+            require(origin.resolve() == path and path.resolve() == path,
+                    "restore conflict: redirected path " + name)
+            require(not path.exists() or path.is_file(), "restore conflict: expected regular file " + name)
+            current = path.read_bytes() if path.exists() else None
+            original = entry["original"]
+            original = base64.b64decode(original, validate=True) if original is not None else None
+            require(current == original or digest(current) in entry["allowed"], "restore conflict: " + name)
+            return path, current, original
+
+        # Preflight all entries, then recheck each one immediately before restoring it.
+        for name, entry in self.data["files"].items():
+            inspect(name, entry)
+
+        for name, entry in list(self.data["files"].items()):
+            path, current, original = inspect(name, entry)
+            if current != original:
+                if original is None:
+                    path.unlink(missing_ok=True)
+                else:
+                    atomic(path, original)
+            del self.data["files"][name]
+            self.save()
+        self.path.unlink(missing_ok=True)
+        print("Restored managed files. Reload affected apps to refresh their appearance.")
+
+
+def ghostty(t, write, report):
+    directory = CONFIG / "ghostty"
+    path = directory / "config"
+    if not path.exists():
+        report("Ghostty", "skipped", "Ghostty config absent")
+        return
+    colors = t["colors"]
+    theme = CONFIG / "dotfiles/generated/ghostty-theme"
+    source = t["source"]
+    if source["type"] == "neovim":
+        name = source["colorscheme"]
+        existing = directory / "themes" / name
+        bundled = Path("/Applications/Ghostty.app/Contents/Resources/ghostty/themes") / name
+        if existing.is_file() or (sys.platform == "darwin" and bundled.is_file()):
+            theme = name
+    if isinstance(theme, Path):
+        roles = {"background": "background", "foreground": "foreground", "cursor-color": "cursor",
+                 "selection-background": "selection", "selection-foreground": "foreground"}
+        lines = [f"{key} = {colors[role]}" for key, role in roles.items()]
+        lines.extend(f"palette = {i}={color}" for i, color in enumerate(t["ansi"]))
+        write(theme, ("\n".join(lines) + "\n").encode())
+    settings = {"theme": theme}
+    overrides = t.get("apps", {}).get("ghostty", {})
+    if "background-opacity" in overrides:
+        settings["background-opacity"] = overrides["background-opacity"]
+    raw = path.read_bytes().decode()
+    newline = "\r\n" if "\r\n" in raw else "\n"
+    for key, value in settings.items():
+        pattern = rf"(?m)^([ \t]*{key}[ \t]*=[ \t]*)[^\r\n]*"
+        if re.search(pattern, raw):
+            raw = re.sub(pattern, lambda m: m[1] + str(value), raw)
+        else:
+            if raw and not raw.endswith("\n"):
+                raw += newline
+            raw += f"{key} = {value}" + newline
+    write(path, raw.encode())
+    status = "manual step"
+    detail = "Config saved. Reload Ghostty. On macOS, restart it for opacity changes."
+    if sys.platform == "darwin" and os.getenv("DOTFILES_THEME_NO_RELOAD") != "1":
+        running = subprocess.run(["pgrep", "-x", "ghostty"], capture_output=True)
+        if running.returncode == 0:
+            script = 'tell application "Ghostty" to perform action "reload_config" on terminal 1'
+            result = subprocess.run(["osascript", "-e", script], capture_output=True, text=True, timeout=10)
+            if result.returncode or result.stdout.strip() != "true":
+                report("Ghostty", "manual step", detail)
+                return
+            status = "applied"
+            detail = "Config reloaded. Restart Ghostty for changed opacity."
+    report("Ghostty", status, detail)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    sub = parser.add_subparsers(dest="command", required=True)
+    sub.add_parser("list").add_argument("--json", action="store_true")
+    for cmd in ("status", "restore", "import-neovim"):
+        sub.add_parser(cmd)
+    for cmd in ("show", "apply", "validate", "check", "preview", "export"):
+        sub.add_parser(cmd).add_argument("id")
+    sub.add_parser("import-wallpaper").add_argument("image", type=Path)
+    sub.add_parser("import").add_argument("file", type=Path)
+    args = parser.parse_args()
+    if args.command == "import":
+        t = validate(json.loads(args.file.read_bytes()))
+    if args.command == "import-wallpaper":
+        t = validate(theme_from_image(args.image, luminance))
+    if args.command == "list":
+        summaries = []
+        for key in sorted({p.stem for d in (PRESETS, THEMES) for p in d.glob("*.json")}):
+            theme = load(key)
+            summaries.append({field: theme[field] for field in ("id", "name", "appearance")})
+        if args.json:
+            print(json.dumps(summaries))
+        else:
+            for summary in summaries:
+                print(summary["id"], summary["name"], sep="\t")
+        return
+    if args.command in ("validate", "show", "apply", "check", "preview", "export"):
+        t = load(args.id)
+        if args.command == "check":
+            print("\n".join(accessibility(t)))
+            return
+        if args.command == "preview":
+            print(encoded(dict(t, contrastChecks=accessibility(t))).decode().rstrip())
+            return
+        if args.command != "apply":
+            print("valid" if args.command == "validate" else encoded(t).decode().rstrip())
+            return
+    if args.command == "status":
+        print(json.dumps(Session().data.get("last", {"status": "no theme applied"}), indent=2))
+        return
+    STATE.mkdir(parents=True, exist_ok=True, mode=0o700)
+    with (STATE / "lock").open("a") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        if args.command in ("import", "import-neovim"):
+            if args.command == "import-neovim":
+                t = validate(json.load(sys.stdin))
+                require(t["source"]["type"] == "neovim", "expected Neovim source")
+                base = t["id"]
+                if (THEMES / (base + ".json")).exists() or (PRESETS / (base + ".json")).exists():
+                    if load(base) != t:
+                        fingerprint = digest(json.dumps(t, sort_keys=True).encode())[:16]
+                        t["id"] = base + "-" + fingerprint
+            dest = THEMES / (t["id"] + ".json")
+            require(not dest.is_symlink() or dest.exists(), "broken manifest link: " + str(dest))
+            if dest.exists() or (PRESETS / dest.name).exists():
+                require(load(t["id"]) == t, "theme ID already exists with different content")
+            else:
+                atomic(dest, encoded(t))
+            print(t["id"])
+            return
+        if args.command == "import-wallpaper":
+            dest = THEMES / (t["id"] + ".json")
+            if dest.exists():
+                require(load(t["id"]).get("wallpaper") == t["wallpaper"], "theme id already in use")
+            atomic(dest, encoded(t))
+            print(t["id"])
+            return
+        session = Session()
+        if args.command == "restore":
+            session.restore()
+            return
+        results = {}
+
+        def report(app, status, detail):
+            results[app] = {"status": status, "detail": detail}
+            print(f"{app}: {status} — {detail}")
+
+        try:
+            ghostty(t, session.write, report)
+        except (OSError, ValueError, subprocess.SubprocessError) as exc:
+            report("Ghostty", "failed", str(exc))
+        apply_extra(t, CONFIG, session.write, report)
+        session.data["last"] = {"id": t["id"], "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                                "adapters": results}
+        session.save()
+        return int(any(r["status"] == "failed" for r in results.values()))
+
+
+if __name__ == "__main__":
+    try:
+        sys.exit(main())
+    except (OSError, ValueError, TypeError, KeyError, AttributeError) as error:
+        sys.exit(f"dotfiles-theme: {error}")
