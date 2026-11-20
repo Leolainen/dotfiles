@@ -27,6 +27,10 @@ else
     ui_run "Cloning nerd-fonts" git clone --depth 1 https://github.com/ryanoasis/nerd-fonts "$repo" || exit 1
 fi
 
-ui_run "Installing Nerd Fonts (takes a while)" bash -c 'cd "$1" && ./install.sh' _ "$repo" || exit 1
+# Without font names install.sh opens an interactive menu, which installs
+# nothing when run unattended. LiberationMono is the "LiterationMono Nerd Font" used by sketchybar.
+NERD_FONTS=(LiberationMono)
+
+ui_run "Installing Nerd Fonts" bash -c 'cd "$1" && shift && ./install.sh install "$@"' _ "$repo" "${NERD_FONTS[@]}" || exit 1
 
 success "Nerd Fonts ready"
