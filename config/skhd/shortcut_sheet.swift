@@ -6,7 +6,7 @@ final class ShortcutSheet: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
-        let size = NSSize(width: 560, height: 460)
+        let size = NSSize(width: 560, height: 600)
 
         let text = NSTextView()
         text.string = """
@@ -15,6 +15,7 @@ final class ShortcutSheet: NSObject, NSApplicationDelegate {
         ⇧⌃⌥ H/J/K/L      Swap with neighbor
         ⌃⌥ Arrows        Resize
         ⌃⌥ F             Toggle float
+        ⌃⌥ C             Toggle centered 4:3 window
         ⌃⌥ M             Maximize
         ⌃⌥ R / X / Y     Rotate / mirror
         ⌃⌥ 0             Balance layout
@@ -27,7 +28,7 @@ final class ShortcutSheet: NSObject, NSApplicationDelegate {
         ⇧⌃⌥ ← / →        Send window to previous / next space
 
         YABAI
-        ⇧⌃⌥ R            Restart Yabai (start if stopped)
+        ⇧⌃⌥ Q / S / R    Stop / start / restart Yabai
 
         APPS
         ⌃⌥ S             Open (S)lack
@@ -44,6 +45,7 @@ final class ShortcutSheet: NSObject, NSApplicationDelegate {
 
         Esc             Close this sheet
         ⌃⌥ Space        Toggle this sheet
+        ⇧⌃⌥ Space       Toggle the theme picker
         """
         text.isEditable = false
         text.isSelectable = false
@@ -58,7 +60,7 @@ final class ShortcutSheet: NSObject, NSApplicationDelegate {
 
         let scrollView = NSScrollView(frame: NSRect(origin: .zero, size: size))
         scrollView.drawsBackground = false
-        scrollView.hasVerticalScroller = false
+        scrollView.hasVerticalScroller = true
         scrollView.documentView = text
 
         panel = NSPanel(

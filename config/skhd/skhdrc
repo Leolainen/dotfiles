@@ -37,7 +37,7 @@ ctrl + alt - y : yabai -m space --mirror y-axis
 ctrl + alt - x : yabai -m space --mirror x-axis
 ctrl + alt - f : yabai -m window --toggle float --grid 12:12:2:1:8:10
 ctrl + alt - m : yabai -m window --toggle zoom-fullscreen; sketchybar --trigger window_focus
-ctrl + alt - c : "$HOME/.config/yabai/toggle_window_layout.sh"
+ctrl + alt - c : "$HOME/.config/yabai/toggle_window_ratio.sh"
 ctrl + alt - 0 : yabai -m space --balance
 
 # -- Spaces and Displays --
@@ -87,6 +87,8 @@ ctrl + alt - u : open -a "Microsoft Outlook"
 # -- Help and Services --
 
 ctrl + alt - space : if pgrep -f '/dotfiles-shortcut-sheet$' >/dev/null; then pkill -TERM -f '/dotfiles-shortcut-sheet$'; else "$HOME/.local/bin/dotfiles-shortcut-sheet" >/dev/null 2>&1 & fi
+shift + ctrl + alt - space : if pgrep -f '/dotfiles-theme-picker$' >/dev/null; then pkill -TERM -f '/dotfiles-theme-picker$'; else "$HOME/.local/bin/dotfiles-theme-picker" >/dev/null 2>&1 & fi
+shift + ctrl + alt - backspace : /bin/zsh -c 'rc="$HOME/.config/skhd/skhdrc"; exec "${rc:A:h}/reload_desktop.sh"'
 shift + ctrl + alt - q : yabai --stop-service
 shift + ctrl + alt - s : yabai --start-service
 shift + ctrl + alt - r : yabai --restart-service || yabai --start-service
